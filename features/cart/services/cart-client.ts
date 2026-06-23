@@ -1,0 +1,66 @@
+import { clientFetch } from '@/lib/api/client';
+import { Cart, CustomerAddress, Payment, PaymentMethod } from '@/lib/types/entities';
+
+export async function getCart() {
+  const res = await clientFetch<Cart>('/api/cart');
+  return res.data!;
+}
+
+export async function removeCartItem(itemId: string) {
+  await clientFetch(`/api/cart/items/${itemId}`, { method: 'DELETE' });
+}
+
+export async function clearCart() {
+  await clientFetch('/api/cart', { method: 'DELETE' });
+}
+
+export async function getAddresses() {
+  const res = await clientFetch<CustomerAddress[]>('/api/addresses');
+  return res.data!;
+}
+
+export async function addAddress(data: Omit<CustomerAddress, 'id'>) {
+  const res = await clientFetch<CustomerAddress>('/api/addresses', {
+    method: 'POST',
+    body: data,
+  });
+  return res.data!;
+}
+
+export async function deleteAddress(id: string) {
+  await clientFetch(`/api/addresses/${id}`, { method: 'DELETE' });
+}
+
+export async function getPaymentMethods() {
+  const res = await clientFetch<PaymentMethod[]>('/api/payments/methods');
+  return res.data!;
+}
+
+export async function submitPayment(orderId: string, file: File) {
+  const form = new FormData();
+  form.append('receipt', file);
+  const res = await clientFetch<Payment>(`/api/payments/orders/${orderId}`, {
+    method: 'POST',
+    body: form,
+  });
+  return res.data!;
+}
+
+export async function getPendingPayments(page = 1, limit = 20) {
+  const res = await clientFetch<{ payments: Payment[]; total: number; page: number; limit: number }>(
+    '/api/payments/pending',
+    { searchParams: { page, limit } },
+  );
+  return res.data!;
+}
+
+export async function approvePayment(id: string) {
+  await clientFetch(`/api/payments/${id}/approve`, { method: 'PATCH' });
+}
+
+export async function rejectPayment(id: string, reason: string) {
+  await clientFetch(`/api/payments/${id}/reject`, {
+    method: 'PATCH',
+    body: { reason },
+  });
+}

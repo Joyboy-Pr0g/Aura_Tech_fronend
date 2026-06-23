@@ -1,0 +1,21 @@
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth/session';
+import { Sidebar } from '@/features/shared/components/sidebar';
+import { UserProvider } from '@/features/shared/components/user-provider';
+
+export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
+  const user = await getSession();
+  if (!user) redirect('/login');
+  if (user.role !== 'customer') redirect('/admin');
+
+  return (
+    <UserProvider user={user}>
+      <div className="flex min-h-screen">
+        <Sidebar type="customer" user={user} />
+        <main className="flex-1 bg-dark-950 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </UserProvider>
+  );
+}

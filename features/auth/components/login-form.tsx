@@ -1,0 +1,114 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, LoginInput } from '@/features/auth/schemas/auth-schemas';
+import { login } from '@/features/auth/services/auth-service';
+import { getErrorMessage } from '@/lib/errors/api-error';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { ShoppingBag } from 'lucide-react';
+
+export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [error, setError] = useState('');
+
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (values: LoginInput) => {
+    setError('');
+    try {
+      const user = await login(values);
+      const redirect = searchParams.get('redirect');
+      if (redirect) {
+        router.push(redirect);
+      } else {
+        router.push(user.role === 'customer' ? '/dashboard' : '/admin');
+      }
+      router.refresh();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  return (
+    <Card className="border-white/10 shadow-2xl shadow-primary-500/5">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500/15 border border-primary-500/30">
+          <ShoppingBag className="h-6 w-6 text-primary-400" />
+        </div>
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardDescription>Sign in to your AURA TECH account</CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        {error && (
+          <Alert variant="error" className="mb-5">
+            {error}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              error={!!errors.email}
+              {...register('email')}
+            />
+            {errors.email && (
+              <p className="text-xs text-danger">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              error={!!errors.password}
+              {...register('password')}
+            />
+            {errors.password && (
+              <p className="text-xs text-danger">{errors.password.message}</p>
+            )}
+          </div>
+
+          <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
+            {isSubmitting ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+      </CardContent>
+
+      <CardFooter className="flex flex-col gap-4">
+        <Separator />
+        <p className="text-sm text-white/50 text-center">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="text-primary-400 hover:text-primary-300 font-medium">
+            Create one
+          </Link>
+        </p>
+      </CardFooter>
+    </Card>
+  );
+}
