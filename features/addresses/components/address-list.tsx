@@ -6,6 +6,7 @@ import { CustomerAddress } from '@/lib/types/entities';
 import { toast } from '@/components/ui/Toaster';
 import { addAddress, deleteAddress } from '@/features/cart/services/cart-client';
 import { MapPin, Plus, Trash2, Star } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 interface AddressListProps {
   initialAddresses: CustomerAddress[];
@@ -13,6 +14,7 @@ interface AddressListProps {
 
 export function AddressList({ initialAddresses }: AddressListProps) {
   const router = useRouter();
+  const { t } = useLocale();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -21,9 +23,9 @@ export function AddressList({ initialAddresses }: AddressListProps) {
     phone: '',
     city: '',
     governorate: '',
-    district: null as string | null,
+    district: 'Sana\'a' as string,
     street_address: '',
-    postal_code: null as string | null,
+    postal_code: '1010' as string,
     is_default: false,
     type: 'both' as const,
   });
@@ -35,12 +37,12 @@ export function AddressList({ initialAddresses }: AddressListProps) {
     try {
       const newAddr = await addAddress(form);
       setAddresses((prev) => [...prev, newAddr!]);
-      toast('Address added', 'success');
+      toast(t('address.added'), 'success');
       setShowForm(false);
-      setForm({ label: '', full_name: '', phone: '', city: '', governorate: '', district: null, street_address: '', postal_code: null, is_default: false, type: 'both' });
+      setForm({ label: '', full_name: '', phone: '', city: '', governorate: '', district: 'Sana\'a', street_address: '', postal_code: '1010', is_default: false, type: 'both' });
       router.refresh();
     } catch {
-      toast('Failed to add address', 'error');
+      toast(t('address.addFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -49,49 +51,51 @@ export function AddressList({ initialAddresses }: AddressListProps) {
   const handleDelete = async (id: string) => {
     await deleteAddress(id);
     setAddresses((prev) => prev.filter((a) => a.id !== id));
-    toast('Address deleted', 'info');
+    toast(t('address.deleted'), 'info');
     router.refresh();
   };
+
+  const fields = [
+    { key: 'label', labelKey: 'address.label' as const, placeholderKey: 'address.labelPlaceholder' as const },
+    { key: 'full_name', labelKey: 'address.fullName' as const, placeholderKey: 'auth.fullNamePlaceholder' as const },
+    { key: 'phone', labelKey: 'address.phone' as const, placeholderKey: 'auth.phonePlaceholder' as const },
+    { key: 'city', labelKey: 'address.city' as const, placeholderKey: null },
+    { key: 'governorate', labelKey: 'address.governorate' as const, placeholderKey: null },
+  ];
 
   return (
     <div className="p-8 space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Delivery Addresses</h2>
+        <h2 className="text-2xl font-bold text-white">{t('address.title')}</h2>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary flex items-center gap-2">
           <Plus size={16} />
-          Add Address
+          {t('address.add')}
         </button>
       </div>
 
       {showForm && (
         <div className="card-dark p-5">
-          <h3 className="font-semibold text-white mb-4">New Address</h3>
+          <h3 className="font-semibold text-white mb-4">{t('address.new')}</h3>
           <form onSubmit={handleAdd} className="grid grid-cols-2 gap-4">
-            {[
-              { key: 'label', label: 'Label', placeholder: 'Home, Office...' },
-              { key: 'full_name', label: 'Full Name', placeholder: 'Your name' },
-              { key: 'phone', label: 'Phone', placeholder: '+967 7XX...' },
-              { key: 'city', label: 'City', placeholder: "Sana'a" },
-              { key: 'governorate', label: 'Governorate', placeholder: "Sana'a" },
-            ].map(({ key, label, placeholder }) => (
+            {fields.map(({ key, labelKey, placeholderKey }) => (
               <div key={key}>
-                <label className="label-dark">{label}</label>
+                <label className="label-dark">{t(labelKey)}</label>
                 <input
                   value={(form as Record<string, string | boolean>)[key] as string}
                   onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                   className="input-dark"
-                  placeholder={placeholder}
+                  placeholder={placeholderKey ? t(placeholderKey) : undefined}
                   required
                 />
               </div>
             ))}
             <div className="col-span-2">
-              <label className="label-dark">Street Address</label>
+              <label className="label-dark">{t('address.street')}</label>
               <input
                 value={form.street_address}
                 onChange={(e) => setForm((f) => ({ ...f, street_address: e.target.value }))}
                 className="input-dark"
-                placeholder="Building, street..."
+                placeholder={t('address.streetPlaceholder')}
                 required
               />
             </div>
@@ -103,11 +107,15 @@ export function AddressList({ initialAddresses }: AddressListProps) {
                 onChange={(e) => setForm((f) => ({ ...f, is_default: e.target.checked }))}
                 className="w-4 h-4 accent-primary-500"
               />
-              <label htmlFor="is_default" className="text-sm text-white/60">Set as default address</label>
+              <label htmlFor="is_default" className="text-sm text-white/60">{t('address.setDefault')}</label>
             </div>
             <div className="col-span-2 flex gap-3">
-              <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Saving...' : 'Save Address'}</button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn-outline">Cancel</button>
+              <button type="submit" disabled={saving} className="btn-primary">
+                {saving ? t('address.saving') : t('address.save')}
+              </button>
+              <button type="button" onClick={() => setShowForm(false)} className="btn-outline">
+                {t('common.cancel')}
+              </button>
             </div>
           </form>
         </div>
@@ -116,7 +124,7 @@ export function AddressList({ initialAddresses }: AddressListProps) {
       {addresses.length === 0 && !showForm ? (
         <div className="card-dark p-12 text-center">
           <MapPin size={48} className="text-white/20 mx-auto mb-4" />
-          <p className="text-white/50">No addresses yet</p>
+          <p className="text-white/50">{t('address.empty')}</p>
         </div>
       ) : (
         <div className="space-y-3">

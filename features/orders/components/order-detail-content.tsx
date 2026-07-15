@@ -1,6 +1,7 @@
 import { getMyOrderServer } from '@/features/orders/services/orders-server';
 import { getPaymentMethodsServer } from '@/features/cart/services/cart-server';
 import { OrderDetail } from '@/features/orders/components/order-detail';
+import { OrderNotFound } from '@/features/orders/components/order-not-found';
 
 interface OrderDetailContentProps {
   id: string;
@@ -13,7 +14,7 @@ export async function OrderDetailContent({ id }: OrderDetailContentProps) {
   ]);
 
   if (!order) {
-    return <div className="p-8 text-white/50">Order not found</div>;
+    return <OrderNotFound />;
   }
 
   return <OrderDetail order={order} paymentMethods={paymentMethods ?? []} />;

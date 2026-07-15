@@ -35,5 +35,39 @@ export const endpoints = {
   },
   categories: {
     root: '/categories',
+    bySlug: (slug: string) => `/categories/slug/${slug}`,
+  },
+  engagement: {
+    wishlists: '/wishlists',
+    wishlistItem: (productId: string) => `/wishlists/${productId}`,
+    reviewsMy: '/reviews/my',
+    reviews: '/reviews',
+    productReviews: (productId: string) => `/products/${productId}/reviews`,
+    productQuestions: (productId: string) => `/products/${productId}/questions`,
+    orderHistory: (orderId: string) => `/orders/my/${orderId}/history`,
+  },
+  admin: {
+    dashboard: '/admin',
+    users: '/admin/users',
+    user: (id: string) => `/admin/users/${id}`,
+    userAction: (id: string, action: 'activate' | 'deactivate' | 'soft-delete' | 'restore' | 'reset-password') =>
+      `/admin/users/${id}/${action}`,
+    categories: '/admin/categories',
+    category: (id: string) => `/admin/categories/${id}`,
+    categoryAction: (
+      id: string,
+      action: 'activate' | 'deactivate' | 'soft-delete' | 'restore' | 'unassign-parent',
+    ) => `/admin/categories/${id}/${action}`,
+    products: '/admin/products',
+    product: (id: string) => `/admin/products/${id}`,
+    productAction: (id: string, action: 'soft-delete' | 'restore' | 'set-primary-image' | 'remove-image') =>
+      `/admin/products/${id}/${action}`,
+    productStock: (id: string) => `/admin/products/${id}/stock`,
+    payments: '/admin/payments',
+    paymentOrder: (orderId: string) => `/admin/payments/orders/${orderId}`,
+    paymentMethods: '/admin/payments/methods',
+    paymentMethod: (id: string) => `/admin/payments/methods/${id}`,
+    paymentApprove: (id: string) => `/admin/payments/${id}/approve`,
+    paymentReject: (id: string) => `/admin/payments/${id}/reject`,
   },
 } as const;

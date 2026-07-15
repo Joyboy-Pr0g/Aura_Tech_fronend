@@ -1,12 +1,15 @@
 import { serverFetch } from '@/lib/api/server';
 import { Order } from '@/lib/types/entities';
-import { PaginatedResult } from '@/lib/types/api';
 
-export async function getMyOrdersServer(page = 1, limit = 10) {
-  const res = await serverFetch<PaginatedResult<Order>>('/orders/my', {
-    searchParams: { page, limit },
+export async function getMyOrdersServer(limit = 10, cursor?: string) {
+  const res = await serverFetch<Order[]>('/orders/my', {
+    searchParams: { limit, cursor },
   });
-  return res.data!;
+  return {
+    items: res.data ?? [],
+    next_cursor: res.next_cursor ?? null,
+    has_more: res.has_more ?? false,
+  };
 }
 
 export async function getMyOrderServer(id: string) {

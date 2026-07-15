@@ -1,12 +1,15 @@
 import { clientFetch } from '@/lib/api/client';
 import { Order, OrderStatus } from '@/lib/types/entities';
-import { PaginatedResult } from '@/lib/types/api';
 
-export async function getMyOrders(page = 1, limit = 10) {
-  const res = await clientFetch<PaginatedResult<Order>>('/api/orders/my', {
-    searchParams: { page, limit },
+export async function getMyOrders(limit = 10, cursor?: string) {
+  const res = await clientFetch<Order[]>('/api/orders/my', {
+    searchParams: { limit, cursor },
   });
-  return res.data!;
+  return {
+    items: res.data ?? [],
+    next_cursor: res.next_cursor ?? null,
+    has_more: res.has_more ?? false,
+  };
 }
 
 export async function getMyOrder(id: string) {
@@ -26,11 +29,15 @@ export async function checkout(data: {
   return res.data!;
 }
 
-export async function getAllOrders(params?: { status?: string; page?: number; limit?: number }) {
-  const res = await clientFetch<PaginatedResult<Order>>('/api/orders', {
+export async function getAllOrders(params?: { status?: string; limit?: number; cursor?: string }) {
+  const res = await clientFetch<Order[]>('/api/orders', {
     searchParams: params,
   });
-  return res.data!;
+  return {
+    items: res.data ?? [],
+    next_cursor: res.next_cursor ?? null,
+    has_more: res.has_more ?? false,
+  };
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus, reason?: string) {

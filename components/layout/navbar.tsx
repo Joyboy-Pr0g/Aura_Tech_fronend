@@ -8,13 +8,14 @@ import { cn } from '@/lib/utils/cn';
 import { Container } from '@/components/ui/container';
 import { ButtonLink } from '@/components/ui/button';
 import { User as UserType } from '@/lib/types/entities';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/products', label: 'Products' },
-  { href: '/blogs', label: 'Blogs' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/', labelKey: 'nav.home' as const },
+  { href: '/products', labelKey: 'nav.products' as const },
+  { href: '/blogs', labelKey: 'nav.blogs' as const },
+  { href: '/about', labelKey: 'nav.about' as const },
+  { href: '/contact', labelKey: 'nav.contact' as const },
 ];
 
 interface NavbarProps {
@@ -23,6 +24,7 @@ interface NavbarProps {
 
 export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
 
   const dashboardHref = user?.role === 'customer' ? '/dashboard' : '/admin';
@@ -53,7 +55,7 @@ export function Navbar({ user }: NavbarProps) {
                     : 'text-white/60 hover:text-white hover:bg-white/5',
                 )}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
           </div>
@@ -62,15 +64,15 @@ export function Navbar({ user }: NavbarProps) {
             {user ? (
               <ButtonLink href={dashboardHref} variant="outline" size="sm">
                 <User className="h-4 w-4" />
-                Dashboard
+                {t('nav.dashboard')}
               </ButtonLink>
             ) : (
               <>
                 <ButtonLink href="/login" variant="ghost" size="sm">
-                  Sign In
+                  {t('nav.signIn')}
                 </ButtonLink>
                 <ButtonLink href="/register" size="sm">
-                  Register
+                  {t('nav.register')}
                 </ButtonLink>
               </>
             )}
@@ -80,7 +82,7 @@ export function Navbar({ user }: NavbarProps) {
             type="button"
             className="lg:hidden p-2 rounded-lg text-white/70 hover:bg-white/5"
             onClick={() => setOpen(!open)}
-            aria-label="Toggle menu"
+            aria-label={t('nav.toggleMenu')}
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -100,21 +102,21 @@ export function Navbar({ user }: NavbarProps) {
                     : 'text-white/60 hover:text-white hover:bg-white/5',
                 )}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
             <div className="pt-3 px-4 flex flex-col gap-2">
               {user ? (
                 <ButtonLink href={dashboardHref} variant="outline" className="w-full">
-                  Dashboard
+                  {t('nav.dashboard')}
                 </ButtonLink>
               ) : (
                 <>
                   <ButtonLink href="/login" variant="outline" className="w-full">
-                    Sign In
+                    {t('nav.signIn')}
                   </ButtonLink>
                   <ButtonLink href="/register" className="w-full">
-                    Register
+                    {t('nav.register')}
                   </ButtonLink>
                 </>
               )}

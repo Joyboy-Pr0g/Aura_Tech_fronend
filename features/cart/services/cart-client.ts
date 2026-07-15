@@ -1,6 +1,18 @@
 import { clientFetch } from '@/lib/api/client';
 import { Cart, CustomerAddress, Payment, PaymentMethod } from '@/lib/types/entities';
 
+export async function addToCart(data: {
+  product_id: string;
+  variant_id?: string;
+  quantity: number;
+}) {
+  const res = await clientFetch<Cart>('/api/cart/items', {
+    method: 'POST',
+    body: data,
+  });
+  return res.data!;
+}
+
 export async function getCart() {
   const res = await clientFetch<Cart>('/api/cart');
   return res.data!;
@@ -46,12 +58,15 @@ export async function submitPayment(orderId: string, file: File) {
   return res.data!;
 }
 
-export async function getPendingPayments(page = 1, limit = 20) {
-  const res = await clientFetch<{ payments: Payment[]; total: number; page: number; limit: number }>(
-    '/api/payments/pending',
-    { searchParams: { page, limit } },
-  );
-  return res.data!;
+export async function getPendingPayments(limit = 20, cursor?: string) {
+  const res = await clientFetch<Payment[]>('/api/payments/pending', {
+    searchParams: { limit, cursor },
+  });
+  return {
+    items: res.data ?? [],
+    next_cursor: res.next_cursor ?? null,
+    has_more: res.has_more ?? false,
+  };
 }
 
 export async function approvePayment(id: string) {

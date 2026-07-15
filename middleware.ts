@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE_NAME, decodeTokenRole } from '@/lib/auth/constants';
 
-function nextWithPathname(request: NextRequest): NextResponse {
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-pathname', request.nextUrl.pathname);
-  return NextResponse.next({ request: { headers: requestHeaders } });
-}
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
@@ -16,11 +10,11 @@ export function middleware(request: NextRequest) {
 
   if (!isProtected) {
     if (token && (pathname === '/login' || pathname === '/register') && !decodeTokenRole(token)) {
-      const response = nextWithPathname(request);
+      const response = NextResponse.next();
       response.cookies.delete(AUTH_COOKIE_NAME);
       return response;
     }
-    return nextWithPathname(request);
+    return NextResponse.next();
   }
 
   if (!token) {
@@ -47,7 +41,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
 
-  return nextWithPathname(request);
+  return NextResponse.next();
 }
 
 export const config = {

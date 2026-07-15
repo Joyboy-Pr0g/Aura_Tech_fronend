@@ -22,9 +22,11 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { UserPlus } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 export function RegisterForm() {
   const router = useRouter();
+  const { t } = useLocale();
   const [error, setError] = useState('');
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterInput>({
@@ -48,8 +50,8 @@ export function RegisterForm() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500/15 border border-primary-500/30">
           <UserPlus className="h-6 w-6 text-primary-400" />
         </div>
-        <CardTitle className="text-2xl">Create account</CardTitle>
-        <CardDescription>Join AURA TECH and start shopping</CardDescription>
+        <CardTitle className="text-2xl">{t('auth.registerTitle')}</CardTitle>
+        <CardDescription>{t('auth.registerSubtitle')}</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -61,10 +63,10 @@ export function RegisterForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="full_name">Full name</Label>
+            <Label htmlFor="full_name">{t('auth.fullName')}</Label>
             <Input
               id="full_name"
-              placeholder="Your full name"
+              placeholder={t('auth.fullNamePlaceholder')}
               error={!!errors.full_name}
               {...register('full_name')}
             />
@@ -74,11 +76,11 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="email">{t('auth.email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('auth.emailPlaceholder')}
               error={!!errors.email}
               {...register('email')}
             />
@@ -88,11 +90,11 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('auth.password')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="Min 8 chars, upper, lower, digit"
+              placeholder={t('auth.passwordHint')}
               error={!!errors.password}
               {...register('password')}
             />
@@ -102,11 +104,11 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone number</Label>
+            <Label htmlFor="phone">{t('auth.phone')}</Label>
             <Input
               id="phone"
               type="tel"
-              placeholder="+9677XXXXXXXX"
+              placeholder={t('auth.phonePlaceholder')}
               error={!!errors.phone}
               {...register('phone')}
             />
@@ -116,7 +118,7 @@ export function RegisterForm() {
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
-            {isSubmitting ? 'Creating account...' : 'Create Account'}
+            {isSubmitting ? t('auth.creating') : t('auth.createAccount')}
           </Button>
         </form>
       </CardContent>
@@ -124,9 +126,9 @@ export function RegisterForm() {
       <CardFooter className="flex flex-col gap-4">
         <Separator />
         <p className="text-sm text-white/50 text-center">
-          Already have an account?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link href="/login" className="text-primary-400 hover:text-primary-300 font-medium">
-            Sign in
+            {t('auth.signIn')}
           </Link>
         </p>
       </CardFooter>

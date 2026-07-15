@@ -10,7 +10,7 @@ export interface FetchBackendOptions extends Omit<RequestInit, 'body'> {
 }
 
 function buildUrl(path: string, searchParams?: FetchBackendOptions['searchParams']): string {
-  const url = new URL(path.startsWith('http') ? path : `${BACKEND_API_URL}${path}`);
+  const url = new URL(path.startsWith('http') ? path : `${BACKEND_API_URL}${path}`)
   if (searchParams) {
     for (const [key, value] of Object.entries(searchParams)) {
       if (value !== undefined && value !== '') {
@@ -18,20 +18,21 @@ function buildUrl(path: string, searchParams?: FetchBackendOptions['searchParams
       }
     }
   }
+
   return url.toString();
 }
 
-function prepareBody(body: FetchBackendOptions['body']): BodyInit | undefined {
-  if (body === null || body === undefined) return undefined;
-  if (body instanceof FormData || body instanceof URLSearchParams || typeof body === 'string') {
-    return body;
-  }
+
+function prepareBody(body: FetchBackendOptions['body']): BodyInit | null {
+  if (body === undefined || body === null) return null;
+  if (body instanceof FormData || body instanceof URLSearchParams || typeof body === 'string') return body;
   return JSON.stringify(body);
 }
 
 export async function fetchBackend<T = unknown>(
   path: string,
   options: FetchBackendOptions = {},
+  tags?: string[],
 ): Promise<ApiResponse<T>> {
   const { token, body, searchParams, headers, ...rest } = options;
   const preparedBody = prepareBody(body);
@@ -46,6 +47,7 @@ export async function fetchBackend<T = unknown>(
       ...headers,
     },
     cache: 'no-store',
+    next:{tags: tags ?? []},
   });
 
   let payload: ApiResponse<T>;

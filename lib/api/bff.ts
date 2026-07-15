@@ -1,0 +1,1 @@
+export const bffPath = (backendPath: string): string => `/api${backendPath}`;

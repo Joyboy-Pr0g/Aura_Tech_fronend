@@ -1,30 +1,41 @@
+'use client';
+
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import { Separator } from '@/components/ui/separator';
 import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 const FOOTER_LINKS = {
-  Shop: [
-    { href: '/products', label: 'All Products' },
-    { href: '/products?category_id=laptops', label: 'Laptops' },
-    { href: '/products?category_id=smartphones', label: 'Smartphones' },
-    { href: '/products?category_id=accessories', label: 'Accessories' },
+  shop: [
+    { href: '/products', labelKey: 'footer.allProducts' as const },
+    { href: '/products?category_id=laptops', labelKey: 'footer.laptops' as const },
+    { href: '/products?category_id=smartphones', labelKey: 'footer.smartphones' as const },
+    { href: '/products?category_id=accessories', labelKey: 'footer.accessories' as const },
   ],
-  Company: [
-    { href: '/about', label: 'About Us' },
-    { href: '/blogs', label: 'Blog' },
-    { href: '/contact', label: 'Contact' },
+  company: [
+    { href: '/about', labelKey: 'footer.about' as const },
+    { href: '/blogs', labelKey: 'footer.blog' as const },
+    { href: '/contact', labelKey: 'footer.contact' as const },
   ],
-  Account: [
-    { href: '/login', label: 'Sign In' },
-    { href: '/register', label: 'Register' },
-    { href: '/dashboard', label: 'My Account' },
+  account: [
+    { href: '/login', labelKey: 'footer.signIn' as const },
+    { href: '/register', labelKey: 'footer.register' as const },
+    { href: '/dashboard', labelKey: 'footer.myAccount' as const },
   ],
 };
 
+const SECTION_TITLE_KEYS = {
+  shop: 'footer.shop',
+  company: 'footer.company',
+  account: 'footer.account',
+} as const;
+
 export function Footer() {
+  const { t } = useLocale();
+
   return (
-    <footer className="border-t border-white/5 bg-dark-900/50">
+    <footer className="relative z-10 border-t border-white/5 bg-dark-950">
       <Container className="py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           <div className="lg:col-span-2 space-y-4">
@@ -33,12 +44,12 @@ export function Footer() {
               <span className="text-white"> TECH</span>
             </Link>
             <p className="text-sm text-white/50 max-w-sm leading-relaxed">
-              Premium technology products delivered across Yemen. Laptops, phones, accessories, and expert support — all in one place.
+              {t('footer.tagline')}
             </p>
             <div className="space-y-2 text-sm text-white/50">
               <p className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary-400 shrink-0" />
-                Sana&apos;a, Yemen
+                {t('footer.location')}
               </p>
               <p className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary-400 shrink-0" />
@@ -51,17 +62,19 @@ export function Footer() {
             </div>
           </div>
 
-          {Object.entries(FOOTER_LINKS).map(([title, links]) => (
-            <div key={title}>
-              <h4 className="text-sm font-semibold text-white mb-4">{title}</h4>
+          {(Object.keys(FOOTER_LINKS) as Array<keyof typeof FOOTER_LINKS>).map((section) => (
+            <div key={section}>
+              <h4 className="text-sm font-semibold text-white mb-4">
+                {t(SECTION_TITLE_KEYS[section])}
+              </h4>
               <ul className="space-y-2">
-                {links.map((link) => (
+                {FOOTER_LINKS[section].map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
                       className="text-sm text-white/50 hover:text-primary-400 transition-colors"
                     >
-                      {link.label}
+                      {t(link.labelKey)}
                     </Link>
                   </li>
                 ))}
@@ -74,7 +87,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} AURA TECH. All rights reserved.
+            © {new Date().getFullYear()} AURA TECH. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-4">
             {[Twitter, Facebook, Instagram].map((Icon, i) => (
@@ -82,7 +95,7 @@ export function Footer() {
                 key={i}
                 href="#"
                 className="text-white/40 hover:text-primary-400 transition-colors"
-                aria-label="Social link"
+                aria-label={t('footer.social')}
               >
                 <Icon className="h-4 w-4" />
               </a>

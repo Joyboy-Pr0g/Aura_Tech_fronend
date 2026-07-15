@@ -4,9 +4,6 @@ import { endpoints } from '@/lib/api/endpoints';
 import { User } from '@/lib/types/entities';
 import { AUTH_COOKIE_NAME } from '@/lib/auth/constants';
 
-export { AUTH_COOKIE_NAME } from '@/lib/auth/constants';
-export { decodeTokenRole } from '@/lib/auth/constants';
-
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -15,22 +12,22 @@ const cookieOptions = {
   maxAge: 60 * 60 * 24,
 };
 
-export async function getAuthToken(): Promise<string | undefined> {
+export const getAuthToken = async (): Promise<string | undefined> => {
   const cookieStore = await cookies();
   return cookieStore.get(AUTH_COOKIE_NAME)?.value;
-}
+};
 
-export async function setAuthCookie(token: string): Promise<void> {
+export const setAuthCookie = async (token: string): Promise<void> => {
   const cookieStore = await cookies();
   cookieStore.set(AUTH_COOKIE_NAME, token, cookieOptions);
-}
+};
 
-export async function clearAuthCookie(): Promise<void> {
+export const clearAuthCookie = async (): Promise<void> => {
   const cookieStore = await cookies();
   cookieStore.delete(AUTH_COOKIE_NAME);
-}
+};
 
-export async function getSession(): Promise<User | null> {
+export const getSession = async (): Promise<User | null> => {
   const token = await getAuthToken();
   if (!token) return null;
 

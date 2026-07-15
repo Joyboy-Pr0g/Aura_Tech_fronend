@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useSyncExternalStore } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -57,22 +58,28 @@ export function Toaster() {
   }, [currentToasts]);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none">
-      {currentToasts.map((t) => (
-        <div
-          key={t.id}
-          className={cn(
-            'flex items-center gap-3 border rounded-lg px-4 py-3 text-sm font-medium shadow-lg',
-            'pointer-events-auto min-w-[260px] max-w-sm',
-            TYPE_STYLES[t.type],
-          )}
-        >
-          <span className="flex-1">{t.message}</span>
-          <button onClick={() => removeToast(t.id)} className="opacity-60 hover:opacity-100">
-            <X size={14} />
-          </button>
-        </div>
-      ))}
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] space-y-2 pointer-events-none">
+      <AnimatePresence>
+        {currentToasts.map((t) => (
+          <motion.div
+            key={t.id}
+            initial={{ opacity: 0, x: 80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -80 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className={cn(
+              'flex items-center gap-3 border rounded-lg px-4 py-3 text-sm font-medium shadow-lg',
+              'pointer-events-auto min-w-[260px] max-w-sm',
+              TYPE_STYLES[t.type],
+            )}
+          >
+            <span className="flex-1">{t.message}</span>
+            <button onClick={() => removeToast(t.id)} className="opacity-60 hover:opacity-100">
+              <X size={14} />
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

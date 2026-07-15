@@ -1,8 +1,19 @@
-export default function AdminUsersPage() {
+import { Suspense } from 'react';
+import { AdminUsersContent } from '@/features/admin/components/users/admin-users-content';
+import { AdminTableSkeleton } from '@/features/admin/skeletons/admin-table-skeleton';
+
+interface AdminUsersPageProps {
+  searchParams: Promise<{
+    role?: string;
+    search?: string;
+    include_deleted?: string;
+  }>;
+}
+
+export default function AdminUsersPage(props: AdminUsersPageProps) {
   return (
-    <div className="p-8">
-      <h2 className="text-2xl font-bold text-white">Users</h2>
-      <p className="text-white/40 mt-2">User management coming soon.</p>
-    </div>
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <AdminUsersContent {...props} />
+    </Suspense>
   );
 }

@@ -22,10 +22,12 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingBag } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useLocale();
   const [error, setError] = useState('');
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
@@ -54,8 +56,8 @@ export function LoginForm() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500/15 border border-primary-500/30">
           <ShoppingBag className="h-6 w-6 text-primary-400" />
         </div>
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your AURA TECH account</CardDescription>
+        <CardTitle className="text-2xl">{t('auth.loginTitle')}</CardTitle>
+        <CardDescription>{t('auth.loginSubtitle')}</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -67,11 +69,11 @@ export function LoginForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="email">{t('auth.email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('auth.emailPlaceholder')}
               error={!!errors.email}
               {...register('email')}
             />
@@ -81,7 +83,7 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('auth.password')}</Label>
             <Input
               id="password"
               type="password"
@@ -95,7 +97,7 @@ export function LoginForm() {
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
           </Button>
         </form>
       </CardContent>
@@ -103,9 +105,9 @@ export function LoginForm() {
       <CardFooter className="flex flex-col gap-4">
         <Separator />
         <p className="text-sm text-white/50 text-center">
-          Don&apos;t have an account?{' '}
+          {t('auth.noAccount')}{' '}
           <Link href="/register" className="text-primary-400 hover:text-primary-300 font-medium">
-            Create one
+            {t('auth.createOne')}
           </Link>
         </p>
       </CardFooter>

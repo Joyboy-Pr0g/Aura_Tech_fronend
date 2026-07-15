@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 interface SearchBarProps {
   className?: string;
@@ -16,11 +17,12 @@ interface SearchBarProps {
 
 export function SearchBar({
   className,
-  placeholder = 'Search products, brands, categories...',
+  placeholder,
   defaultValue = '',
   size = 'default',
 }: SearchBarProps) {
   const router = useRouter();
+  const { t } = useLocale();
   const [query, setQuery] = useState(defaultValue);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -39,7 +41,7 @@ export function SearchBar({
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('home.searchPlaceholder')}
         className={cn(
           'pl-11 pr-28 bg-dark-900/80 border-white/10',
           size === 'large' && 'h-14 text-base pl-12',
@@ -53,7 +55,7 @@ export function SearchBar({
           size === 'large' && 'h-11',
         )}
       >
-        Search
+        {t('home.searchButton')}
       </Button>
     </form>
   );

@@ -18,7 +18,9 @@ export interface User {
   phone: string | null;
   role: Role;
   status: UserStatus;
+  deleted_at?: string | null;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Category {
@@ -28,12 +30,39 @@ export interface Category {
   description: string | null;
   image_url: string | null;
   parent_category_id: string | null;
+  children: Category[];
+}
+
+
+export interface AdminCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  is_active: boolean;
+  image_url: string | null;
+  image_public_id: string | null;
+  parent_category_id: string | null;
+  product_count: number;
+  deleted_at: string | null;
+  children: AdminCategory[];
 }
 
 export interface ProductImage {
   url: string;
   public_id: string;
   is_primary: boolean;
+}
+
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  size: string | null;
+  color: string | null;
+  price: number | null;
+  stock_quantity: number;
+  reserved_quantity: number;
+  images?: ProductImage[] | null;
 }
 
 export interface Product {
@@ -48,7 +77,21 @@ export interface Product {
   reserved_quantity: number;
   images: ProductImage[];
   category: Category;
+  sub_category?: Category | null;
+  variants?: ProductVariant[];
+  is_wishlisted?: boolean;
   created_at: string;
+}
+
+export interface ProductBrand {
+  brand: string;
+}
+
+export interface AdminProduct extends Product {
+  deleted_at: string | null;
+  category_id: string;
+  sub_category_id?: string | null;
+  sub_category?: Category | null;
 }
 
 export interface CartItem {
@@ -58,6 +101,7 @@ export interface CartItem {
   quantity: number;
   price_at_time: number;
   product: Product;
+  variant?: ProductVariant | null;
 }
 
 export interface Cart {
@@ -81,15 +125,25 @@ export interface Payment {
   id: string;
   order_id: string;
   amount: number;
+  payment_method_id?: string | null;
   status: PaymentStatus;
   receipt_document_url: string | null;
   submitted_at: string;
   approved_at: string | null;
   rejected_at: string | null;
   rejection_reason: string | null;
+  submitted_by_customer_id?: string;
+  approved_by_admin_id?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+  order?: Pick<Order, 'id' | 'order_number' | 'status' | 'total'>;
+  payment_method?: PaymentMethod | null;
   submitted_by_customer?: User;
   approved_by_admin?: User;
 }
+
+export type AdminPayment = Payment;
 
 export interface Order {
   id: string;

@@ -6,8 +6,10 @@ import { formatCurrency, formatDateTime } from '@/lib/utils/format';
 import { toast } from '@/components/ui/Toaster';
 import { getPendingPayments, approvePayment, rejectPayment } from '@/features/cart/services/cart-client';
 import { CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 export function PaymentsQueue() {
+  const { t } = useLocale();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [total, setTotal] = useState(0);
   const [actionId, setActionId] = useState<string | null>(null);
@@ -18,8 +20,8 @@ export function PaymentsQueue() {
   const load = () => {
     startTransition(async () => {
       const data = await getPendingPayments();
-      setPayments((data as { payments?: Payment[] })?.payments ?? []);
-      setTotal(data?.total ?? 0);
+      setPayments(data.items);
+      setTotal(data.items.length);
     });
   };
 
@@ -31,10 +33,10 @@ export function PaymentsQueue() {
     setActionId(id);
     try {
       await approvePayment(id);
-      toast('Payment approved!', 'success');
+      toast(t('admin.paymentApproved'), 'success');
       load();
     } catch {
-      toast('Failed to approve', 'error');
+      toast(t('admin.approveFailed'), 'error');
     } finally {
       setActionId(null);
     }
@@ -45,12 +47,12 @@ export function PaymentsQueue() {
     setActionId(rejectModal.id);
     try {
       await rejectPayment(rejectModal.id, reason);
-      toast('Payment rejected', 'info');
+      toast(t('admin.paymentRejected'), 'info');
       setRejectModal(null);
       setReason('');
       load();
     } catch {
-      toast('Failed to reject', 'error');
+      toast(t('admin.rejectFailed'), 'error');
     } finally {
       setActionId(null);
     }
@@ -60,18 +62,18 @@ export function PaymentsQueue() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Payment Queue</h2>
-          <p className="text-white/40 mt-1">{total} pending payment{total !== 1 ? 's' : ''}</p>
+          <h2 className="text-2xl font-bold text-white">{t('admin.paymentQueue')}</h2>
+          <p className="text-white/40 mt-1">{t('admin.pendingCount', { count: total })}</p>
         </div>
         <button onClick={load} disabled={isPending} className="btn-outline">
-          {isPending ? 'Refreshing...' : 'Refresh'}
+          {isPending ? t('admin.refreshing') : t('admin.refresh')}
         </button>
       </div>
 
       {payments.length === 0 ? (
         <div className="card-dark p-12 text-center">
           <CheckCircle2 size={48} className="text-success/30 mx-auto mb-4" />
-          <p className="text-white/50">All caught up! No pending payments.</p>
+          <p className="text-white/50">{t('admin.queueEmpty')}</p>
         </div>
       ) : (
         <div className={`space-y-3 transition-opacity ${isPending ? 'opacity-60' : ''}`}>
@@ -83,9 +85,9 @@ export function PaymentsQueue() {
                     Order #{(p as Payment & { order?: { order_number: string } }).order?.order_number ?? p.order_id.slice(0, 8)}
                   </p>
                   <p className="text-sm text-white/40">
-                    Customer: {p.submitted_by_customer?.email ?? 'Unknown'}
+                    {t('admin.customer')}: {p.submitted_by_customer?.email ?? t('admin.unknown')}
                   </p>
-                  <p className="text-sm text-white/40">Submitted: {formatDateTime(p.submitted_at)}</p>
+                  <p className="text-sm text-white/40">{t('admin.submitted')}: {formatDateTime(p.submitted_at)}</p>
                   <p className="text-lg font-bold text-primary-400">{formatCurrency(p.amount)}</p>
                 </div>
 
@@ -98,7 +100,7 @@ export function PaymentsQueue() {
                       className="btn-outline flex items-center gap-2 text-sm py-1.5"
                     >
                       <ExternalLink size={14} />
-                      View Receipt
+                      {t('admin.viewReceipt')}
                     </a>
                   )}
 
@@ -108,7 +110,7 @@ export function PaymentsQueue() {
                     className="btn-primary flex items-center gap-2 text-sm py-1.5"
                   >
                     <CheckCircle2 size={15} />
-                    Approve
+                    {t('admin.approve')}
                   </button>
 
                   <button
@@ -117,7 +119,7 @@ export function PaymentsQueue() {
                     className="btn-danger flex items-center gap-2 text-sm py-1.5"
                   >
                     <XCircle size={15} />
-                    Reject
+                    {t('admin.reject')}
                   </button>
                 </div>
               </div>
@@ -129,13 +131,13 @@ export function PaymentsQueue() {
       {rejectModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
           <div className="card-dark p-6 w-full max-w-md space-y-4">
-            <h3 className="font-bold text-white text-lg">Reject Payment</h3>
-            <p className="text-white/60 text-sm">Provide a reason that will be shown to the customer:</p>
+            <h3 className="font-bold text-white text-lg">{t('admin.rejectTitle')}</h3>
+            <p className="text-white/60 text-sm">{t('admin.rejectHint')}</p>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="input-dark resize-none h-24"
-              placeholder="e.g. Amount doesn't match, receipt unclear..."
+              placeholder={t('admin.rejectPlaceholder')}
               autoFocus
             />
             <div className="flex gap-3">
@@ -144,10 +146,10 @@ export function PaymentsQueue() {
                 disabled={!reason.trim() || !!actionId}
                 className="btn-danger flex-1"
               >
-                Confirm Rejection
+                {t('admin.confirmReject')}
               </button>
               <button onClick={() => setRejectModal(null)} className="btn-outline flex-1">
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </div>

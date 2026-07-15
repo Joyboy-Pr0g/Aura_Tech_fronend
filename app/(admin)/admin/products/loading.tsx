@@ -1,1 +1,5 @@
-export { ProductGridSkeleton as default } from '@/features/products/skeletons/product-grid-skeleton';
+import { AdminTableSkeleton } from '@/features/admin/skeletons/admin-table-skeleton';
+
+export default function AdminProductsLoading() {
+  return <AdminTableSkeleton />;
+}
