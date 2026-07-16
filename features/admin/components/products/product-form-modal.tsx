@@ -53,6 +53,10 @@ interface VariantRow {
   color: string;
   price: string;
   stock_quantity: string;
+  existingImage?: { url: string; public_id: string } | null;
+  imageFile?: File | null;
+  imagePreview?: string | null;
+  deleteImage?: boolean;
 }
 
 export type ProductFormMode =
@@ -74,6 +78,10 @@ const emptyVariant = (): VariantRow => ({
   color: '',
   price: '',
   stock_quantity: '0',
+  existingImage: null,
+  imageFile: null,
+  imagePreview: null,
+  deleteImage: false,
 });
 
 function featuresToRows(features: Record<string, string>): FeatureRow[] {
@@ -99,6 +107,10 @@ function variantsToRows(variants?: ProductVariant[]): VariantRow[] {
     color: variant.color ?? '',
     price: variant.price != null ? String(Number(variant.price)) : '',
     stock_quantity: String(variant.stock_quantity),
+    existingImage: variant.images?.[0] ?? null,
+    imageFile: null,
+    imagePreview: null,
+    deleteImage: false,
   }));
 }
 
@@ -112,7 +124,25 @@ function rowsToVariants(rows: VariantRow[]) {
       color: row.color.trim() || null,
       price: row.price ? Number(row.price) : null,
       stock_quantity: Number(row.stock_quantity) || 0,
+      ...(row.deleteImage && row.existingImage
+        ? { delete_image_public_id: row.existingImage.public_id }
+        : {}),
     }));
+}
+
+function collectVariantImageFiles(rows: VariantRow[]) {
+  const files: Array<{ index: number; file: File }> = [];
+  let variantIndex = 0;
+
+  for (const row of rows) {
+    if (!row.sku.trim()) continue;
+    if (row.imageFile) {
+      files.push({ index: variantIndex, file: row.imageFile });
+    }
+    variantIndex += 1;
+  }
+
+  return files;
 }
 
 function resolveBrandSelection(brand: string | null | undefined, brands: ProductBrand[]) {
@@ -130,8 +160,9 @@ function buildProductBody(
   payload: Record<string, unknown>,
   imageFiles: File[],
   jsonFields: string[] = [],
+  variantImageFiles: Array<{ index: number; file: File }> = [],
 ): FormData | Record<string, unknown> {
-  if (!imageFiles.length) return payload;
+  if (!imageFiles.length && !variantImageFiles.length) return payload;
 
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
@@ -143,6 +174,7 @@ function buildProductBody(
     }
   });
   imageFiles.forEach((file) => formData.append('images', file));
+  variantImageFiles.forEach(({ index, file }) => formData.append(`variant_image_${index}`, file));
   return formData;
 }
 
@@ -247,8 +279,43 @@ export function ProductFormModal({
   useEffect(() => {
     return () => {
       newImagePreviews.forEach((url) => URL.revokeObjectURL(url));
+      variantRows.forEach((row) => {
+        if (row.imagePreview) URL.revokeObjectURL(row.imagePreview);
+      });
     };
-  }, [newImagePreviews]);
+  }, [newImagePreviews, variantRows]);
+
+  const handleVariantImageChange = (index: number, file: File | null) => {
+    setVariantRows((rows) => {
+      const next = [...rows];
+      const current = next[index];
+      if (current.imagePreview) URL.revokeObjectURL(current.imagePreview);
+
+      next[index] = {
+        ...current,
+        imageFile: file,
+        imagePreview: file ? URL.createObjectURL(file) : null,
+        deleteImage: false,
+      };
+      return next;
+    });
+  };
+
+  const handleRemoveVariantImage = (index: number) => {
+    setVariantRows((rows) => {
+      const next = [...rows];
+      const current = next[index];
+      if (current.imagePreview) URL.revokeObjectURL(current.imagePreview);
+
+      next[index] = {
+        ...current,
+        imageFile: null,
+        imagePreview: null,
+        deleteImage: Boolean(current.existingImage),
+      };
+      return next;
+    });
+  };
 
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -336,17 +403,18 @@ export function ProductFormModal({
     setSubmitting(true);
     try {
       const variants = rowsToVariants(variantRows);
+      const variantImageFiles = collectVariantImageFiles(variantRows);
 
       basePayload.stock_quantity = Math.max(0, Number(stockQuantity) || 0);
 
       if (mode.type === 'create') {
         const payload = { ...basePayload, variants };
-        const body = buildProductBody(payload, newImageFiles, ['features', 'variants']);
+        const body = buildProductBody(payload, newImageFiles, ['features', 'variants'], variantImageFiles);
         await createAdminProduct(body);
         toast(t('admin.productCreated'), 'success');
       } else {
         const payload = { ...basePayload, variants };
-        const body = buildProductBody(payload, newImageFiles, ['features', 'variants']);
+        const body = buildProductBody(payload, newImageFiles, ['features', 'variants'], variantImageFiles);
         await updateAdminProduct(mode.productId, body);
         toast(t('admin.productUpdated'), 'success');
       }
@@ -617,6 +685,30 @@ export function ProductFormModal({
                                 next[index] = { ...next[index], stock_quantity: e.target.value };
                                 setVariantRows(next);
                               }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>{t('admin.variantImage')}</Label>
+                            {(row.imagePreview || (row.existingImage && !row.deleteImage)) && (
+                              <div className="relative h-20 w-20 rounded-lg overflow-hidden border border-white/10">
+                                <ProductImageComponent
+                                  src={row.imagePreview ?? row.existingImage?.url ?? null}
+                                  alt={row.sku || t('admin.variant')}
+                                  fill
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute top-1 right-1 rounded-full bg-dark-950/80 p-1 text-white/70 hover:text-white"
+                                  onClick={() => handleRemoveVariantImage(index)}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            )}
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleVariantImageChange(index, e.target.files?.[0] ?? null)}
                             />
                           </div>
                         </div>

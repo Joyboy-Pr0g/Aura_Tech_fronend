@@ -39,6 +39,13 @@ export async function addAddress(data: Omit<CustomerAddress, 'id'>) {
   return res.data!;
 }
 
+export async function updateAddress(id: string, data: Omit<CustomerAddress, 'id'>) {
+  await clientFetch(`/api/addresses/${id}`, {
+    method: 'PUT',
+    body: data,
+  });
+}
+
 export async function deleteAddress(id: string) {
   await clientFetch(`/api/addresses/${id}`, { method: 'DELETE' });
 }
@@ -48,9 +55,10 @@ export async function getPaymentMethods() {
   return res.data!;
 }
 
-export async function submitPayment(orderId: string, file: File) {
+export async function submitPayment(orderId: string, file: File, paymentMethodId: string) {
   const form = new FormData();
   form.append('receipt', file);
+  form.append('payment_method_id', paymentMethodId);
   const res = await clientFetch<Payment>(`/api/payments/orders/${orderId}`, {
     method: 'POST',
     body: form,

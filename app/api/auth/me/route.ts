@@ -5,6 +5,7 @@ import { getAuthToken } from '@/lib/auth/session';
 import { AUTH_COOKIE_NAME } from '@/lib/auth/constants';
 import { ApiError } from '@/lib/errors/api-error';
 import { User } from '@/lib/types/entities';
+import { proxyToBackend } from '@/lib/api/route-handler';
 
 export async function GET() {
   try {
@@ -40,4 +41,11 @@ export async function GET() {
       { status: 500 },
     );
   }
+}
+
+export async function PATCH(request: NextRequest) {
+  return proxyToBackend(request, {
+    path: endpoints.auth.me,
+    method: 'PATCH',
+  });
 }

@@ -16,7 +16,7 @@ export function Skeleton({ className }: SkeletonProps) {
 export function ProductCardSkeleton() {
   return (
     <div className="rounded-xl border border-white/10 overflow-hidden">
-      <Skeleton className="aspect-square w-full rounded-none" />
+      <Skeleton className="h-44 w-full rounded-none" />
       <div className="p-4 space-y-2">
         <Skeleton className="h-3 w-1/2" />
         <Skeleton className="h-4 w-full" />

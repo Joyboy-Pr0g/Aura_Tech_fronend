@@ -7,12 +7,13 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { Product } from '@/lib/types/entities';
 import { formatCurrency } from '@/lib/utils/format';
 import {
-  getProductImageUrl,
   getDisplayPrice,
   getDisplayStock,
   getVariantLabel,
   getProductPriceRange,
   getVariantAvailableStock,
+  getDefaultDetailImage,
+  buildProductGalleryImages,
   isInStock,
 } from '@/lib/products/helpers';
 import { addToCart } from '@/features/cart/services/cart-client';
@@ -41,18 +42,25 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
   const variants = product.variants ?? [];
   const hasVariants = variants.length > 0;
   const priceRange = useMemo(() => getProductPriceRange(product), [product]);
+  const initialVariant = useMemo(
+    () => variants.find((variant) => getVariantAvailableStock(variant) > 0) ?? variants[0] ?? null,
+    [variants],
+  );
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariantId, setSelectedVariantId] = useState(
-    () => variants.find((variant) => getVariantAvailableStock(variant) > 0)?.id ?? variants[0]?.id ?? '',
-  );
+  const [selectedVariantId, setSelectedVariantId] = useState(() => initialVariant?.id ?? '');
   const [adding, setAdding] = useState(false);
   const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
-  const [activeImage, setActiveImage] = useState(getProductImageUrl(product));
+  const [activeImage, setActiveImage] = useState(() => getDefaultDetailImage(product, initialVariant));
 
   const selectedVariant = useMemo(
     () => variants.find((variant) => variant.id === selectedVariantId) ?? null,
     [variants, selectedVariantId],
+  );
+
+  const galleryImages = useMemo(
+    () => buildProductGalleryImages(product, selectedVariant),
+    [product, selectedVariant],
   );
 
   const displayPrice = getDisplayPrice(product, selectedVariant);
@@ -62,7 +70,10 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
 
   useEffect(() => {
     setQuantity(1);
-  }, [selectedVariantId]);
+    const variant = variants.find((item) => item.id === selectedVariantId) ?? null;
+    const nextImage = getDefaultDetailImage(product, variant);
+    if (nextImage) setActiveImage(nextImage);
+  }, [selectedVariantId, product, variants]);
 
   useEffect(() => {
     setWishlisted(product.is_wishlisted ?? false);
@@ -131,9 +142,9 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
           <div className="relative aspect-square rounded-2xl overflow-hidden bg-dark-800 border border-white/10">
             <ProductImage src={activeImage} alt={product.title} fill priority sizes="(max-width: 1024px) 100vw, 50vw" />
           </div>
-          {product.images && product.images.length > 1 && (
+          {galleryImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {product.images.map((img) => (
+              {galleryImages.map((img) => (
                 <button
                   key={img.public_id}
                   type="button"
@@ -142,6 +153,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                   className={cn(
                     'relative shrink-0 h-16 w-16 sm:h-20 sm:w-20 rounded-lg overflow-hidden border-2 transition-colors',
                     activeImage === img.url ? 'border-primary-500' : 'border-white/10 hover:border-white/25',
+                    img.source === 'variant' && activeImage !== img.url && 'border-secondary-500/40',
                   )}
                 >
                   <ProductImage src={img.url} alt="" fill className="object-cover" sizes="80px" />

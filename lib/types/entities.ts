@@ -154,6 +154,8 @@ export interface Order {
   discount_total: number;
   tax: number;
   shipping_cost: number;
+  shipping_fee_id?: string | null;
+  shipping_fee?: ShippingFee | null;
   total: number;
   notes: string | null;
   items: OrderItem[];
@@ -185,4 +187,14 @@ export interface PaymentMethod {
   iban: string | null;
   description: string | null;
   is_active: boolean;
+}
+
+export interface ShippingFee {
+  id: string;
+  price: number;
+  duration: string;
+  delivery_way: string;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

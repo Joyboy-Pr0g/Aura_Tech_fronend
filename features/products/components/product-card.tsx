@@ -19,9 +19,16 @@ interface ProductCardProps {
   product: Product;
   showWishlist?: boolean;
   isAuthenticated?: boolean;
+  /** Tailwind height/aspect classes for the image area, e.g. `h-40`, `h-48`, `aspect-video` */
+  imageClassName?: string;
 }
 
-export function ProductCard({ product, showWishlist = false, isAuthenticated = false }: ProductCardProps) {
+export function ProductCard({
+  product,
+  showWishlist = false,
+  isAuthenticated = false,
+  imageClassName = 'h-56',
+}: ProductCardProps) {
   const router = useRouter();
   const { t } = useLocale();
   const imageUrl = getProductImageUrl(product);
@@ -52,13 +59,15 @@ export function ProductCard({ product, showWishlist = false, isAuthenticated = f
       }
     } catch {
       toast(t('wishlist.error'), 'error');
+    } finally {
+      router.refresh();
     }
   };
 
   return (
     <Link href={`/products/${product.slug}`}>
       <Card className="group overflow-hidden h-full transition-all hover:border-primary-500/30 hover:shadow-lg hover:shadow-primary-500/5">
-        <div className="relative aspect-square overflow-hidden bg-dark-800 flex items-center justify-center">
+        <div className={cn('relative w-full overflow-hidden bg-dark-800 flex items-center justify-center', imageClassName)}>
           {imageUrl ? (
             <ProductImage
               src={imageUrl}

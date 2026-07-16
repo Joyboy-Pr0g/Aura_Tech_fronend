@@ -49,6 +49,59 @@ export function getProductImageUrl(product: Product): string | null {
   return getPrimaryImage(product)?.url ?? null;
 }
 
+export function getVariantImageUrl(variant?: ProductVariant | null): string | null {
+  return variant?.images?.[0]?.url ?? null;
+}
+
+export interface GalleryImage {
+  url: string;
+  public_id: string;
+  source: 'product' | 'variant';
+  is_primary?: boolean;
+}
+
+export function buildProductGalleryImages(
+  product: Product,
+  selectedVariant?: ProductVariant | null,
+): GalleryImage[] {
+  const gallery: GalleryImage[] = [];
+  const seen = new Set<string>();
+
+  const addImage = (
+    image: { url: string; public_id: string; is_primary?: boolean },
+    source: GalleryImage['source'],
+  ) => {
+    const key = image.public_id || image.url;
+    if (seen.has(key)) return;
+    seen.add(key);
+    gallery.push({
+      url: image.url,
+      public_id: image.public_id,
+      source,
+      is_primary: image.is_primary,
+    });
+  };
+
+  if (selectedVariant?.images?.length) {
+    for (const image of selectedVariant.images) {
+      addImage(image, 'variant');
+    }
+  }
+
+  for (const image of product.images ?? []) {
+    addImage(image, 'product');
+  }
+
+  return gallery;
+}
+
+export function getDefaultDetailImage(
+  product: Product,
+  selectedVariant?: ProductVariant | null,
+): string | null {
+  return getVariantImageUrl(selectedVariant) ?? getProductImageUrl(product);
+}
+
 export function getProductPriceRange(product: Product): { min: number; max: number } | null {
   if (!product.variants?.length) return null;
 

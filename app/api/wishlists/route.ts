@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/api/route-handler';
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function GET(request: NextRequest) {
   return proxyToBackend(request, { path: '/wishlists', method: 'GET' });
@@ -8,6 +8,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const res = await proxyToBackend(request, { path: '/wishlists', method: 'POST' });
-  revalidateTag('wishlists');
+  revalidateTag('wishlist');
+  revalidateTag('products');
+  revalidatePath('/dashboard/wishlist');
+  revalidatePath('/products');
+  console.log(
+    `[${new Date().toISOString()}] Revalidated: wishlist, products`
+  );
   return res;
 }

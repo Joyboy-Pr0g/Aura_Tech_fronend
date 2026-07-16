@@ -52,7 +52,7 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuContent align="end" className="w-48 bg-dark-900 border-white/10">
         <DropdownMenuItem asChild>
           <Link href={dashboardHref} className="flex items-center gap-2 cursor-pointer">
-            <LayoutDashboard className="h-4 w-4" /> {user.role === 'customer' ? t('nav.profile') : t('nav.dashboard')}
+            <LayoutDashboard className="h-4 w-4" /> {t('nav.dashboard')}
           </Link>
         </DropdownMenuItem>
         {user.role === 'admin' && (

@@ -19,7 +19,8 @@ export async function getMyOrder(id: string) {
 
 export async function checkout(data: {
   shipping_address_id?: string;
-  billing_address_id?: string;
+  billing_address_id: string;
+  shipping_fee_id: string;
   notes?: string;
 }) {
   const res = await clientFetch<Order>('/api/orders/checkout', {

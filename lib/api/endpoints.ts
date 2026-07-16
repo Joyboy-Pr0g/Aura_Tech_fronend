@@ -4,6 +4,9 @@ export const endpoints = {
     register: '/auth/register',
     logout: '/auth/logout',
     me: '/auth/me',
+    password: '/auth/password',
+    emailVerificationSend: '/auth/email-verification/send',
+    emailVerificationVerify: '/auth/email-verification/verify',
   },
   cart: {
     root: '/cart',
@@ -27,6 +30,9 @@ export const endpoints = {
     pending: '/payments/pending',
     approve: (id: string) => `/payments/${id}/approve`,
     reject: (id: string) => `/payments/${id}/reject`,
+  },
+  shippingFees: {
+    root: '/shipping-fees',
   },
   products: {
     root: '/products',
@@ -69,5 +75,9 @@ export const endpoints = {
     paymentMethod: (id: string) => `/admin/payments/methods/${id}`,
     paymentApprove: (id: string) => `/admin/payments/${id}/approve`,
     paymentReject: (id: string) => `/admin/payments/${id}/reject`,
+    shippingFees: '/admin/shipping-fees',
+    shippingFee: (id: string) => `/admin/shipping-fees/${id}`,
+    shippingFeeAction: (id: string, action: 'activate' | 'deactivate') =>
+      `/admin/shipping-fees/${id}/${action}`,
   },
 } as const;

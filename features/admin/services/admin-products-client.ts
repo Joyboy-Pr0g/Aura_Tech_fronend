@@ -20,6 +20,7 @@ export interface CreateProductPayload {
     color?: string | null;
     price?: number | null;
     stock_quantity?: number;
+    delete_image_public_id?: string | null;
   }>;
 }
 
@@ -40,6 +41,7 @@ export interface UpdateProductPayload {
     color?: string | null;
     price?: number | null;
     stock_quantity?: number;
+    delete_image_public_id?: string | null;
   }>;
 }
 

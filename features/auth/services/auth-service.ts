@@ -1,5 +1,12 @@
 import { User } from '@/lib/types/entities';
-import { LoginInput, RegisterInput } from '@/features/auth/schemas/auth-schemas';
+import {
+  LoginInput,
+  RegisterInput,
+  UpdateProfileInput,
+  ChangePasswordInput,
+  SendEmailVerificationInput,
+  VerifyEmailChangeInput,
+} from '@/features/auth/schemas/auth-schemas';
 import { clientFetch } from '@/lib/api/client';
 
 interface AuthResponse {
@@ -29,4 +36,33 @@ export async function logout(): Promise<void> {
 export async function getMe(): Promise<User> {
   const res = await clientFetch<User>('/api/auth/me');
   return res.data!;
+}
+
+export async function updateProfile(data: UpdateProfileInput): Promise<User> {
+  const res = await clientFetch<User>('/api/auth/me', {
+    method: 'PATCH',
+    body: data,
+  });
+  return res.data!;
+}
+
+export async function changePassword(data: ChangePasswordInput): Promise<void> {
+  await clientFetch('/api/auth/password', {
+    method: 'PATCH',
+    body: data,
+  });
+}
+
+export async function sendEmailVerification(data: SendEmailVerificationInput): Promise<void> {
+  await clientFetch('/api/auth/email-verification/send', {
+    method: 'POST',
+    body: data,
+  });
+}
+
+export async function verifyEmailChange(data: VerifyEmailChangeInput): Promise<void> {
+  await clientFetch('/api/auth/email-verification/verify', {
+    method: 'POST',
+    body: data,
+  });
 }

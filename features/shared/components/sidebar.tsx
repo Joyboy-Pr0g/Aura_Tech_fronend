@@ -10,7 +10,7 @@ import {
   ShoppingCart, Package, MapPin, Settings,
   LayoutDashboard, Users, ClipboardList, Banknote, LogOut, Heart, Star,
   Menu, X,
-  ListIcon,
+  ListIcon, Truck,
 } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,7 @@ const ADMIN_NAV: NavItem[] = [
   { key: 'sidebar.categories', href: '/admin/categories', icon: <ListIcon size={18} /> },
   { key: 'sidebar.products', href: '/admin/products', icon: <Package size={18} /> },
   { key: 'sidebar.adminOrders', href: '/admin/orders', icon: <ClipboardList size={18} /> },
+  { key: 'sidebar.shippingFees', href: '/admin/shipping-fees', icon: <Truck size={18} /> },
   { key: 'sidebar.payments', href: '/admin/payments', icon: <Banknote size={18} /> },
 ];
 
