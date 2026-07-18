@@ -4,8 +4,12 @@ import { VisitTracker } from '@/components/analytics/visit-tracker';
 import { PushTokenRegister } from '@/components/notifications/push-token-register';
 import { getSession } from '@/lib/auth/session';
 import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
+import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
+  if (isStorefrontComingSoon()) {
+    return null;
+  }
 
   const [user, settings] = await Promise.all([getSession(), getWebsiteSettingsServer()]);
 

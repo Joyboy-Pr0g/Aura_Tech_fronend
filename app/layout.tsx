@@ -4,11 +4,8 @@ import { Toaster } from '@/components/ui/Toaster';
 import { LocaleProvider } from '@/lib/i18n/locale-provider';
 import { AppProviders } from '@/components/app-providers';
 import { getRootMetadata } from '@/lib/seo/metadata';
-import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
-import { withWebsiteSettingsDefaults } from '@/lib/website-settings/defaults';
-import { Analytics } from '@vercel/analytics/next';
 import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
-import { ComingSoonGate } from '@/features/storefront/components/coming-soon-gate';
+import { Analytics } from '@vercel/analytics/next';
 
 const COMING_SOON_METADATA: Metadata = {
   title: 'AuraTech — Coming Soon',
@@ -25,14 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export async function generateViewport(): Promise<Viewport> {
-  if (isStorefrontComingSoon()) {
-    return { themeColor: '#00d9ff' };
-  }
-
-  const settings = withWebsiteSettingsDefaults(await getWebsiteSettingsServer());
-  return {
-    themeColor: settings.theme_color ?? '#00d9ff',
-  };
+  return { themeColor: '#00d9ff' };
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -47,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased bg-dark-950 text-white min-h-screen overflow-x-hidden">
         <LocaleProvider>
-          <ComingSoonGate>{children}</ComingSoonGate>
+          {children}
           <AppProviders />
           <Toaster />
           <Analytics />

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE_NAME, decodeTokenRole } from '@/lib/auth/constants';
+import { shouldShowComingSoonForPath } from '@/lib/storefront/coming-soon';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (shouldShowComingSoonForPath(pathname)) {
+    return NextResponse.rewrite(new URL('/coming-soon', request.url));
+  }
+
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
 
   const isProtected =
