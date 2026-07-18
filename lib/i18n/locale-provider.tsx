@@ -5,6 +5,7 @@ import { en, type TranslationKey } from './en';
 import { ar } from './ar';
 
 export type Locale = 'en' | 'ar';
+export const DEFAULT_LOCALE: Locale = 'ar';
 
 const translations: Record<Locale, Record<TranslationKey, string>> = { en, ar };
 
@@ -25,23 +26,30 @@ function interpolate(template: string, params?: Record<string, string | number>)
   );
 }
 
+function resolveInitialLocale(): Locale {
+  if (typeof window === 'undefined') return DEFAULT_LOCALE;
+  const saved = localStorage.getItem('aura-locale') as Locale | null;
+  return saved === 'en' || saved === 'ar' ? saved : DEFAULT_LOCALE;
+}
+
+function applyDocumentLocale(locale: Locale) {
+  document.documentElement.lang = locale;
+  document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
-    const saved = localStorage.getItem('aura-locale') as Locale | null;
-    if (saved === 'en' || saved === 'ar') {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-      document.documentElement.dir = saved === 'ar' ? 'rtl' : 'ltr';
-    }
+    const resolved = resolveInitialLocale();
+    setLocaleState(resolved);
+    applyDocumentLocale(resolved);
   }, []);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     localStorage.setItem('aura-locale', next);
-    document.documentElement.lang = next;
-    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
+    applyDocumentLocale(next);
   }, []);
 
   const t = useCallback(
@@ -49,6 +57,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       const dict = translations[locale];
       const raw =
         dict[key as TranslationKey] ??
+        translations.ar[key as TranslationKey] ??
         translations.en[key as TranslationKey] ??
         key;
       return interpolate(raw, params);

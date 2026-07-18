@@ -1,7 +1,3 @@
-import { getMyOrdersServer } from '@/features/orders/services/orders-server';
-import { OrdersListView } from '@/features/orders/components/orders-list-view';
+import { OrdersListContent } from '@/features/orders/components/orders-list-content';
 
-export async function OrdersList() {
-  const data = await getMyOrdersServer();
-  return <OrdersListView orders={data.items} total={data.items.length} />;
-}
+export { OrdersListContent as OrdersList };

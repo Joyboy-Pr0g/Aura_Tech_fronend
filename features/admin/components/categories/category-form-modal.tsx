@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,18 +26,20 @@ import {
   updateAdminCategory,
 } from '@/features/admin/services/admin-categories-client';
 
-const categoryFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  description: z.string().min(10, 'Description must be at least 10 characters').max(500),
-  parent_category_id: z
-    .union([z.string().uuid(), z.literal('')])
-    .nullable()
-    .optional()
-    .transform((value) => (!value || value === '' ? null : value)),
-  is_active: z.boolean(),
-});
+function createCategoryFormSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(2, t('validation.nameMin2')).max(100),
+    description: z.string().min(10, t('validation.descriptionMin10')).max(500),
+    parent_category_id: z
+      .union([z.string().uuid(), z.literal('')])
+      .nullable()
+      .optional()
+      .transform((value) => (!value || value === '' ? null : value)),
+    is_active: z.boolean(),
+  });
+}
 
-type CategoryFormValues = z.infer<typeof categoryFormSchema>;
+type CategoryFormValues = z.infer<ReturnType<typeof createCategoryFormSchema>>;
 
 export type CategoryFormMode =
   | { type: 'create'; parentCategoryId?: string | null; parentCategoryName?: string }
@@ -67,6 +69,7 @@ export function CategoryFormModal({
   const isEdit = mode?.type === 'edit';
   const isSubcategoryCreate = mode?.type === 'create' && Boolean(mode.parentCategoryId);
   const lockParent = isSubcategoryCreate;
+  const categoryFormSchema = useMemo(() => createCategoryFormSchema(t), [t]);
 
   const {
     register,

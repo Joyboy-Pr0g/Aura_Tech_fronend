@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -23,6 +23,10 @@ html, body {
   background-color: #050507;
   color: #f5f5f5;
   scroll-behavior: smooth;
+}
+
+html[dir='rtl'] body {
+  font-family: 'Cairo', 'Inter', system-ui, sans-serif;
 }
 
 @layer components {
@@ -66,12 +70,24 @@ html, body {
   }
 
   .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-start
            text-white/60 hover:text-white hover:bg-white/5 transition-all cursor-pointer;
   }
 
   .sidebar-item-active {
     @apply text-primary-400 bg-primary-500/10 hover:bg-primary-500/10 hover:text-primary-400;
+  }
+
+  .admin-table-head {
+    @apply border-b border-white/10 text-start text-white/50;
+  }
+
+  .admin-table-actions-head {
+    @apply px-5 py-4 font-medium text-end;
+  }
+
+  .admin-table-actions-cell {
+    @apply px-5 py-4 text-end;
   }
 }
 

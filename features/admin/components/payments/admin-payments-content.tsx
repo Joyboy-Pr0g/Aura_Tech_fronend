@@ -6,7 +6,7 @@ const PAGE_SIZE = 20;
 interface AdminPaymentsContentProps {
   searchParams: Promise<{
     tab?: string;
-    order_id?: string;
+    search?: string;
     payment_method_id?: string;
     status?: string;
     min_amount?: string;
@@ -20,7 +20,7 @@ export async function AdminPaymentsContent({ searchParams }: AdminPaymentsConten
 
   const [paymentsPage, methods] = await Promise.all([
     getAdminPaymentsServer({
-      order_id: params.order_id || undefined,
+      search: params.search?.trim() || undefined,
       payment_method_id: params.payment_method_id || undefined,
       status: params.status || undefined,
       min_amount: params.min_amount || undefined,
@@ -35,7 +35,7 @@ export async function AdminPaymentsContent({ searchParams }: AdminPaymentsConten
       initialPayments={paymentsPage}
       initialMethods={methods}
       initialTab={tab}
-      initialOrderId={params.order_id}
+      initialSearch={params.search}
       initialPaymentMethodId={params.payment_method_id}
       initialStatus={params.status}
       initialMinAmount={params.min_amount}

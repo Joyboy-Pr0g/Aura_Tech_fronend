@@ -5,6 +5,7 @@ import {
   ProductQuestion,
   OrderStatusHistoryEntry,
 } from '@/features/engagement/types';
+import { assertContentAllowed } from '@/lib/moderation/check-content';
 
 export async function getWishlist() {
   const res = await clientFetch<Product[]>('/api/wishlists');
@@ -51,6 +52,8 @@ export async function createReview(data: {
   title: string;
   content: string;
 }) {
+  assertContentAllowed(data.title, data.content);
+
   const res = await clientFetch<ProductReview>('/api/reviews', {
     method: 'POST',
     body: data,
@@ -71,11 +74,13 @@ export async function getProductQuestions(productId: string, cursor?: string) {
 }
 
 export async function askQuestion(productId: string, question: string) {
-  const res = await clientFetch(`/api/products/${productId}/questions`, {
+  assertContentAllowed(question);
+
+  const res = await clientFetch<ProductQuestion>(`/api/products/${productId}/questions`, {
     method: 'POST',
     body: { question },
   });
-  return res.data;
+  return res.data!;
 }
 
 export async function getOrderStatusHistory(orderId: string) {

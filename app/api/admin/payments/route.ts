@@ -5,3 +5,7 @@ import { endpoints } from '@/lib/api/endpoints';
 export async function GET(request: NextRequest) {
   return proxyToBackend(request, { path: endpoints.admin.payments, method: 'GET' });
 }
+
+export async function POST(request: NextRequest) {
+  return proxyToBackend(request, { path: endpoints.admin.payments, method: 'POST' });
+}

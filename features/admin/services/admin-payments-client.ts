@@ -2,7 +2,7 @@ import { clientFetch } from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import { bffPath } from '@/lib/api/bff';
 import { CursorPage } from '@/lib/types/api';
-import { AdminPayment, PaymentMethod } from '@/lib/types/entities';
+import { AdminPayment, Payment, PaymentMethod } from '@/lib/types/entities';
 import { parseAdminPaymentsPage } from '@/features/admin/lib/parse-admin-payments-page';
 
 export interface CreatePaymentMethodPayload {
@@ -23,7 +23,7 @@ export interface UpdatePaymentMethodPayload {
 }
 
 export async function getAdminPayments(params?: {
-  order_id?: string;
+  search?: string;
   payment_method_id?: string;
   status?: string;
   min_amount?: number;
@@ -43,7 +43,7 @@ export async function getAdminPaymentMethods(): Promise<PaymentMethod[]> {
 export async function createAdminPaymentMethod(data: CreatePaymentMethodPayload): Promise<PaymentMethod> {
   const res = await clientFetch<PaymentMethod>(bffPath(endpoints.admin.paymentMethods), {
     method: 'POST',
-    body: data,
+    body: { ...data },
   });
   return res.data!;
 }
@@ -51,7 +51,7 @@ export async function createAdminPaymentMethod(data: CreatePaymentMethodPayload)
 export async function updateAdminPaymentMethod(id: string, data: UpdatePaymentMethodPayload): Promise<void> {
   await clientFetch(bffPath(endpoints.admin.paymentMethod(id)), {
     method: 'PUT',
-    body: data,
+    body: { ...data },
   });
 }
 
@@ -68,4 +68,20 @@ export async function rejectAdminPayment(id: string, reason: string): Promise<vo
     method: 'PATCH',
     body: { reason },
   });
+}
+
+export async function createAdminManualPayment(data: {
+  order_number: string;
+  amount: number;
+}): Promise<AdminPayment> {
+  const res = await clientFetch<AdminPayment>(bffPath(endpoints.admin.payments), {
+    method: 'POST',
+    body: { ...data },
+  });
+  return res.data!;
+}
+
+export async function getAdminPaymentByOrderId(orderId: string): Promise<Payment | null> {
+  const res = await clientFetch<Payment>(bffPath(endpoints.admin.paymentOrder(orderId)));
+  return res.data ?? null;
 }

@@ -1,8 +1,10 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
-import { askQuestion, getProductQuestions } from '@/features/engagement/services/engagement-client';
-import { ProductQuestion } from '@/features/engagement/types';
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { askQuestion } from '@/features/engagement/services/engagement-client';
+import { ProductQuestionSummary } from '@/lib/types/entities';
+import { ItemCarousel } from '@/components/ui/item-carousel';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/Toaster';
@@ -10,25 +12,49 @@ import { toast } from '@/components/ui/Toaster';
 interface ProductQaTabProps {
   productId: string;
   isAuthenticated: boolean;
+  questions?: ProductQuestionSummary[];
 }
 
-export function ProductQaTab({ productId, isAuthenticated }: ProductQaTabProps) {
+function QuestionCard({ question }: { question: ProductQuestionSummary }) {
   const { t } = useLocale();
-  const [questions, setQuestions] = useState<ProductQuestion[]>([]);
+
+  return (
+    <article className="card-dark p-4 space-y-3">
+      <div>
+        <p className="text-white font-medium">{question.question}</p>
+        <p className="text-xs text-white/40 mt-1">
+          {question.customer?.full_name ?? t('reviews.anonymous')} ·{' '}
+          {new Date(question.created_at).toLocaleDateString()}
+        </p>
+      </div>
+      {question.answers.length > 0 ? (
+        <div className="border-s-2 border-primary-500/30 ps-4 space-y-2">
+          {question.answers.map((answer) => (
+            <div key={answer.id}>
+              <p className="text-sm text-white/70">{answer.answer}</p>
+              <p className="text-xs text-white/40 mt-1">
+                {answer.answered_by?.full_name ?? t('qa.staff')}
+                {answer.is_seller_answer && ` · ${t('qa.seller')}`}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-white/40">{t('qa.awaiting')}</p>
+      )}
+    </article>
+  );
+}
+
+export function ProductQaTab({
+  productId,
+  isAuthenticated,
+  questions = [],
+}: ProductQaTabProps) {
+  const router = useRouter();
+  const { t } = useLocale();
   const [question, setQuestion] = useState('');
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  const load = () => {
-    setLoading(true);
-    getProductQuestions(productId)
-      .then((data) => setQuestions(data.items))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    load();
-  }, [productId]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -40,12 +66,17 @@ export function ProductQaTab({ productId, isAuthenticated }: ProductQaTabProps) 
 
     setSubmitting(true);
     try {
-      await askQuestion(productId, question.trim());
+      const result = await askQuestion(productId, question.trim());
       setQuestion('');
-      toast(t('qa.submitted'), 'success');
-      load();
-    } catch {
-      toast(t('qa.error'), 'error');
+      toast(
+        result.is_published === false
+          ? t('qa.submittedModeration')
+          : t('qa.submitted'),
+        result.is_published === false ? 'info' : 'success',
+      );
+      router.refresh();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : t('qa.error'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -71,40 +102,11 @@ export function ProductQaTab({ productId, isAuthenticated }: ProductQaTabProps) 
         )}
       </form>
 
-      {loading ? (
-        <p className="text-white/40 text-sm">{t('common.loading')}</p>
-      ) : questions.length === 0 ? (
-        <p className="text-white/40 text-sm">{t('qa.none')}</p>
-      ) : (
-        <ul className="space-y-4">
-          {questions.map((q) => (
-            <li key={q.id} className="card-dark p-4 space-y-3">
-              <div>
-                <p className="text-white font-medium">{q.question}</p>
-                <p className="text-xs text-white/40 mt-1">
-                  {q.customer?.full_name ?? t('reviews.anonymous')} ·{' '}
-                  {new Date(q.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              {q.answers.length > 0 ? (
-                <div className="border-s-2 border-primary-500/30 ps-4 space-y-2">
-                  {q.answers.map((a) => (
-                    <div key={a.id}>
-                      <p className="text-sm text-white/70">{a.answer}</p>
-                      <p className="text-xs text-white/40 mt-1">
-                        {a.answered_by?.full_name ?? t('qa.staff')}
-                        {a.is_seller_answer && ` · ${t('qa.seller')}`}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-white/40">{t('qa.awaiting')}</p>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      <ItemCarousel
+        items={questions}
+        emptyMessage={t('qa.none')}
+        renderItem={(item) => <QuestionCard question={item} />}
+      />
     </div>
   );
 }

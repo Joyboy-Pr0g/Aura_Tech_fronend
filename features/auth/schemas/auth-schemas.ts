@@ -1,82 +1,88 @@
 import { z } from 'zod';
 
-export const loginSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password required'),
-});
+export type SchemaTranslate = (key: string) => string;
 
-export type LoginInput = z.infer<typeof loginSchema>;
-
-export const registerSchema = z.object({
-  full_name: z.string().min(3, 'Name must be at least 3 characters').max(50),
-  email: z.string().email('Invalid email'),
-  password: z
-    .string()
-    .min(8, 'Min 8 characters')
-    .max(64)
-    .regex(/[a-z]/, 'Need lowercase letter')
-    .regex(/[A-Z]/, 'Need uppercase letter')
-    .regex(/\d/, 'Need a number'),
-  phone: z
-    .string()
-    .regex(
-      /^(\+967|0)(7[0137]\d{7})$/,
-      'Valid Yemeni mobile required (e.g. +9677XXXXXXXX or 07XXXXXXXX)',
-    ),
-});
-
-export type RegisterInput = z.infer<typeof registerSchema>;
-
-export const passwordFieldSchema = z
-  .string()
-  .min(8, 'Min 8 characters')
-  .max(64)
-  .regex(/[a-z]/, 'Need lowercase letter')
-  .regex(/[A-Z]/, 'Need uppercase letter')
-  .regex(/\d/, 'Need a number');
-
-export const updateProfileSchema = z.object({
-  full_name: z.string().min(3, 'Name must be at least 3 characters').max(50),
-  email: z.string().email('Invalid email'),
-  phone: z
-    .string()
-    .regex(
-      /^(\+967|0)(7[0137]\d{7})$/,
-      'Valid Yemeni mobile required (e.g. +9677XXXXXXXX or 07XXXXXXXX)',
-    ),
-});
-
-export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
-
-export const changePasswordSchema = z
-  .object({
-    current_password: z.string().min(1, 'Current password required'),
-    new_password: passwordFieldSchema,
-    confirm_password: z.string().min(1, 'Confirm password required'),
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: 'Passwords do not match',
-    path: ['confirm_password'],
-  })
-  .refine((data) => data.new_password !== data.current_password, {
-    message: 'New password must differ from current password',
-    path: ['new_password'],
+export function createLoginSchema(t: SchemaTranslate) {
+  return z.object({
+    email: z.string().email(t('validation.invalidEmail')),
+    password: z.string().min(1, t('validation.passwordRequired')),
   });
+}
 
-export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>;
 
-export const sendEmailVerificationSchema = z.object({
-  email: z.string().email('Invalid email'),
-});
+export function createRegisterSchema(t: SchemaTranslate) {
+  return z
+    .object({
+      full_name: z.string().min(3, t('validation.nameMin3')).max(50),
+      email: z.string().email(t('validation.invalidEmail')),
+      password: createPasswordFieldSchema(t),
+      confirm_password: z.string().min(1, t('validation.confirmPasswordRequired')),
+      phone: z.string().regex(/^(\+967|0)(7[0137]\d{7})$/, t('validation.yemeniMobile')),
+    })
+    .refine((data) => data.password === data.confirm_password, {
+      message: t('validation.passwordsNoMatch'),
+      path: ['confirm_password'],
+    });
+}
 
-export type SendEmailVerificationInput = z.infer<typeof sendEmailVerificationSchema>;
+export type RegisterInput = z.infer<ReturnType<typeof createRegisterSchema>>;
 
-export const verifyEmailChangeSchema = z.object({
-  email: z.string().email('Invalid email'),
-  code: z
+function createPasswordFieldSchema(t: SchemaTranslate) {
+  return z
     .string()
-    .length(6, 'Code must be 6 digits')
-    .regex(/^\d{6}$/, 'Code must be 6 digits'),
-});
+    .min(8, t('validation.min8Chars'))
+    .max(64)
+    .regex(/[a-z]/, t('validation.needLowercase'))
+    .regex(/[A-Z]/, t('validation.needUppercase'))
+    .regex(/\d/, t('validation.needNumber'));
+}
 
-export type VerifyEmailChangeInput = z.infer<typeof verifyEmailChangeSchema>;
+export function createUpdateProfileSchema(t: SchemaTranslate) {
+  return z.object({
+    full_name: z.string().min(3, t('validation.nameMin3')).max(50),
+    email: z.string().email(t('validation.invalidEmail')),
+    phone: z.string().regex(/^(\+967|0)(7[0137]\d{7})$/, t('validation.yemeniMobile')),
+  });
+}
+
+export type UpdateProfileInput = z.infer<ReturnType<typeof createUpdateProfileSchema>>;
+
+export function createChangePasswordSchema(t: SchemaTranslate) {
+  return z
+    .object({
+      current_password: z.string().min(1, t('validation.currentPasswordRequired')),
+      new_password: createPasswordFieldSchema(t),
+      confirm_password: z.string().min(1, t('validation.confirmPasswordRequired')),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t('validation.passwordsNoMatch'),
+      path: ['confirm_password'],
+    })
+    .refine((data) => data.new_password !== data.current_password, {
+      message: t('validation.passwordMustDiffer'),
+      path: ['new_password'],
+    });
+}
+
+export type ChangePasswordInput = z.infer<ReturnType<typeof createChangePasswordSchema>>;
+
+export function createSendEmailVerificationSchema(t: SchemaTranslate) {
+  return z.object({
+    email: z.string().email(t('validation.invalidEmail')),
+  });
+}
+
+export type SendEmailVerificationInput = z.infer<ReturnType<typeof createSendEmailVerificationSchema>>;
+
+export function createVerifyEmailChangeSchema(t: SchemaTranslate) {
+  return z.object({
+    email: z.string().email(t('validation.invalidEmail')),
+    code: z
+      .string()
+      .length(6, t('validation.code6Digits'))
+      .regex(/^\d{6}$/, t('validation.code6Digits')),
+  });
+}
+
+export type VerifyEmailChangeInput = z.infer<ReturnType<typeof createVerifyEmailChangeSchema>>;

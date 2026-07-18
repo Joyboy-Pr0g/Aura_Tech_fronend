@@ -21,7 +21,7 @@ export function AdminPageHeader({
 }: AdminPageHeaderProps) {
   return (
     <header className={cn('space-y-4', className)}>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{title}</h1>

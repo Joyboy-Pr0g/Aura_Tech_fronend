@@ -35,6 +35,8 @@ import {
 } from '@/features/admin/services/admin-categories-client';
 import { CategoryFormModal, type CategoryFormMode } from '@/features/admin/components/categories/category-form-modal';
 import { AdminPageHeader } from '@/components/ui/admin-page-header';
+import { useAdminLatestActions } from '@/features/admin/hooks/use-admin-latest-actions';
+import { AdminLastActionLabel } from '@/features/admin/components/audit/admin-last-action-label';
 
 const PAGE_SIZE = 20;
 
@@ -70,6 +72,7 @@ export function AdminCategoriesPanel({
   const [selectedObject, setSelectedObject] = useState<AdminCategory | null>(null);
   const isInitialRender = useRef(true);
   const [selectedCategory, setSelectedCategory] = useState<AdminCategory | null>(null);
+  const latestActions = useAdminLatestActions('category', categories.map((c) => c.id));
 
   useEffect(() => {
     setCategories(initial.items);
@@ -384,14 +387,15 @@ export function AdminCategoriesPanel({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-white/50">
+                  <tr className="admin-table-head">
                     <th className="px-5 py-4 font-medium">{t('admin.categoryImage')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.categoryName')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.categorySlug')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.categoryProducts')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.categorySubcategories')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.categoryStatus')}</th>
-                    <th className="px-5 py-4 font-medium text-right">{t('admin.actions')}</th>
+                    <th className="px-5 py-4 font-medium">{t('admin.audit')}</th>
+                    <th className="admin-table-actions-head">{t('admin.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,7 +411,10 @@ export function AdminCategoriesPanel({
                       <td className="px-5 py-4 text-white/70">{category.product_count}</td>
                       <td className="px-5 py-4">{renderSubcategories(category)}</td>
                       <td className="px-5 py-4">{renderStatusBadges(category)}</td>
-                      <td className="px-5 py-4 text-right">{renderCategoryActions(category)}</td>
+                      <td className="px-5 py-4">
+                        <AdminLastActionLabel action={latestActions[category.id]} />
+                      </td>
+                      <td className="admin-table-actions-cell">{renderCategoryActions(category)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -426,6 +433,7 @@ export function AdminCategoriesPanel({
                     <div className="min-w-0">
                       <p className="font-semibold text-white truncate">{category.name}</p>
                       <p className="text-sm text-white/50 truncate">{category.slug}</p>
+                      <AdminLastActionLabel action={latestActions[category.id]} />
                     </div>
                   </div>
                   {renderCategoryActions(category)}
@@ -470,7 +478,7 @@ export function AdminCategoriesPanel({
                     </div>
                     <p className="font-semibold text-white truncate">{child.name}</p>
                   </div>
-                  <span className="absolute top-0 right-2">
+                  <span className="absolute top-0 end-2">
                     {renderSubcategoryActions(child)}
                   </span>
                 </div>
@@ -499,7 +507,7 @@ export function AdminCategoriesPanel({
       {/* Delete Modal */}
       {selectedObject && (
         <ConfirmModal
-          name={`${selectedObject.name} ${!selectedObject.parent_category_id ? 'Category' : 'Subcategory'}`}
+          name={`${selectedObject.name} ${!selectedObject.parent_category_id ? t('admin.productCategory') : t('admin.productSubCategory')}`}
           onConfirm={
             selectedObject.deleted_at ? () => runAction(selectedObject.id, () => deleteAdminCategory(selectedObject.id), 'admin.categoryDeleted') :
               () => runAction(selectedObject.id, () => softDeleteAdminCategory(selectedObject.id), 'admin.categorySoftDeleted')

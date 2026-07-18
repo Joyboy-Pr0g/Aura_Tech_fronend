@@ -13,9 +13,9 @@ export default function ContactPage() {
   const { t } = useLocale();
 
   const CONTACT_INFO = [
-    { icon: MapPin, labelKey: 'contact.address' as const, value: "Haddah Street, Sana'a, Yemen" },
-    { icon: Phone, labelKey: 'contact.phone' as const, value: '+967 777 000 000' },
-    { icon: Mail, labelKey: 'contact.email' as const, value: 'hello@auratech.com' },
+    { icon: MapPin, labelKey: 'contact.address' as const, value: t('contact.addressValue') },
+    { icon: Phone, labelKey: 'contact.phone' as const, value: t('contact.phoneValue') },
+    { icon: Mail, labelKey: 'contact.email' as const, value: t('contact.emailValue') },
     { icon: Clock, labelKey: 'contact.hours' as const, value: t('contact.hoursValue') },
   ];
 

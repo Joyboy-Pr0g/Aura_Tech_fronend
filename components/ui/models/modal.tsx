@@ -5,6 +5,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 const ModalContext = React.createContext(false);
 
@@ -59,6 +60,8 @@ export const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
     ref,
   ) => {
     const open = React.useContext(ModalContext);
+    const { t } = useLocale();
+    const resolvedCloseLabel = closeLabel ?? t('admin.close');
 
     return (
       <AnimatePresence>
@@ -106,12 +109,12 @@ export const ModalContent = React.forwardRef<HTMLDivElement, ModalContentProps>(
                   {showClose && (
                     <DialogPrimitive.Close
                       className={cn(
-                        'absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-lg',
+                        'absolute end-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-lg',
                         'border border-white/10 text-white/50 transition-colors',
                         'hover:bg-white/5 hover:text-white',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40',
                       )}
-                      aria-label={closeLabel}
+                      aria-label={resolvedCloseLabel}
                     >
                       <X size={18} />
                     </DialogPrimitive.Close>
@@ -130,7 +133,7 @@ ModalContent.displayName = 'ModalContent';
 export function ModalHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-col gap-1.5 border-b border-white/10 px-6 py-5 pr-14', className)}
+      className={cn('flex flex-col gap-1.5 border-b border-white/10 px-6 py-5 pe-14', className)}
       {...props}
     />
   );

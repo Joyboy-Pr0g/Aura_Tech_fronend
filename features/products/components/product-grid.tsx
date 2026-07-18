@@ -1,22 +1,27 @@
+'use client';
+
 import { Product } from '@/lib/types/entities';
 import { formatCurrency } from '@/lib/utils/format';
 import { getProductImageUrl, isInStock } from '@/lib/products/helpers';
 import { ProductImage } from '@/components/ui/product-image';
 import { Package } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 interface ProductGridProps {
   products: Product[];
 }
 
 export function ProductGrid({ products }: ProductGridProps) {
+  const { t } = useLocale();
+
   return (
     <div className="p-8 space-y-6">
-      <h2 className="text-2xl font-bold text-white">Products</h2>
+      <h2 className="text-2xl font-bold text-white">{t('products.title')}</h2>
 
       {products.length === 0 ? (
         <div className="card-dark p-12 text-center">
           <Package size={48} className="text-white/20 mx-auto mb-4" />
-          <p className="text-white/50">No products yet. Add some via the API.</p>
+          <p className="text-white/50">{t('products.noResults')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -45,7 +50,7 @@ export function ProductGrid({ products }: ProductGridProps) {
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-primary-400">{formatCurrency(p.price)}</span>
                   <span className={`text-xs ${inStock ? 'text-success' : 'text-danger'}`}>
-                    {inStock ? 'In stock' : 'Out of stock'}
+                    {inStock ? t('common.inStock') : t('common.outOfStock')}
                   </span>
                 </div>
               </div>

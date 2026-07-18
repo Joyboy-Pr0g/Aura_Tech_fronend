@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Clock, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils/cn';
 import { useLocale } from '@/lib/i18n/locale-provider';
@@ -25,6 +25,7 @@ function HeaderSearchInner({ className }: HeaderSearchProps) {
   const urlQuery = isProductsPage ? getProductSearchQuery(searchParams) : '';
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -34,6 +35,24 @@ function HeaderSearchInner({ className }: HeaderSearchProps) {
       setQuery(urlQuery);
     }
   }, [isProductsPage, urlQuery]);
+
+  const fetchRecentSearches = useCallback(async () => {
+    try {
+      const res = await fetch('/api/search-queries/recent', { credentials: 'include' });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setRecentSearches(data.data);
+      }
+    } catch {
+      setRecentSearches([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      void fetchRecentSearches();
+    }
+  }, [open, fetchRecentSearches]);
 
   const fetchSuggestions = useCallback(async (q: string) => {
     if (q.length < 2) {
@@ -103,8 +122,17 @@ function HeaderSearchInner({ className }: HeaderSearchProps) {
     }
   };
 
+  const showDropdown = open && (suggestions.length > 0 || (query.trim().length < 2 && recentSearches.length > 0));
+
   return (
-    <div ref={wrapperRef} className={cn('relative flex-1 w-full', className)}>
+    <div
+      ref={wrapperRef}
+      className={cn(
+        'relative flex-1 w-full transition-all duration-200',
+        open && 'md:z-[60]',
+        className,
+      )}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -149,23 +177,38 @@ function HeaderSearchInner({ className }: HeaderSearchProps) {
         </button>
       </form>
 
-      {open && suggestions.length > 0 && (
-        <ul className="absolute top-full mt-1 w-full rounded-lg border border-white/10 bg-dark-900 shadow-xl z-50 overflow-hidden">
-          {suggestions.map((s) => (
-            <li key={s}>
-              <button
-                type="button"
-                className="w-full text-start px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-primary-400"
-                onClick={() => {
-                  setQuery(s);
-                  navigate(s);
-                }}
-              >
-                {s}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {showDropdown && (
+        <div
+          className={cn(
+            'absolute top-full mt-2 rounded-xl border border-white/10 bg-dark-900 shadow-2xl z-50 overflow-hidden',
+            'left-1/2 -translate-x-1/2 w-[min(100vw-2rem,42rem)] md:w-[min(100vw-4rem,48rem)]',
+          )}
+        >
+          {query.trim().length < 2 && recentSearches.length > 0 && (
+            <div className="px-4 py-2 border-b border-white/5">
+              <p className="text-xs font-medium uppercase tracking-wide text-white/40 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                {t('nav.recentSearches')}
+              </p>
+            </div>
+          )}
+          <ul className="max-h-80 overflow-y-auto">
+            {(query.trim().length >= 2 ? suggestions : recentSearches).map((s) => (
+              <li key={s}>
+                <button
+                  type="button"
+                  className="w-full text-start px-4 py-3 text-sm text-white/70 hover:bg-white/5 hover:text-primary-400"
+                  onClick={() => {
+                    setQuery(s);
+                    navigate(s);
+                  }}
+                >
+                  {s}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

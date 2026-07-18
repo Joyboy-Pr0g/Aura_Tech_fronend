@@ -31,6 +31,8 @@ import { ConfirmModal } from '@/components/ui/models/confirm';
 import { toast } from '@/components/ui/Toaster';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { AdminPageHeader } from '@/components/ui/admin-page-header';
+import { useAdminLatestActions } from '@/features/admin/hooks/use-admin-latest-actions';
+import { AdminLastActionLabel } from '@/features/admin/components/audit/admin-last-action-label';
 import {
   approveAdminPayment,
   deleteAdminPaymentMethod,
@@ -42,9 +44,10 @@ import {
   type PaymentMethodFormMode,
 } from '@/features/admin/components/payments/payment-method-form-modal';
 import { RejectPaymentModal } from '@/features/admin/components/payments/reject-payment-modal';
+import { RecordManualPaymentModal } from '@/features/admin/components/payments/record-manual-payment-modal';
 
 const PAGE_SIZE = 20;
-const PAYMENT_STATUSES: PaymentStatus[] = ['pending', 'approved', 'rejected', 'refunded'];
+const PAYMENT_STATUSES: PaymentStatus[] = ['pending', 'approved', 'manual_approved', 'rejected', 'refunded'];
 
 type AdminPaymentsTab = 'payments' | 'methods';
 
@@ -52,7 +55,7 @@ interface AdminPaymentsPanelProps {
   initialPayments: CursorPage<AdminPayment>;
   initialMethods: PaymentMethod[];
   initialTab?: AdminPaymentsTab;
-  initialOrderId?: string;
+  initialSearch?: string;
   initialPaymentMethodId?: string;
   initialStatus?: string;
   initialMinAmount?: string;
@@ -61,7 +64,7 @@ interface AdminPaymentsPanelProps {
 
 function paymentStatusBadgeVariant(status: PaymentStatus): 'warning' | 'success' | 'danger' | 'outline' {
   if (status === 'pending') return 'warning';
-  if (status === 'approved') return 'success';
+  if (status === 'approved' || status === 'manual_approved') return 'success';
   if (status === 'rejected') return 'danger';
   return 'outline';
 }
@@ -70,7 +73,7 @@ export function AdminPaymentsPanel({
   initialPayments,
   initialMethods,
   initialTab = 'payments',
-  initialOrderId,
+  initialSearch,
   initialPaymentMethodId,
   initialStatus,
   initialMinAmount,
@@ -86,13 +89,13 @@ export function AdminPaymentsPanel({
   const [hasMore, setHasMore] = useState(initialPayments.has_more);
   const [methods, setMethods] = useState(initialMethods);
 
-  const [orderIdFilter, setOrderIdFilter] = useState(initialOrderId ?? '');
+  const [searchFilter, setSearchFilter] = useState(initialSearch ?? '');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState(initialPaymentMethodId ?? '');
   const [statusFilter, setStatusFilter] = useState(initialStatus ?? '');
   const [minAmountFilter, setMinAmountFilter] = useState(initialMinAmount ?? '');
   const [maxAmountFilter, setMaxAmountFilter] = useState(initialMaxAmount ?? '');
 
-  const debouncedOrderId = useDebounce(orderIdFilter, 500);
+  const debouncedSearch = useDebounce(searchFilter, 500);
   const debouncedMinAmount = useDebounce(minAmountFilter, 500);
   const debouncedMaxAmount = useDebounce(maxAmountFilter, 500);
 
@@ -104,7 +107,9 @@ export function AdminPaymentsPanel({
   const [methodFormMode, setMethodFormMode] = useState<PaymentMethodFormMode | null>(null);
   const [deleteMethod, setDeleteMethod] = useState<PaymentMethod | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isManualPaymentModalOpen, setIsManualPaymentModalOpen] = useState(false);
   const isInitialRender = useRef(true);
+  const latestActions = useAdminLatestActions('payment', payments.map((p) => p.id));
 
   useEffect(() => {
     setPayments(initialPayments.items);
@@ -119,7 +124,7 @@ export function AdminPaymentsPanel({
   const buildQueryParams = useCallback(
     (
       tab: AdminPaymentsTab,
-      orderId: string,
+      search: string,
       paymentMethodId: string,
       status: string,
       minAmount: string,
@@ -127,7 +132,7 @@ export function AdminPaymentsPanel({
     ) => {
       const params = new URLSearchParams();
       if (tab !== 'payments') params.set('tab', tab);
-      if (orderId.trim()) params.set('order_id', orderId.trim());
+      if (search.trim()) params.set('search', search.trim());
       if (paymentMethodId) params.set('payment_method_id', paymentMethodId);
       if (status) params.set('status', status);
       if (minAmount) params.set('min_amount', minAmount);
@@ -140,13 +145,13 @@ export function AdminPaymentsPanel({
   const applyFilters = useCallback(
     (
       tab: AdminPaymentsTab,
-      orderId: string,
+      debouncedSearch: string,
       paymentMethodId: string,
       status: string,
       minAmount: string,
       maxAmount: string,
     ) => {
-      const query = buildQueryParams(tab, orderId, paymentMethodId, status, minAmount, maxAmount).toString();
+      const query = buildQueryParams(tab, debouncedSearch, paymentMethodId, status, minAmount, maxAmount).toString();
       router.push(query ? `${pathname}?${query}` : pathname);
     },
     [buildQueryParams, pathname, router],
@@ -158,10 +163,10 @@ export function AdminPaymentsPanel({
       isInitialRender.current = false;
       return;
     }
-    applyFilters(activeTab, debouncedOrderId, paymentMethodFilter, statusFilter, debouncedMinAmount, debouncedMaxAmount);
+    applyFilters(activeTab, debouncedSearch, paymentMethodFilter, statusFilter, debouncedMinAmount, debouncedMaxAmount);
   }, [
     activeTab,
-    debouncedOrderId,
+    debouncedSearch,
     paymentMethodFilter,
     statusFilter,
     debouncedMinAmount,
@@ -170,8 +175,8 @@ export function AdminPaymentsPanel({
   ]);
 
   const buildPaymentParams = useCallback(
-    (orderId: string, paymentMethodId: string, status: string, minAmount: string, maxAmount: string) => ({
-      order_id: orderId.trim() || undefined,
+    (search: string, paymentMethodId: string, status: string, minAmount: string, maxAmount: string) => ({
+      search: search.trim() || undefined,
       payment_method_id: paymentMethodId || undefined,
       status: status || undefined,
       min_amount: minAmount ? Number(minAmount) : undefined,
@@ -184,7 +189,7 @@ export function AdminPaymentsPanel({
   const refreshPayments = useCallback(() => {
     startTransition(async () => {
       const page = await getAdminPayments(
-        buildPaymentParams(debouncedOrderId, paymentMethodFilter, statusFilter, debouncedMinAmount, debouncedMaxAmount),
+        buildPaymentParams(debouncedSearch, paymentMethodFilter, statusFilter, debouncedMinAmount, debouncedMaxAmount),
       );
       setPayments(page.items);
       setNextCursor(page.next_cursor);
@@ -192,7 +197,7 @@ export function AdminPaymentsPanel({
     });
   }, [
     buildPaymentParams,
-    debouncedOrderId,
+    debouncedSearch,
     paymentMethodFilter,
     statusFilter,
     debouncedMinAmount,
@@ -210,7 +215,7 @@ export function AdminPaymentsPanel({
     if (!nextCursor) return;
     startTransition(async () => {
       const page = await getAdminPayments({
-        ...buildPaymentParams(debouncedOrderId, paymentMethodFilter, statusFilter, debouncedMinAmount, debouncedMaxAmount),
+        ...buildPaymentParams(debouncedSearch, paymentMethodFilter, statusFilter, debouncedMinAmount, debouncedMaxAmount),
         cursor: nextCursor,
       });
       setPayments((prev) => [...prev, ...page.items]);
@@ -221,7 +226,7 @@ export function AdminPaymentsPanel({
 
   const handleTabChange = (tab: AdminPaymentsTab) => {
     setActiveTab(tab);
-    applyFilters(tab, orderIdFilter, paymentMethodFilter, statusFilter, minAmountFilter, maxAmountFilter);
+    applyFilters(tab, searchFilter, paymentMethodFilter, statusFilter, minAmountFilter, maxAmountFilter);
   };
 
   const handleApprove = async (id: string) => {
@@ -261,7 +266,6 @@ export function AdminPaymentsPanel({
   }, [activeTab, methods.length, payments.length, t]);
 
   const renderPaymentActions = (payment: AdminPayment) => {
-    if (payment.status !== 'pending') return null;
 
     return (
       <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -276,27 +280,31 @@ export function AdminPaymentsPanel({
             {t('admin.viewReceipt')}
           </a>
         )}
-        <Button
-          size="sm"
-          variant="primary"
-          disabled={actionId === payment.id}
-          onClick={() => handleApprove(payment.id)}
-        >
-          <CheckCircle2 size={14} className="me-1" />
-          {t('admin.approve')}
-        </Button>
-        <Button
-          size="sm"
-          variant="danger"
-          disabled={actionId === payment.id}
-          onClick={() => {
-            setRejectPaymentId(payment.id);
-            setIsRejectModalOpen(true);
-          }}
-        >
-          <XCircle size={14} className="me-1" />
-          {t('admin.reject')}
-        </Button>
+        {payment.status === 'pending' && (
+          <>
+            <Button
+              size="sm"
+              variant="primary"
+              disabled={actionId === payment.id}
+              onClick={() => handleApprove(payment.id)}
+            >
+              <CheckCircle2 size={14} className="me-1" />
+              {t('admin.approve')}
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              disabled={actionId === payment.id}
+              onClick={() => {
+                setRejectPaymentId(payment.id);
+                setIsRejectModalOpen(true);
+              }}
+            >
+              <XCircle size={14} className="me-1" />
+              {t('admin.reject')}
+            </Button>
+          </>
+        )}
       </div>
     );
   };
@@ -307,7 +315,6 @@ export function AdminPaymentsPanel({
         <p className="font-medium text-white">
           #{payment.order?.order_number ?? payment.order_id.slice(0, 8)}
         </p>
-        <p className="text-xs text-white/40 font-mono">{payment.order_id}</p>
       </td>
       <td className="px-5 py-4 text-white">{formatCurrency(payment.amount)}</td>
       <td className="px-5 py-4 text-white/70">
@@ -322,7 +329,10 @@ export function AdminPaymentsPanel({
         {payment.submitted_by_customer?.email ?? t('admin.unknown')}
       </td>
       <td className="px-5 py-4 text-white/50 text-sm">{formatDateTime(payment.submitted_at)}</td>
-      <td className="px-5 py-4 text-right">{renderPaymentActions(payment)}</td>
+      <td className="px-5 py-4">
+        <AdminLastActionLabel action={latestActions[payment.id]} />
+      </td>
+      <td className="admin-table-actions-cell">{renderPaymentActions(payment)}</td>
     </>
   );
 
@@ -346,6 +356,7 @@ export function AdminPaymentsPanel({
         )}
         <span className="text-white/40">{formatDateTime(payment.submitted_at)}</span>
       </div>
+      <AdminLastActionLabel action={latestActions[payment.id]} />
       {payment.rejection_reason && (
         <p className="text-sm text-danger/80">{payment.rejection_reason}</p>
       )}
@@ -455,55 +466,63 @@ export function AdminPaymentsPanel({
             </div>
 
             {activeTab === 'payments' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
-                <Input
-                  value={orderIdFilter}
-                  onChange={(e) => setOrderIdFilter(e.target.value)}
-                  placeholder={t('admin.filterByOrderId')}
-                  className="input-dark w-full font-mono text-sm"
-                />
-                <select
-                  value={paymentMethodFilter}
-                  onChange={(e) => setPaymentMethodFilter(e.target.value)}
-                  className="input-dark w-full"
-                >
-                  <option value="">{t('admin.allPaymentMethods')}</option>
-                  {methods.map((method) => (
-                    <option key={method.id} value={method.id}>
-                      {method.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="input-dark w-full"
-                >
-                  <option value="">{t('admin.allPaymentStatuses')}</option>
-                  {PAYMENT_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {t(`admin.paymentStatus.${status}`)}
-                    </option>
-                  ))}
-                </select>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={minAmountFilter}
-                  onChange={(e) => setMinAmountFilter(e.target.value)}
-                  placeholder={t('admin.minAmount')}
-                  className="input-dark w-full"
-                />
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={maxAmountFilter}
-                  onChange={(e) => setMaxAmountFilter(e.target.value)}
-                  placeholder={t('admin.maxAmount')}
-                  className="input-dark w-full"
-                />
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-3">
+                  <div className="xl:col-span-2">
+                    <Input
+                      value={searchFilter}
+                      onChange={(e) => setSearchFilter(e.target.value)}
+                      placeholder={t('admin.searchPayments')}
+                      className="input-dark w-full text-sm"
+                    />
+                  </div>
+                  <select
+                    value={paymentMethodFilter}
+                    onChange={(e) => setPaymentMethodFilter(e.target.value)}
+                    className="input-dark w-full"
+                  >
+                    <option value="">{t('admin.allPaymentMethods')}</option>
+                    {methods.map((method) => (
+                      <option key={method.id} value={method.id}>
+                        {method.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="input-dark w-full"
+                  >
+                    <option value="">{t('admin.allPaymentStatuses')}</option>
+                    {PAYMENT_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {t(`admin.paymentStatus.${status}`)}
+                      </option>
+                    ))}
+                  </select>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={minAmountFilter}
+                    onChange={(e) => setMinAmountFilter(e.target.value)}
+                    placeholder={t('admin.minAmount')}
+                    className="input-dark w-full"
+                  />
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={maxAmountFilter}
+                    onChange={(e) => setMaxAmountFilter(e.target.value)}
+                    placeholder={t('admin.maxAmount')}
+                    className="input-dark w-full"
+                  />
+                  <Button variant="primary" onClick={() => setIsManualPaymentModalOpen(true)}>
+                    <Plus size={16} className="me-1" />
+                    {t('admin.recordManualPayment')}
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="flex justify-end">
@@ -534,14 +553,15 @@ export function AdminPaymentsPanel({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 text-left text-white/50">
+                    <tr className="admin-table-head">
                       <th className="px-5 py-4 font-medium">{t('admin.paymentOrder')}</th>
                       <th className="px-5 py-4 font-medium">{t('admin.paymentAmount')}</th>
                       <th className="px-5 py-4 font-medium">{t('admin.paymentMethod')}</th>
                       <th className="px-5 py-4 font-medium">{t('admin.paymentStatusLabel')}</th>
                       <th className="px-5 py-4 font-medium">{t('admin.customer')}</th>
                       <th className="px-5 py-4 font-medium">{t('admin.submitted')}</th>
-                      <th className="px-5 py-4 font-medium text-right">{t('admin.actions')}</th>
+                      <th className="px-5 py-4 font-medium">{t('admin.audit')}</th>
+                      <th className="admin-table-actions-head">{t('admin.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -580,6 +600,12 @@ export function AdminPaymentsPanel({
         open={isRejectModalOpen}
         onOpenChange={setIsRejectModalOpen}
         paymentId={rejectPaymentId}
+        onSuccess={refreshPayments}
+      />
+
+      <RecordManualPaymentModal
+        open={isManualPaymentModalOpen}
+        onOpenChange={setIsManualPaymentModalOpen}
         onSuccess={refreshPayments}
       />
 

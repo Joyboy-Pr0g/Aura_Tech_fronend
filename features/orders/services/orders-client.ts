@@ -1,9 +1,19 @@
 import { clientFetch } from '@/lib/api/client';
-import { Order, OrderStatus } from '@/lib/types/entities';
+import { Order, OrderStatus, OrderPaymentType } from '@/lib/types/entities';
 
-export async function getMyOrders(limit = 10, cursor?: string) {
+export async function getMyOrders(params?: {
+  search?: string;
+  status?: string;
+  limit?: number;
+  cursor?: string;
+}) {
   const res = await clientFetch<Order[]>('/api/orders/my', {
-    searchParams: { limit, cursor },
+    searchParams: {
+      limit: params?.limit ?? 10,
+      cursor: params?.cursor,
+      search: params?.search,
+      status: params?.status,
+    },
   });
   return {
     items: res.data ?? [],
@@ -22,10 +32,12 @@ export async function checkout(data: {
   billing_address_id: string;
   shipping_fee_id: string;
   notes?: string;
+  payment_type?: OrderPaymentType;
+  coupon_code?: string;
 }) {
   const res = await clientFetch<Order>('/api/orders/checkout', {
     method: 'POST',
-    body: data,
+    body: { ...data },
   });
   return res.data!;
 }

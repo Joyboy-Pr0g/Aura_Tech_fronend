@@ -383,11 +383,14 @@ export function GamingCircuitBoard() {
     const clock = new THREE.Clock();
 
     const resize = () => {
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+      const width = container.clientWidth || window.innerWidth;
+      const height = container.clientHeight || window.innerHeight;
       if (width === 0 || height === 0) return;
       renderer.setPixelRatio(getOptimalPixelRatio());
       renderer.setSize(width, height, false);
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };
@@ -474,6 +477,16 @@ export function GamingCircuitBoard() {
     window.addEventListener('resize', resize, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
+
+    const resizeObserver = new ResizeObserver(() => resize());
+    resizeObserver.observe(container);
+
+    const dirObserver = new MutationObserver(() => resize());
+    dirObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['dir', 'lang'],
+    });
+
     container.appendChild(renderer.domElement);
     animationId = requestAnimationFrame(animate);
 
@@ -483,6 +496,8 @@ export function GamingCircuitBoard() {
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onVisibility);
+      resizeObserver.disconnect();
+      dirObserver.disconnect();
 
       lineGroup.children.forEach((child) => {
         (child as THREE.Line).geometry.dispose();
@@ -511,7 +526,7 @@ export function GamingCircuitBoard() {
     <div
       ref={containerRef}
       aria-hidden
-      className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+      className="absolute inset-0 z-0 size-full overflow-hidden pointer-events-none"
     />
   );
 }

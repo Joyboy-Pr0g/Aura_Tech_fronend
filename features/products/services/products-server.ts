@@ -20,9 +20,14 @@ export async function getProductsServer(params?: {
   };
 }
 
+export async function getTrendingProductsServer(limit = 12): Promise<Product[]> {
+  const res = await serverFetch<Product[]>('/products/trending', { searchParams: { limit } }, ['products', 'trending']);
+  return res.data ?? [];
+}
+
 export async function getProductBySlugServer(slug: string): Promise<Product | null> {
   try {
-    const res = await serverFetch<Product>(`/products/slug/${slug}`,{},['products']);
+    const res = await serverFetch<Product>(`/products/slug/${slug}`, {}, ['products']);
     return res.data ?? null;
   } catch {
     return null;

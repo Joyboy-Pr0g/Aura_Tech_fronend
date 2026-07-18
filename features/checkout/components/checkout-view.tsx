@@ -2,16 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Cart, CustomerAddress, PaymentMethod, ShippingFee } from '@/lib/types/entities';
+import { Cart, CustomerAddress, OrderPaymentType, PaymentMethod, ShippingFee } from '@/lib/types/entities';
 import { formatCurrency } from '@/lib/utils/format';
 import { checkout } from '@/features/orders/services/orders-client';
 import { submitPayment } from '@/features/cart/services/cart-client';
+import { validateCoupon, type ValidateCouponResult } from '@/features/coupons/services/coupons-client';
 import { toast } from '@/components/ui/Toaster';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
 import { useLocale } from '@/lib/i18n/locale-provider';
-
+import { Banknote, Tag, Truck } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors/api-error';
 interface CheckoutViewProps {
   cart: Cart;
   addresses: CustomerAddress[];
@@ -37,19 +39,89 @@ export function CheckoutView({
   const [step, setStep] = useState(0);
   const [selectedAddr, setSelectedAddr] = useState(addresses.find((a) => a.is_default)?.id ?? '');
   const [selectedShippingFeeId, setSelectedShippingFeeId] = useState(shippingFees[0]?.id ?? '');
+  const [paymentType, setPaymentType] = useState<OrderPaymentType>('bank_transfer');
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
   const [receipt, setReceipt] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<ValidateCouponResult | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const items = cart.items ?? [];
   const subtotal = items.reduce((s, i) => s + Number(i.price_at_time) * i.quantity, 0);
   const selectedShippingFee = shippingFees.find((fee) => fee.id === selectedShippingFeeId);
   const shippingCost = Number(selectedShippingFee?.price ?? 0);
-  const total = subtotal + shippingCost;
+  const discountAmount = appliedCoupon?.discount_amount ?? 0;
+  const total = Math.max(0, subtotal - discountAmount + shippingCost);  const isPayOnDelivery = paymentType === 'pay_on_delivery';
 
-  const handlePlaceOrder = async () => {
-    if (!selectedAddr || !selectedShippingFeeId || !selectedPaymentMethodId) {
+  const canContinuePaymentStep =
+    isPayOnDelivery || (Boolean(selectedPaymentMethodId) && Boolean(receipt));
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+
+    setCouponLoading(true);
+    try {
+      const couponItems = items.map((item) => ({
+        product_id: item.product_id,
+        category_id: item.product.category?.id ?? '',
+        sub_category_id: item.product.sub_category?.id ?? null,
+        line_total: Number(item.price_at_time) * item.quantity,
+      })).filter((item) => item.category_id);
+      const result = await validateCoupon(code, subtotal, couponItems);
+      setAppliedCoupon(result);
+      setCouponInput(result.code);
+      toast(t('checkout.couponApplied', { code: result.code }), 'success');
+    } catch (error) {
+      setAppliedCoupon(null);
+      toast(getErrorMessage(error) || t('checkout.couponInvalid'), 'error');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+  };
+
+  const renderOrderTotals = (emphasizeTotal = false) => (
+    <div className={cn('space-y-2 text-sm', emphasizeTotal && 'pt-2')}>
+      <div className="flex justify-between text-white/70">
+        <span>{t('cart.subtotal')}</span>
+        <span>{formatCurrency(subtotal)}</span>
+      </div>
+      {selectedShippingFee && (
+        <div className="flex justify-between text-white/50">
+          <span>
+            {t('cart.shipping')} ({selectedShippingFee.delivery_way} · {selectedShippingFee.duration})
+          </span>
+          <span>{formatCurrency(shippingCost)}</span>
+        </div>
+      )}
+      {appliedCoupon && discountAmount > 0 && (
+        <div className="flex justify-between text-emerald-400/90">
+          <span>{t('checkout.couponDiscount')} ({appliedCoupon.code})</span>
+          <span>-{formatCurrency(discountAmount)}</span>
+        </div>
+      )}
+      <div className={cn(
+        'flex justify-between font-bold text-primary-400',
+        emphasizeTotal ? 'text-lg pt-2 border-t border-white/10' : 'text-lg',
+      )}>
+        <span>{t('order.total')}</span>
+        <span>{formatCurrency(total)}</span>
+      </div>
+    </div>
+  );
+
+  const handlePlaceOrder = async () => {    if (!selectedAddr || !selectedShippingFeeId) {
       toast(t('checkout.missingFields'), 'error');
+      return;
+    }
+    if (!isPayOnDelivery && !selectedPaymentMethodId) {
+      toast(t('checkout.selectPaymentMethod'), 'error');
       return;
     }
 
@@ -59,12 +131,16 @@ export function CheckoutView({
         shipping_address_id: selectedAddr,
         billing_address_id: selectedAddr,
         shipping_fee_id: selectedShippingFeeId,
-      });
-      if (receipt && order?.id) {
+        payment_type: paymentType,
+        coupon_code: appliedCoupon?.code,
+      });      if (!isPayOnDelivery && receipt && order?.id) {
         await submitPayment(order.id, receipt, selectedPaymentMethodId);
       }
-      toast(t('checkout.success'), 'success');
-      router.push(`/dashboard/orders/${order!.id}`);
+      toast(
+        isPayOnDelivery ? t('checkout.successPayOnDelivery') : t('checkout.success'),
+        'success',
+      );
+      router.push(`/dashboard/orders/${order!.order_number}`);
     } catch (error) {
       toast(error instanceof Error ? error.message : t('checkout.failed'), 'error');
     } finally {
@@ -166,70 +242,161 @@ export function CheckoutView({
 
       {step === 2 && (
         <Card className="p-6 space-y-4">
-          <h2 className="font-semibold text-white">{t('checkout.paymentBank')}</h2>
-          {paymentMethods.length === 0 ? (
-            <p className="text-white/50 text-sm">{t('checkout.noPaymentMethods')}</p>
-          ) : (
-            paymentMethods.map((pm) => (
-              <label
-                key={pm.id}
-                className={cn(
-                  'block p-4 rounded-lg border cursor-pointer text-sm space-y-1',
-                  selectedPaymentMethodId === pm.id ? 'border-primary-500 bg-primary-500/5' : 'border-white/10 bg-dark-800',
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    checked={selectedPaymentMethodId === pm.id}
-                    onChange={() => setSelectedPaymentMethodId(pm.id)}
-                    className="mt-1"
-                  />
-                  <div className="space-y-1">
-                    <p className="font-medium text-white">{pm.name}</p>
-                    <p className="text-white/50">{t('checkout.bank')}: {pm.bank_name}</p>
-                    {pm.account_number && <p className="text-white/50">{t('checkout.account')}: {pm.account_number}</p>}
-                    {pm.iban && <p className="text-white/50">{t('checkout.iban')}: {pm.iban}</p>}
-                  </div>
-                </div>
-              </label>
-            ))
-          )}
-          <div className="flex justify-between text-lg font-bold text-primary-400">
-            <span>{t('order.total')}</span>
-            <span>{formatCurrency(total)}</span>
-          </div>
-          <div>
-            <label className="label-dark">{t('checkout.uploadReceipt')}</label>
+          <h2 className="font-semibold text-white">{t('checkout.paymentMethodTitle')}</h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label
-              htmlFor="receipt-upload"
-              onClick={(e) => {
-                if (!selectedPaymentMethodId) {
-                  e.preventDefault();
-                  toast(t('checkout.selectPaymentMethod'), 'error');
-                }
-              }}
-              className={`inline-flex items-center justify-center py-2 px-4 rounded bg-primary-500 text-dark-950 font-medium cursor-pointer transition-opacity ${!selectedPaymentMethodId ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
-                }`}
+              className={cn(
+                'flex items-start gap-3 p-4 rounded-lg border cursor-pointer',
+                paymentType === 'bank_transfer' ? 'border-primary-500 bg-primary-500/5' : 'border-white/10',
+              )}
             >
-              {receipt ? receipt.name : t('checkout.uploadReceipt')}
+              <input
+                type="radio"
+                name="payment_type"
+                checked={paymentType === 'bank_transfer'}
+                onChange={() => {
+                  setPaymentType('bank_transfer');
+                  setReceipt(null);
+                }}
+                className="mt-1"
+              />
+              <div>
+                <div className="flex items-center gap-2 text-white font-medium">
+                  <Banknote size={16} className="text-primary-400" />
+                  {t('checkout.paymentBank')}
+                </div>
+                <p className="text-sm text-white/50 mt-1">{t('checkout.paymentBankDesc')}</p>
+              </div>
             </label>
-            <input
-              id="receipt-upload"
-              type="file"
-              accept="image/*"
-              disabled={!selectedPaymentMethodId}
-              onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-              className="sr-only"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setStep(1)}>{t('common.back')}</Button>
-            <Button
-              disabled={!receipt || !selectedPaymentMethodId}
-              onClick={() => setStep(3)}
+
+            <label
+              className={cn(
+                'flex items-start gap-3 p-4 rounded-lg border cursor-pointer',
+                paymentType === 'pay_on_delivery' ? 'border-primary-500 bg-primary-500/5' : 'border-white/10',
+              )}
             >
+              <input
+                type="radio"
+                name="payment_type"
+                checked={paymentType === 'pay_on_delivery'}
+                onChange={() => {
+                  setPaymentType('pay_on_delivery');
+                  setSelectedPaymentMethodId('');
+                  setReceipt(null);
+                }}
+                className="mt-1"
+              />
+              <div>
+                <div className="flex items-center gap-2 text-white font-medium">
+                  <Truck size={16} className="text-primary-400" />
+                  {t('checkout.payOnDelivery')}
+                </div>
+                <p className="text-sm text-white/50 mt-1">{t('checkout.payOnDeliveryDesc')}</p>
+              </div>
+            </label>
+          </div>
+
+          {!isPayOnDelivery && (
+            <>
+              {paymentMethods.length === 0 ? (
+                <p className="text-white/50 text-sm">{t('checkout.noPaymentMethods')}</p>
+              ) : (
+                paymentMethods.map((pm) => (
+                  <label
+                    key={pm.id}
+                    className={cn(
+                      'block p-4 rounded-lg border cursor-pointer text-sm space-y-1',
+                      selectedPaymentMethodId === pm.id ? 'border-primary-500 bg-primary-500/5' : 'border-white/10 bg-dark-800',
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        checked={selectedPaymentMethodId === pm.id}
+                        onChange={() => setSelectedPaymentMethodId(pm.id)}
+                        className="mt-1"
+                      />
+                      <div className="space-y-1">
+                        <p className="font-medium text-white">{pm.name}</p>
+                        <p className="text-white/50">{t('checkout.bank')}: {pm.bank_name}</p>
+                        {pm.account_number && <p className="text-white/50">{t('checkout.account')}: {pm.account_number}</p>}
+                        {pm.iban && <p className="text-white/50">{t('checkout.iban')}: {pm.iban}</p>}
+                      </div>
+                    </div>
+                  </label>
+                ))
+              )}
+              <div>
+                <label className="label-dark">{t('checkout.uploadReceipt')}</label>
+                <label
+                  htmlFor="receipt-upload"
+                  onClick={(e) => {
+                    if (!selectedPaymentMethodId) {
+                      e.preventDefault();
+                      toast(t('checkout.selectPaymentMethod'), 'error');
+                    }
+                  }}
+                  className={`inline-flex items-center justify-center py-2 px-4 rounded bg-primary-500 text-dark-950 font-medium cursor-pointer transition-opacity ${!selectedPaymentMethodId ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                    }`}
+                >
+                  {receipt ? receipt.name : t('checkout.uploadReceipt')}
+                </label>
+                <input
+                  id="receipt-upload"
+                  type="file"
+                  accept="image/*"
+                  disabled={!selectedPaymentMethodId}
+                  onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+                  className="sr-only"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4 space-y-3">
+            <div className="flex items-center gap-2 text-white font-medium">
+              <Tag size={16} className="text-primary-400" />
+              {t('checkout.couponCode')}
+            </div>
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-emerald-400">
+                  {t('checkout.couponApplied', { code: appliedCoupon.code })}
+                  {' · '}
+                  -{formatCurrency(discountAmount)}
+                </p>
+                <Button type="button" variant="outline" size="sm" onClick={handleRemoveCoupon}>
+                  {t('checkout.removeCoupon')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder={t('checkout.couponPlaceholder')}
+                  className="input-dark flex-1 uppercase"
+                  disabled={couponLoading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleApplyCoupon}
+                  disabled={couponLoading || !couponInput.trim()}
+                >
+                  {couponLoading ? t('checkout.couponValidating') : t('checkout.applyCoupon')}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {renderOrderTotals()}
+
+          <div className="flex gap-2">            <Button variant="outline" onClick={() => setStep(1)}>{t('common.back')}</Button>
+            <Button disabled={!canContinuePaymentStep} onClick={() => setStep(3)}>
               {t('common.continue')}
             </Button>
           </div>
@@ -239,6 +406,20 @@ export function CheckoutView({
       {step === 3 && (
         <Card className="p-6 space-y-4">
           <h2 className="font-semibold text-white">{t('checkout.reviewOrder')}</h2>
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4 text-sm space-y-2">
+            <div className="flex justify-between text-white/70">
+              <span>{t('checkout.paymentMethodTitle')}</span>
+              <span className="text-white">
+                {isPayOnDelivery ? t('checkout.payOnDelivery') : t('checkout.paymentBank')}
+              </span>
+            </div>
+            {appliedCoupon && (
+              <div className="flex justify-between text-white/70">
+                <span>{t('checkout.couponCode')}</span>
+                <span className="text-emerald-400">{appliedCoupon.code}</span>
+              </div>
+            )}
+          </div>
           <div className="space-y-2 text-sm">
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-white/70">
@@ -246,20 +427,8 @@ export function CheckoutView({
                 <span>{formatCurrency(Number(item.price_at_time) * item.quantity)}</span>
               </div>
             ))}
-            {selectedShippingFee && (
-              <div className="flex justify-between text-white/50 pt-2 border-t border-white/10">
-                <span>
-                  {t('cart.shipping')} ({selectedShippingFee.delivery_way} · {selectedShippingFee.duration})
-                </span>
-                <span>{formatCurrency(shippingCost)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-lg font-bold text-primary-400 pt-2">
-              <span>{t('order.total')}</span>
-              <span>{formatCurrency(total)}</span>
-            </div>
-          </div>
-          <div className="flex gap-2">
+            {renderOrderTotals(true)}
+          </div>          <div className="flex gap-2">
             <Button disabled={loading} variant="outline" onClick={() => setStep(2)}>{t('common.back')}</Button>
             <Button onClick={handlePlaceOrder} disabled={loading}>
               {loading ? t('checkout.placing') : t('checkout.placeOrder')}

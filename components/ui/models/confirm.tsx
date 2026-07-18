@@ -1,6 +1,9 @@
+'use client';
+
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalBody, ModalFooter } from './modal';
 import { Button } from '../button';
 import { Loader2 } from 'lucide-react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 interface ConfirmModalProps {
     name: string;
@@ -16,15 +19,17 @@ interface ConfirmModalProps {
 }
 
 export const ConfirmModal = ({ name, onConfirm, onCancel, isOpen, setIsOpen, loading, confirmText, cancelText, confirmVariant, cancelVariant }: ConfirmModalProps) => {
+    const { t } = useLocale();
+
     return (
         <Modal open={isOpen} onOpenChange={setIsOpen}>
             <ModalContent size="md">
                 <ModalHeader>
-                    <ModalTitle>Delete {name}</ModalTitle>
-                    <ModalDescription>Are you sure you want to delete {name}?</ModalDescription>
+                    <ModalTitle>{t('common.deleteTitle', { name })}</ModalTitle>
+                    <ModalDescription>{t('common.deleteConfirm', { name })}</ModalDescription>
                 </ModalHeader>
                 <ModalBody>
-                    <p className='text-white/50'>This action cannot be undone.</p>
+                    <p className='text-white/50'>{t('common.cannotUndo')}</p>
                 </ModalBody>
                 <ModalFooter>
                     <Button disabled={loading} variant={cancelVariant} onClick={onCancel}>{cancelText}</Button>
@@ -35,4 +40,4 @@ export const ConfirmModal = ({ name, onConfirm, onCancel, isOpen, setIsOpen, loa
             </ModalContent>
         </Modal>
     );
-}
+};

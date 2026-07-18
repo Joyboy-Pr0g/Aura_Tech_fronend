@@ -5,7 +5,6 @@ import { Cart, CustomerAddress } from '@/lib/types/entities';
 import { formatCurrency } from '@/lib/utils/format';
 import { toast } from '@/components/ui/Toaster';
 import { removeCartItem } from '@/features/cart/services/cart-client';
-import { checkout } from '@/features/orders/services/orders-client';
 import { Trash2, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { ProductImage } from '@/components/ui/product-image';
@@ -24,7 +23,6 @@ export function CartView({ cart: initialCart, addresses }: CartViewProps) {
     addresses.find((a) => a.is_default)?.id ?? '',
   );
   const [notes, setNotes] = useState('');
-  const [checkingOut, setCheckingOut] = useState(false);
 
   const handleRemove = async (itemId: string) => {
     await removeCartItem(itemId);
@@ -32,22 +30,9 @@ export function CartView({ cart: initialCart, addresses }: CartViewProps) {
     router.refresh();
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!cart?.items?.length) return;
-    setCheckingOut(true);
-    try {
-      const order = await checkout({
-        shipping_address_id: selectedAddr || undefined,
-        notes: notes || undefined,
-      });
-      toast(t('checkout.success'), 'success');
-      router.push(`/dashboard/orders/${order!.id}`);
-      router.refresh();
-    } catch {
-      toast(t('checkout.failed'), 'error');
-    } finally {
-      setCheckingOut(false);
-    }
+    router.push('/checkout');
   };
 
   const items = cart?.items ?? [];
@@ -77,7 +62,7 @@ export function CartView({ cart: initialCart, addresses }: CartViewProps) {
                   />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-white truncate">{item.product?.title ?? 'Product'}</p>
+                  <p className="font-medium text-white truncate">{item.product?.title ?? t('reviews.product')}</p>
                   <p className="text-sm text-white/40">{t('cart.qty')}: {item.quantity} × {formatCurrency(item.price_at_time)}</p>
                 </div>
                 <div className="text-right">
@@ -124,8 +109,8 @@ export function CartView({ cart: initialCart, addresses }: CartViewProps) {
                 <span className="text-white/50 text-sm">{t('cart.subtotal')}</span>
                 <p className="text-xl font-bold text-white">{formatCurrency(subtotal)}</p>
               </div>
-              <button onClick={handleCheckout} disabled={checkingOut} className="btn-primary">
-                {checkingOut ? t('checkout.placing') : t('checkout.placeOrder')}
+              <button onClick={handleCheckout} className="btn-primary">
+                {t('checkout.placeOrder')}
               </button>
             </div>
           </div>

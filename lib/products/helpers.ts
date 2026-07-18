@@ -1,5 +1,11 @@
 import { Product, ProductImage, ProductVariant } from '@/lib/types/entities';
 
+interface CouponOptions {
+  prefix?: string;
+  length?: number;
+  separator?: string;
+}
+
 export function getVariantAvailableStock(variant: ProductVariant): number {
   return Math.max(0, variant.stock_quantity - variant.reserved_quantity);
 }
@@ -110,4 +116,21 @@ export function getProductPriceRange(product: Product): { min: number; max: numb
   const max = Math.max(...prices);
 
   return min === max ? null : { min, max };
+}
+
+export function generateCouponCode({
+  prefix = "",
+  length = 10,
+  separator = "-",
+}: CouponOptions = {}): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  const randomPart = Array.from({ length }, () => {
+    const index = Math.floor(Math.random() * chars.length);
+    return chars[index];
+  }).join("");
+
+  return prefix
+    ? `${prefix.toUpperCase()}${separator}${randomPart}`
+    : randomPart;
 }

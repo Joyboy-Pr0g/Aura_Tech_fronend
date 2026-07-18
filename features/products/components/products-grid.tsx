@@ -4,6 +4,7 @@ import { Product } from '@/lib/types/entities';
 import { ProductCard } from '@/features/products/components/product-card';
 import { Card } from '@/components/ui/card';
 import { useMemo } from 'react';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
 type SortOption = 'relevance' | 'price_asc' | 'price_desc' | 'newest';
 
@@ -13,6 +14,7 @@ interface ProductsGridProps {
 }
 
 export function ProductsGrid({ products, sort }: ProductsGridProps) {
+  const { t } = useLocale();
   const sorted = useMemo(() => {
     const list = [...products];
     switch (sort) {
@@ -32,7 +34,7 @@ export function ProductsGrid({ products, sort }: ProductsGridProps) {
   if (sorted.length === 0) {
     return (
       <Card className="p-12 text-center col-span-full">
-        <p className="text-white/50">No products match your search. Try adjusting filters.</p>
+        <p className="text-white/50">{t('products.noResults')}</p>
       </Card>
     );
   }

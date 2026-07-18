@@ -11,10 +11,15 @@ const GamingCircuitBoard = dynamic(
  * Homepage background scoped to page content — ends before the footer.
  * Uses a sticky viewport canvas so the 3D scene stays visible while scrolling
  * through sections, then scrolls away when the footer enters view.
+ *
+ * Full-bleed: centered 100vw breakout so LTR/RTL switches never clip the edges.
  */
 export function HomePageBackground() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+    <div
+      className="pointer-events-none absolute inset-y-0 left-1/2 z-0 w-screen max-w-none -translate-x-1/2"
+      aria-hidden
+    >
       <div className="absolute inset-0 bg-[#0F0F0F]" />
       <div className="sticky top-0 h-svh w-full overflow-hidden">
         <GamingCircuitBoard />

@@ -37,21 +37,21 @@ export function SearchBar({
 
   return (
     <form onSubmit={handleSearch} className={cn('relative w-full', className)}>
-      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
+      <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder ?? t('home.searchPlaceholder')}
         className={cn(
-          'pl-11 pr-28 bg-dark-900/80 border-white/10',
-          size === 'large' && 'h-14 text-base pl-12',
+          'ps-11 pe-28 bg-dark-900/80 border-white/10',
+          size === 'large' && 'h-14 text-base ps-12',
         )}
       />
       <Button
         type="submit"
         size={size === 'large' ? 'md' : 'sm'}
         className={cn(
-          'absolute right-1.5 top-1/2 -translate-y-1/2',
+          'absolute end-1.5 top-1/2 -translate-y-1/2',
           size === 'large' && 'h-11',
         )}
       >

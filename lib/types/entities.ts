@@ -9,7 +9,8 @@ export type OrderStatus =
   | 'delivered'
   | 'cancelled'
   | 'refunded';
-export type PaymentStatus = 'pending' | 'approved' | 'rejected' | 'refunded';
+export type PaymentStatus = 'pending' | 'approved' | 'rejected' | 'refunded' | 'manual_approved';
+export type OrderPaymentType = 'bank_transfer' | 'pay_on_delivery';
 
 export interface User {
   id: string;
@@ -65,6 +66,34 @@ export interface ProductVariant {
   images?: ProductImage[] | null;
 }
 
+export interface ProductReviewSummary {
+  id: string;
+  product_id: string;
+  title: string;
+  content: string;
+  helpful_count: number;
+  moderation_status: string;
+  is_verified_purchase: boolean;
+  created_at: string;
+  customer?: Pick<User, 'id' | 'full_name'>;
+  rating?: { id: string; rating: number } | null;
+}
+
+export interface ProductQuestionSummary {
+  id: string;
+  question: string;
+  helpful_count: number;
+  created_at: string;
+  customer?: Pick<User, 'id' | 'full_name'>;
+  answers: Array<{
+    id: string;
+    answer: string;
+    is_seller_answer: boolean;
+    created_at: string;
+    answered_by?: Pick<User, 'id' | 'full_name'>;
+  }>;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -80,6 +109,10 @@ export interface Product {
   sub_category?: Category | null;
   variants?: ProductVariant[];
   is_wishlisted?: boolean;
+  reviews?: ProductReviewSummary[];
+  questions?: ProductQuestionSummary[];
+  average_rating?: number;
+  rating_count?: number;
   created_at: string;
 }
 
@@ -92,6 +125,8 @@ export interface AdminProduct extends Product {
   category_id: string;
   sub_category_id?: string | null;
   sub_category?: Category | null;
+  created_by?: Pick<User, 'id' | 'email' | 'full_name'> | null;
+  updated_by?: Pick<User, 'id' | 'email' | 'full_name'> | null;
 }
 
 export interface CartItem {
@@ -114,11 +149,13 @@ export interface Cart {
 export interface OrderItem {
   id: string;
   product_id: string;
+  variant_id?: string | null;
   quantity: number;
   unit_price: number;
   total_price: number;
   status: string;
   product: Product;
+  variant?: ProductVariant | null;
 }
 
 export interface Payment {
@@ -145,11 +182,73 @@ export interface Payment {
 
 export type AdminPayment = Payment;
 
+export interface Coupon {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed_amount';
+  discount_value: number;
+  max_uses: number | null;
+  current_uses: number;
+  min_purchase_amount: number;
+  max_discount_amount: number | null;
+  expires_at: string | null;
+  is_active: boolean;
+  category_id?: string | null;
+  sub_category_id?: string | null;
+  product_id?: string | null;
+  category?: Category | null;
+  sub_category?: Category | null;
+  product?: Pick<Product, 'id' | 'title' | 'slug'> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminLatestAction {
+  entity_id: string;
+  action: string;
+  admin_email: string | null;
+  admin_name: string | null;
+  created_at: string;
+}
+
+export type RefundRequestStatus = 'pending' | 'approved' | 'rejected';
+
+export interface RefundRequest {
+  id: string;
+  order_id: string;
+  customer_id: string;
+  reason: string;
+  image_url: string | null;
+  status: RefundRequestStatus;
+  processed_at: string | null;
+  rejection_reason: string | null;
+  created_at: string;
+  order?: Pick<Order, 'id' | 'order_number' | 'total' | 'status'>;
+  customer?: Pick<User, 'id' | 'full_name' | 'email'>;
+  processed_by_admin?: Pick<User, 'id' | 'full_name' | 'email'> | null;
+}
+
+export type ExpenseType = 'expense' | 'refund';
+
+export interface Expense {
+  id: string;
+  type: ExpenseType;
+  order_id: string | null;
+  amount: number;
+  receipt_url: string;
+  reason: string;
+  created_by_admin_id: string;
+  created_at: string;
+  order?: Pick<Order, 'id' | 'order_number'> | null;
+  created_by_admin?: Pick<User, 'id' | 'full_name' | 'email'>;
+}
+
 export interface Order {
   id: string;
   order_number: string;
   customer_id: string;
   status: OrderStatus;
+  payment_type?: OrderPaymentType;
   subtotal: number;
   discount_total: number;
   tax: number;
@@ -161,6 +260,7 @@ export interface Order {
   items: OrderItem[];
   payment: Payment | null;
   customer?: User;
+  shipping_address?: CustomerAddress | null;
   created_at: string;
   updated_at: string;
 }
@@ -175,6 +275,7 @@ export interface CustomerAddress {
   district: string | null;
   street_address: string;
   postal_code: string | null;
+  country?: string;
   type: 'shipping' | 'billing' | 'both';
   is_default: boolean;
 }
@@ -189,6 +290,34 @@ export interface PaymentMethod {
   is_active: boolean;
 }
 
+export type NotificationType =
+  | 'order_confirmation'
+  | 'payment_approved'
+  | 'payment_rejected'
+  | 'order_status_updated'
+  | 'shipment_ready'
+  | 'delivery_confirmation'
+  | 'product_available'
+  | 'staff_new_order'
+  | 'staff_payment_submitted'
+  | 'staff_refund_request'
+  | 'question_answered';
+
+export type NotificationDeliveryStatus = 'pending' | 'sent' | 'failed';
+
+export interface AppNotification {
+  id: string;
+  notification_type: NotificationType;
+  title: string;
+  message: string;
+  related_order_id: string | null;
+  related_order_number: string | null;
+  related_product_slug: string | null;
+  status: NotificationDeliveryStatus;
+  read_at: string | null;
+  created_at: string;
+}
+
 export interface ShippingFee {
   id: string;
   price: number;
@@ -197,4 +326,53 @@ export interface ShippingFee {
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface WebsiteSettings {
+  id: string;
+  title: string;
+  header_logo_public_id: string | null;
+  header_logo_url: string | null;
+  footer_logo_public_id: string | null;
+  footer_logo_url: string | null;
+  website_email: string | null;
+  website_phone: string | null;
+  facebook: string | null;
+  instagram: string | null;
+  whatsapp: string | null;
+  tiktok: string | null;
+  description: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  meta_keywords: string | null;
+  site_url: string | null;
+  favicon_public_id: string | null;
+  favicon_url: string | null;
+  og_image_public_id: string | null;
+  og_image_url: string | null;
+  twitter_card: string | null;
+  twitter_handle: string | null;
+  default_locale: string | null;
+  theme_color: string | null;
+  robots: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  cover_image_public_id: string | null;
+  cover_image_url: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  is_published: boolean;
+  published_at: string | null;
+  author_id: string | null;
+  author?: Pick<User, 'id' | 'full_name' | 'email'> | null;
+  created_at: string;
+  updated_at: string;
 }

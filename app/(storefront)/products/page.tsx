@@ -1,9 +1,11 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { getMaxProductPriceServer, getProductBrandsServer, getProductsServer } from '@/features/products/services/products-server';
-import { getCategoriesServer, getCategoryBySlugServer } from '@/features/categories/services/categories-server';
+import { getCategoriesServer, getCategoryByIdServer, getCategoryBySlugServer } from '@/features/categories/services/categories-server';
 import { ProductsCatalog } from '@/features/products/components/products-catalog';
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
 import { getAuthToken } from '@/lib/auth/session';
+import { getPageMetadataFromSettings } from '@/lib/seo/metadata';
 
 const PAGE_SIZE = 12;
 
@@ -11,6 +13,7 @@ interface ProductsPageProps {
   searchParams: Promise<{
     search_query?: string;
     category?: string;
+    category_id?: string;
     sub_category?: string;
     brand?: string;
     min_price?: string;
@@ -19,16 +22,49 @@ interface ProductsPageProps {
   }>;
 }
 
+export async function generateMetadata({ searchParams }: ProductsPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const categoryParam = params.category?.trim() ?? '';
+  const categoryIdParam = params.category_id?.trim() ?? '';
+  const subCategoryParam = params.sub_category?.trim() ?? '';
+
+  const [categoryBySlug, categoryById, subCategory] = await Promise.all([
+    categoryParam ? getCategoryBySlugServer(categoryParam) : Promise.resolve(null),
+    !categoryParam && categoryIdParam ? getCategoryByIdServer(categoryIdParam) : Promise.resolve(null),
+    subCategoryParam ? getCategoryBySlugServer(subCategoryParam) : Promise.resolve(null),
+  ]);
+  const category = categoryBySlug ?? categoryById;
+  const activeCategory = subCategory ?? category;
+
+  if (activeCategory) {
+    return getPageMetadataFromSettings({
+      title: activeCategory.name,
+      description: activeCategory.description ?? `Shop ${activeCategory.name} at AURA TECH.`,
+      path: `/products?category=${activeCategory.slug}`,
+      image: activeCategory.image_url,
+    });
+  }
+
+  return getPageMetadataFromSettings({
+    title: 'Products',
+    description: 'Browse gaming laptops, smartphones, and accessories at AURA TECH.',
+    path: '/products',
+  });
+}
+
 async function ProductsContent({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const search = params.search_query?.trim() ?? '';
   const categoryParam = params.category?.trim() ?? '';
+  const categoryIdParam = params.category_id?.trim() ?? '';
   const subCategoryParam = params.sub_category?.trim() ?? '';
 
-  const [category, subCategory] = await Promise.all([
+  const [categoryBySlug, categoryById, subCategory] = await Promise.all([
     categoryParam ? getCategoryBySlugServer(categoryParam) : Promise.resolve(null),
+    !categoryParam && categoryIdParam ? getCategoryByIdServer(categoryIdParam) : Promise.resolve(null),
     subCategoryParam ? getCategoryBySlugServer(subCategoryParam) : Promise.resolve(null),
   ]);
+  const category = categoryBySlug ?? categoryById;
 
   const fetchParams = {
     search: search || undefined,

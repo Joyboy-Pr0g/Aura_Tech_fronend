@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CustomerAddress } from '@/lib/types/entities';
 import { toast } from '@/components/ui/Toaster';
-import { addAddress, deleteAddress, updateAddress } from '@/features/cart/services/cart-client';
+import { addAddress, deleteAddress, setDefaultAddress, updateAddress } from '@/features/cart/services/cart-client';
 import { MapPin, Pencil, Plus, Trash2, Star } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
 
@@ -114,6 +114,17 @@ export function AddressList({ initialAddresses }: AddressListProps) {
     router.refresh();
   };
 
+  const handleSetDefault = async (id: string) => {
+    try {
+      await setDefaultAddress(id);
+      setAddresses((prev) => prev.map((address) => ({ ...address, is_default: address.id === id })));
+      toast(t('address.defaultSet'), 'success');
+      router.refresh();
+    } catch (error) {
+      toast(error instanceof Error ? error.message : t('address.updateFailed'), 'error');
+    }
+  };
+
   const fields = [
     { key: 'label', labelKey: 'address.label' as const, placeholderKey: 'address.labelPlaceholder' as const },
     { key: 'full_name', labelKey: 'address.fullName' as const, placeholderKey: 'auth.fullNamePlaceholder' as const },
@@ -201,7 +212,17 @@ export function AddressList({ initialAddresses }: AddressListProps) {
                   {address.street_address}, {address.city}, {address.governorate}
                 </p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                {!address.is_default && (
+                  <button
+                    type="button"
+                    onClick={() => handleSetDefault(address.id)}
+                    className="text-xs text-primary-400 hover:text-primary-300"
+                  >
+                    {t('address.makeDefault')}
+                  </button>
+                )}
+                <div className="flex items-center gap-2">
                 <button
                   onClick={() => openEditForm(address)}
                   className="text-white/40 hover:text-primary-400 transition-colors"
@@ -216,6 +237,7 @@ export function AddressList({ initialAddresses }: AddressListProps) {
                 >
                   <Trash2 size={16} />
                 </button>
+                </div>
               </div>
             </div>
           ))}

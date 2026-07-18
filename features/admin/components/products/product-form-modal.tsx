@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -30,16 +30,18 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { Plus, Star, Trash2, X } from 'lucide-react';
 
-const productFormSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters').max(200),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  price: z.coerce.number().positive('Price must be greater than 0'),
-  category_id: z.string().uuid('Category is required'),
-  sub_category_id: z.string().uuid().optional().or(z.literal('')),
-  brand: z.string().max(100).optional(),
-});
+function createProductFormSchema(t: (key: string) => string) {
+  return z.object({
+    title: z.string().min(3, t('validation.titleMin3')).max(200),
+    description: z.string().min(10, t('validation.descriptionMin10')),
+    price: z.coerce.number().positive(t('validation.pricePositive')),
+    category_id: z.string().uuid(t('validation.categoryRequired')),
+    sub_category_id: z.string().uuid().optional().or(z.literal('')),
+    brand: z.string().max(100).optional(),
+  });
+}
 
-type ProductFormValues = z.infer<typeof productFormSchema>;
+type ProductFormValues = z.infer<ReturnType<typeof createProductFormSchema>>;
 
 interface FeatureRow {
   key: string;
@@ -202,6 +204,7 @@ export function ProductFormModal({
 
   const isEdit = mode?.type === 'edit';
   const isOtherBrand = selectedBrand === 'other';
+  const productFormSchema = useMemo(() => createProductFormSchema(t), [t]);
 
   const {
     register,
@@ -439,7 +442,7 @@ export function ProductFormModal({
         </ModalHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalBody className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+          <ModalBody className="space-y-5 max-h-[70vh] overflow-y-auto pe-1">
             {loadingProduct ? (
               <p className="text-white/50 text-sm">{t('admin.loading')}</p>
             ) : (
@@ -638,7 +641,7 @@ export function ProductFormModal({
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                             <Input
-                              placeholder="SKU"
+                              placeholder={t('product.sku')}
                               value={row.sku}
                               onChange={(e) => {
                                 const next = [...variantRows];
@@ -698,7 +701,7 @@ export function ProductFormModal({
                                 />
                                 <button
                                   type="button"
-                                  className="absolute top-1 right-1 rounded-full bg-dark-950/80 p-1 text-white/70 hover:text-white"
+                                  className="absolute top-1 end-1 rounded-full bg-dark-950/80 p-1 text-white/70 hover:text-white"
                                   onClick={() => handleRemoveVariantImage(index)}
                                 >
                                   <X size={12} />
@@ -774,7 +777,7 @@ export function ProductFormModal({
                           </div>
                           <button
                             type="button"
-                            className="absolute top-1 right-1 rounded-full bg-dark-950/80 p-1 text-white/70 hover:text-white"
+                            className="absolute top-1 end-1 rounded-full bg-dark-950/80 p-1 text-white/70 hover:text-white"
                             onClick={() => removeNewImage(index)}
                           >
                             <X size={12} />

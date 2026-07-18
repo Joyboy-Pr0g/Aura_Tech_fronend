@@ -5,7 +5,7 @@ import { PaymentsSkeleton } from '@/features/admin/skeletons/payments-skeleton';
 interface AdminPaymentsPageProps {
   searchParams: Promise<{
     tab?: string;
-    order_id?: string;
+    search?: string;
     payment_method_id?: string;
     status?: string;
     min_amount?: string;

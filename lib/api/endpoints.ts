@@ -7,22 +7,30 @@ export const endpoints = {
     password: '/auth/password',
     emailVerificationSend: '/auth/email-verification/send',
     emailVerificationVerify: '/auth/email-verification/verify',
+    registrationEmailVerificationSend: '/auth/registration/email-verification/send',
+    registrationEmailVerificationVerify: '/auth/registration/email-verification/verify',
+    forgotPassword: '/auth/forgot-password',
   },
   cart: {
     root: '/cart',
     items: '/cart/items',
     item: (itemId: string) => `/cart/items/${itemId}`,
+    editQuantity: '/cart/edit-quantity',
   },
   orders: {
     checkout: '/orders/checkout',
     my: '/orders/my',
     myOrder: (id: string) => `/orders/my/${id}`,
+    myOrderRefundRequest: (orderNumber: string) => `/orders/my/${orderNumber}/refund-request`,
     all: '/orders',
+    byId: (id: string) => `/orders/${id}`,
     status: (id: string) => `/orders/${id}/status`,
+    orderHistory: (id: string) => `/orders/${id}/history`,
   },
   addresses: {
     root: '/addresses',
     byId: (id: string) => `/addresses/${id}`,
+    default: (id: string) => `/addresses/${id}/default`,
   },
   payments: {
     methods: '/payments/methods',
@@ -34,14 +42,40 @@ export const endpoints = {
   shippingFees: {
     root: '/shipping-fees',
   },
+  websiteSettings: {
+    root: '/website-settings',
+  },
   products: {
     root: '/products',
     byId: (id: string) => `/products/${id}`,
     bySlug: (slug: string) => `/products/slug/${slug}`,
+    trending: '/products/trending',
+  },
+  searchQueries: {
+    recent: '/search-queries/recent',
+  },
+  visits: {
+    root: '/visits',
+  },
+  blogs: {
+    root: '/blogs',
+    bySlug: (slug: string) => `/blogs/slug/${slug}`,
+  },
+  coupons: {
+    validate: '/coupons/validate',
+  },
+  notifications: {
+    root: '/notifications',
+    deviceTokens: '/notifications/device-tokens',
+    read: (id: string) => `/notifications/${id}/read`,
   },
   categories: {
     root: '/categories',
+    byId: (id: string) => `/categories/${id}`,
     bySlug: (slug: string) => `/categories/slug/${slug}`,
+  },
+  reminders: {
+    product: (id: string) => `/reminders/products/${id}`,
   },
   engagement: {
     wishlists: '/wishlists',
@@ -50,12 +84,15 @@ export const endpoints = {
     reviews: '/reviews',
     productReviews: (productId: string) => `/products/${productId}/reviews`,
     productQuestions: (productId: string) => `/products/${productId}/questions`,
-    orderHistory: (orderId: string) => `/orders/my/${orderId}/history`,
+    orderHistory: (orderNumber: string) => `/orders/my/${orderNumber}/history`,
   },
   admin: {
     dashboard: '/admin',
     users: '/admin/users',
     user: (id: string) => `/admin/users/${id}`,
+    userOrders: (id: string) => `/admin/users/${id}/orders`,
+    userReviews: (id: string) => `/admin/users/${id}/reviews`,
+    userQuestions: (id: string) => `/admin/users/${id}/questions`,
     userAction: (id: string, action: 'activate' | 'deactivate' | 'soft-delete' | 'restore' | 'reset-password') =>
       `/admin/users/${id}/${action}`,
     categories: '/admin/categories',
@@ -79,5 +116,31 @@ export const endpoints = {
     shippingFee: (id: string) => `/admin/shipping-fees/${id}`,
     shippingFeeAction: (id: string, action: 'activate' | 'deactivate') =>
       `/admin/shipping-fees/${id}/${action}`,
+    websiteSettings: '/admin/website-settings',
+    questions: '/admin/questions',
+    questionAnswer: (id: string) => `/admin/questions/${id}/answers`,
+    analytics: {
+      dashboard: '/admin/analytics/dashboard',
+      revenue: '/admin/analytics/revenue',
+      topProducts: '/admin/analytics/products/top',
+      customers: '/admin/analytics/customers',
+      inventoryStatus: '/admin/analytics/inventory/status',
+      inventoryTurnover: '/admin/analytics/inventory/turnover',
+      inventoryLogs: '/admin/analytics/inventory/logs',
+      paymentStatus: '/admin/analytics/payments/status',
+      paymentHistory: '/admin/analytics/payments/history',
+      financial: '/admin/analytics/financial',
+      expensesHistory: '/admin/analytics/expenses/history',
+    },
+    coupons: '/admin/coupons',
+    coupon: (id: string) => `/admin/coupons/${id}`,
+    blogs: '/admin/blogs',
+    blog: (id: string) => `/admin/blogs/${id}`,
+    actionLogsLatest: '/admin/action-logs/latest',
+    navBadges: '/admin/nav-badges',
+    refundRequests: '/admin/refund-requests',
+    refundRequestApprove: (id: string) => `/admin/refund-requests/${id}/approve`,
+    refundRequestReject: (id: string) => `/admin/refund-requests/${id}/reject`,
+    expenses: '/admin/expenses',
   },
 } as const;

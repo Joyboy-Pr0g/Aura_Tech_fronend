@@ -5,6 +5,7 @@ import { CategoriesSlider } from '@/features/home/components/categories-slider';
 import { FeaturedProductsSection } from '@/features/home/components/featured-products-section';
 import { NewsletterSection } from '@/features/home/components/newsletter-section';
 import { getCategoriesServer } from '@/features/categories/services/categories-server';
+import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
 
 async function CategoriesSection() {
@@ -12,12 +13,14 @@ async function CategoriesSection() {
   return <CategoriesSlider categories={categories} />;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const settings = await getWebsiteSettingsServer();
+
   return (
-    <div className="relative">
+    <div className="relative overflow-x-clip">
       <HomePageBackground />
       <div className="relative z-10">
-        <HeroSection />
+        <HeroSection settings={settings} />
         <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={4} /></div>}>
           <CategoriesSection />
         </Suspense>

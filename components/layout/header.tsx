@@ -1,29 +1,35 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Menu, X, ShoppingBag, ShoppingCart, Globe } from 'lucide-react';
+import { Menu, X, ShoppingCart, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Container } from '@/components/ui/container';
 import { ButtonLink } from '@/components/ui/button';
-import { User as UserType } from '@/lib/types/entities';
+import { User as UserType, WebsiteSettings } from '@/lib/types/entities';
 import { HeaderSearch } from '@/components/layout/header-search';
 import { UserMenu } from '@/components/layout/user-menu';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { CartPanel } from '@/components/cart/cart-panel';
 import { useCartUiStore } from '@/lib/stores/cart-ui-store';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { getCart } from '@/features/cart/services/cart-client';
+import { resolveWebsiteLogo, splitWebsiteTitle } from '@/lib/website-settings/defaults';
 
 interface HeaderProps {
   user?: UserType | null;
+  settings: WebsiteSettings;
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, settings }: HeaderProps) {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocale();
   const { itemCount, setItemCount, togglePanel } = useCartUiStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const logoSrc = resolveWebsiteLogo(settings.header_logo_url);
+  const { primary, secondary } = splitWebsiteTitle(settings.title);
 
   useEffect(() => {
     if (!user) {
@@ -42,12 +48,19 @@ export function Header({ user }: HeaderProps) {
           <div className="flex h-16 items-center gap-3 lg:gap-6">
             {/* Logo — start side (right in RTL) */}
             <Link href="/" className="flex items-center gap-2 shrink-0 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-500/15 border border-primary-500/30 group-hover:glow-primary transition-shadow">
-                <ShoppingBag className="h-4 w-4 text-primary-400" />
+              <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-primary-500/30 bg-primary-500/15 group-hover:glow-primary transition-shadow">
+                <Image
+                  src={logoSrc}
+                  alt={settings.title}
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                  priority
+                />
               </div>
               <span className="text-lg font-bold tracking-tight hidden sm:inline">
-                <span className="text-primary-400 drop-shadow-[0_0_8px_rgba(0,217,255,0.5)]">AURA</span>
-                <span className="text-white"> TECH</span>
+                <span className="text-primary-400 drop-shadow-[0_0_8px_rgba(0,217,255,0.5)]">{primary}</span>
+                {secondary && <span className="text-white"> {secondary}</span>}
               </span>
             </Link>
 
@@ -59,14 +72,17 @@ export function Header({ user }: HeaderProps) {
               <button
                 type="button"
                 onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
-                className="hidden lg:flex p-2 rounded-lg text-white/50 hover:text-primary-400 hover:bg-white/5"
+                className="flex p-2 rounded-lg text-white/50 hover:text-primary-400 hover:bg-white/5"
                 aria-label={t('nav.toggleLanguage')}
               >
                 <Globe className="h-4 w-4" />
               </button>
 
               {user ? (
-                <UserMenu user={user} />
+                <>
+                  <NotificationBell audience={user.role as 'admin' | 'customer'} />
+                  <UserMenu user={user} />
+                </>
               ) : (
                 <div className="hidden sm:flex items-center gap-2">
                   <ButtonLink href="/login" variant="ghost" size="sm">

@@ -11,3 +11,8 @@ export async function getCategoryBySlugServer(slug: string): Promise<Category | 
   const res = await serverFetch<Category | null>(endpoints.categories.bySlug(slug));
   return res.data ?? null;
 }
+
+export async function getCategoryByIdServer(id: string): Promise<Category | null> {
+  const res = await serverFetch<Category | null>(endpoints.categories.byId(id));
+  return res.data ?? null;
+}

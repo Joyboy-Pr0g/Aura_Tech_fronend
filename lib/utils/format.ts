@@ -41,5 +41,6 @@ export const PAYMENT_STATUS_COLORS: Record<string, string> = {
   pending: 'text-warning bg-warning/10',
   approved: 'text-success bg-success/10',
   rejected: 'text-danger bg-danger/10',
+  manual_approved: 'text-success bg-success/10',
   refunded: 'text-primary-500 bg-primary-500/10',
 };

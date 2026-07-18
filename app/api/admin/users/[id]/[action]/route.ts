@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/api/route-handler';
 import { endpoints } from '@/lib/api/endpoints';
 
-const ALLOWED_ACTIONS = ['activate', 'deactivate', 'soft-delete', 'restore'] as const;
+const ALLOWED_ACTIONS = ['activate', 'deactivate', 'soft-delete', 'restore', 'reset-password'] as const;
 
 interface RouteContext {
   params: Promise<{ id: string; action: string }>;

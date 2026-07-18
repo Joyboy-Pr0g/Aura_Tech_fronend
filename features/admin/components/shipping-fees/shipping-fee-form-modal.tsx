@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ShippingFee } from '@/lib/types/entities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +20,7 @@ import { toast } from '@/components/ui/Toaster';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import {
   createAdminShippingFee,
+  getAdminShippingFee,
   updateAdminShippingFee,
 } from '@/features/admin/services/admin-shipping-fees-client';
 
@@ -35,7 +35,7 @@ type ShippingFeeFormValues = z.infer<typeof shippingFeeFormSchema>;
 
 export type ShippingFeeFormMode =
   | { type: 'create' }
-  | { type: 'edit'; fee: ShippingFee };
+  | { type: 'edit'; feeId: string };
 
 interface ShippingFeeFormModalProps {
   open: boolean;
@@ -52,6 +52,7 @@ export function ShippingFeeFormModal({
 }: ShippingFeeFormModalProps) {
   const { t } = useLocale();
   const [submitting, setSubmitting] = useState(false);
+  const [loadingFee, setLoadingFee] = useState(false);
   const isEdit = mode?.type === 'edit';
 
   const {
@@ -75,23 +76,33 @@ export function ShippingFeeFormModal({
 
   useEffect(() => {
     if (!open || !mode) return;
-    if (mode.type === 'edit') {
-      reset({
-        price: Number(mode.fee.price),
-        duration: mode.fee.duration,
-        delivery_way: mode.fee.delivery_way,
-        is_active: mode.fee.is_active,
-      });
-    } else {
+    if (mode.type === 'create') {
       reset({ price: 0, duration: '', delivery_way: '', is_active: true });
+      return;
     }
-  }, [open, mode, reset]);
+
+    setLoadingFee(true);
+    void getAdminShippingFee(mode.feeId)
+      .then((fee) => {
+        reset({
+          price: Number(fee.price),
+          duration: fee.duration,
+          delivery_way: fee.delivery_way,
+          is_active: fee.is_active,
+        });
+      })
+      .catch((error) => {
+        toast(error instanceof Error ? error.message : t('admin.actionFailed'), 'error');
+        onOpenChange(false);
+      })
+      .finally(() => setLoadingFee(false));
+  }, [open, mode, reset, onOpenChange, t]);
 
   const onSubmit = async (values: ShippingFeeFormValues) => {
     setSubmitting(true);
     try {
       if (isEdit && mode?.type === 'edit') {
-        await updateAdminShippingFee(mode.fee.id, values);
+        await updateAdminShippingFee(mode.feeId, values);
         toast(t('admin.shippingFeeUpdated'), 'success');
       } else {
         await createAdminShippingFee(values);
@@ -173,8 +184,8 @@ export function ShippingFeeFormModal({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t('admin.cancel')}
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? t('admin.saving') : isEdit ? t('admin.saveChanges') : t('admin.create')}
+            <Button type="submit" disabled={submitting || loadingFee}>
+              {submitting || loadingFee ? t('admin.saving') : isEdit ? t('admin.saveChanges') : t('admin.create')}
             </Button>
           </ModalFooter>
         </form>

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { loginSchema, LoginInput } from '@/features/auth/schemas/auth-schemas';
+import { createLoginSchema, LoginInput } from '@/features/auth/schemas/auth-schemas';
 import { login } from '@/features/auth/services/auth-service';
 import { getErrorMessage } from '@/lib/errors/api-error';
 import {
@@ -29,6 +29,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const { t } = useLocale();
   const [error, setError] = useState('');
+  const loginSchema = useMemo(() => createLoginSchema(t), [t]);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -83,7 +84,15 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">{t('auth.password')}</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Link
+                href="/forget-password"
+                className="text-xs text-primary-400 hover:text-primary-300 font-medium"
+              >
+                {t('auth.forgotPassword')}
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"

@@ -65,7 +65,7 @@ export function AdminShippingFeesPanel({ initialFees }: AdminShippingFeesPanelPr
   };
 
   const openEdit = (fee: ShippingFee) => {
-    setFormMode({ type: 'edit', fee });
+    setFormMode({ type: 'edit', feeId: fee.id });
     setIsFormOpen(true);
   };
 
@@ -140,12 +140,12 @@ export function AdminShippingFeesPanel({ initialFees }: AdminShippingFeesPanelPr
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="rounded-lg border border-white/10 p-2 text-white/50 hover:text-white hover:bg-white/5"
-                      >
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/60 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
+                        >
                         <MoreHorizontal size={16} />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="bg-dark-900 border-white/10">
                       <DropdownMenuItem onClick={() => openEdit(fee)}>
                         <Pencil size={14} />
                         {t('admin.edit')}

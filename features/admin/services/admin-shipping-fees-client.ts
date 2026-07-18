@@ -22,10 +22,15 @@ export async function getAdminShippingFees(): Promise<ShippingFee[]> {
   return res.data ?? [];
 }
 
+export async function getAdminShippingFee(id: string): Promise<ShippingFee> {
+  const res = await clientFetch<ShippingFee>(bffPath(endpoints.admin.shippingFee(id)));
+  return res.data!;
+}
+
 export async function createAdminShippingFee(data: CreateShippingFeePayload): Promise<ShippingFee> {
   const res = await clientFetch<ShippingFee>(bffPath(endpoints.admin.shippingFees), {
     method: 'POST',
-    body: data,
+    body: { ...data },
   });
   return res.data!;
 }
@@ -33,7 +38,7 @@ export async function createAdminShippingFee(data: CreateShippingFeePayload): Pr
 export async function updateAdminShippingFee(id: string, data: UpdateShippingFeePayload): Promise<ShippingFee> {
   const res = await clientFetch<ShippingFee>(bffPath(endpoints.admin.shippingFee(id)), {
     method: 'PUT',
-    body: data,
+    body: { ...data },
   });
   return res.data!;
 }

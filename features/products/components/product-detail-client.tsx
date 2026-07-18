@@ -18,6 +18,7 @@ import {
 } from '@/lib/products/helpers';
 import { addToCart } from '@/features/cart/services/cart-client';
 import { addToWishlist, removeFromWishlist } from '@/features/engagement/services/engagement-client';
+import { subscribeStockReminder } from '@/features/engagement/services/reminders-client';
 import { ProductReviewsTab } from '@/features/engagement/components/product-reviews-tab';
 import { ProductQaTab } from '@/features/engagement/components/product-qa-tab';
 import { useCartUiStore } from '@/lib/stores/cart-ui-store';
@@ -26,7 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductImage } from '@/components/ui/product-image';
 import { toast } from '@/components/ui/Toaster';
-import { Minus, Plus, Heart, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, Heart, ShoppingCart, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 interface ProductDetailClientProps {
@@ -41,20 +42,18 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
 
   const variants = product.variants ?? [];
   const hasVariants = variants.length > 0;
+  const mainProductStock = getDisplayStock(product, null);
   const priceRange = useMemo(() => getProductPriceRange(product), [product]);
-  const initialVariant = useMemo(
-    () => variants.find((variant) => getVariantAvailableStock(variant) > 0) ?? variants[0] ?? null,
-    [variants],
-  );
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariantId, setSelectedVariantId] = useState(() => initialVariant?.id ?? '');
+  const [selectedVariantId, setSelectedVariantId] = useState('');
   const [adding, setAdding] = useState(false);
+  const [reminding, setReminding] = useState(false);
   const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
-  const [activeImage, setActiveImage] = useState(() => getDefaultDetailImage(product, initialVariant));
+  const [activeImage, setActiveImage] = useState(() => getDefaultDetailImage(product, null));
 
   const selectedVariant = useMemo(
-    () => variants.find((variant) => variant.id === selectedVariantId) ?? null,
+    () => (selectedVariantId ? variants.find((variant) => variant.id === selectedVariantId) ?? null : null),
     [variants, selectedVariantId],
   );
 
@@ -88,7 +87,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     try {
       const cart = await addToCart({
         product_id: product.id,
-        variant_id: hasVariants ? selectedVariantId : undefined,
+        variant_id: selectedVariantId || undefined,
         quantity,
       });
       const count = cart.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
@@ -120,6 +119,25 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
       }
     } catch {
       toast(t('wishlist.error'), 'error');
+    }
+  };
+
+  const handleStockReminder = async () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/products/${product.slug}`);
+      return;
+    }
+    setReminding(true);
+    try {
+      await subscribeStockReminder(
+        product.id,
+        selectedVariantId || null,
+      );
+      toast(t('product.reminderSet'), 'success');
+    } catch (error) {
+      toast(error instanceof Error ? error.message : t('product.reminderFailed'), 'error');
+    } finally {
+      setReminding(false);
     }
   };
 
@@ -211,6 +229,21 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
             <div>
               <p className="label-dark">{t('product.variant')}</p>
               <div className="flex flex-wrap gap-2 mt-2">
+                {mainProductStock > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVariantId('')}
+                    className={cn(
+                      'min-w-[5rem] px-3 py-2 rounded-lg border text-sm transition-colors text-start',
+                      !selectedVariantId
+                        ? 'border-primary-500 bg-primary-500/10 text-primary-400'
+                        : 'border-white/10 text-white/70 hover:border-white/20',
+                    )}
+                  >
+                    <span className="block font-medium">{t('product.mainProduct')}</span>
+                    <span className="block text-xs mt-0.5 opacity-80">{formatCurrency(Number(product.price))}</span>
+                  </button>
+                )}
                 {variants.map((variant) => {
                   const label = getVariantLabel(variant);
                   const variantStock = getVariantAvailableStock(variant);
@@ -274,7 +307,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex items-center gap-3">
             <Button
               onClick={handleAddToCart}
               disabled={!variantInStock || adding}
@@ -283,6 +316,18 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
               <ShoppingCart className="h-4 w-4" />
               {adding ? t('product.adding') : t('product.addToCart')}
             </Button>
+            {!variantInStock && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleStockReminder}
+                disabled={reminding}
+                className="flex-1 gap-2"
+              >
+                <Bell className="h-4 w-4" />
+                {reminding ? t('product.reminding') : t('product.notifyWhenAvailable')}
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={handleWishlist}
@@ -339,11 +384,19 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
         </Tabs.Content>
 
         <Tabs.Content value="reviews">
-          <ProductReviewsTab productId={product.id} />
+          <ProductReviewsTab
+            reviews={product.reviews}
+            averageRating={product.average_rating}
+            ratingCount={product.rating_count}
+          />
         </Tabs.Content>
 
         <Tabs.Content value="qa">
-          <ProductQaTab productId={product.id} isAuthenticated={isAuthenticated} />
+          <ProductQaTab
+            productId={product.id}
+            isAuthenticated={isAuthenticated}
+            questions={product.questions}
+          />
         </Tabs.Content>
       </Tabs.Root>
     </div>

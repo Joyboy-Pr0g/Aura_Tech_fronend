@@ -3,8 +3,21 @@
 import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { cn } from '@/lib/utils/cn';
+import { useLocale } from '@/lib/i18n/locale-provider';
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+function useResolvedDir(dir?: 'ltr' | 'rtl') {
+  const { dir: localeDir } = useLocale();
+  return dir ?? localeDir;
+}
+
+const DropdownMenu = ({
+  dir,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>) => {
+  const resolvedDir = useResolvedDir(dir);
+  return <DropdownMenuPrimitive.Root dir={resolvedDir} {...props} />;
+};
+
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
 const DropdownMenuContent = React.forwardRef<
@@ -16,7 +29,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        'z-50 min-w-[8rem] overflow-hidden rounded-lg border p-1 shadow-lg',
+        'z-50 min-w-[8rem] overflow-hidden rounded-lg border p-1 text-start shadow-lg',
         'animate-in fade-in-0 zoom-in-95',
         className,
       )}
@@ -33,7 +46,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center rounded-md px-3 py-2 text-sm outline-none',
+      'relative flex cursor-default select-none items-center gap-2 rounded-md px-3 py-2 text-sm text-start outline-none',
       'text-white/80 focus:bg-white/5 focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}

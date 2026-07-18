@@ -32,6 +32,8 @@ import {
 } from '@/features/admin/services/admin-products-client';
 import { ProductFormModal, type ProductFormMode } from '@/features/admin/components/products/product-form-modal';
 import { AddStockModal } from '@/features/admin/components/products/add-stock-modal';
+import { AdminAuditTrigger } from '@/features/admin/components/audit/admin-audit-trigger';
+import { useAdminLatestActions } from '@/features/admin/hooks/use-admin-latest-actions';
 import { AdminPageHeader } from '@/components/ui/admin-page-header';
 import { getProductImageUrl, getAvailableStock } from '@/lib/products/helpers';
 
@@ -89,6 +91,7 @@ export function AdminProductsPanel({
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | null>(null);
   const [addStockProduct, setAddStockProduct] = useState<AdminProduct | null>(null);
   const isInitialRender = useRef(true);
+  const latestActions = useAdminLatestActions('product', products.map((p) => p.id));
 
   const brandOptions = useMemo(() => {
     return brands.sort((a, b) => a.brand.localeCompare(b.brand));
@@ -368,7 +371,7 @@ export function AdminProductsPanel({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-white/50">
+                  <tr className="admin-table-head">
                     <th className="px-5 py-4 font-medium">{t('admin.productImage')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productTitle')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productBrand')}</th>
@@ -377,7 +380,8 @@ export function AdminProductsPanel({
                     <th className="px-5 py-4 font-medium">{t('admin.productPrice')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productStock')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productStatus')}</th>
-                    <th className="px-5 py-4 font-medium text-right">{t('admin.actions')}</th>
+                    <th className="px-5 py-4 font-medium">{t('admin.audit')}</th>
+                    <th className="admin-table-actions-head">{t('admin.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -398,7 +402,14 @@ export function AdminProductsPanel({
                       <td className="px-5 py-4 text-white">{formatCurrency(product.price)}</td>
                       <td className="px-5 py-4 text-white/70">{getAvailableStock(product)}</td>
                       <td className="px-5 py-4">{renderStatusBadges(product)}</td>
-                      <td className="px-5 py-4 text-right">{renderProductActions(product)}</td>
+                      <td className="px-5 py-4">
+                        <AdminAuditTrigger
+                          createdBy={product.created_by}
+                          updatedBy={product.updated_by}
+                          action={latestActions[product.id]}
+                        />
+                      </td>
+                      <td className="admin-table-actions-cell">{renderProductActions(product)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -417,6 +428,12 @@ export function AdminProductsPanel({
                     <div className="min-w-0">
                       <p className="font-semibold text-white truncate">{product.title}</p>
                       <p className="text-sm text-white/50 truncate">{product.brand || product.slug}</p>
+                      <AdminAuditTrigger
+                        createdBy={product.created_by}
+                        updatedBy={product.updated_by}
+                        action={latestActions[product.id]}
+                        className="mt-1"
+                      />
                     </div>
                   </div>
                   {renderProductActions(product)}

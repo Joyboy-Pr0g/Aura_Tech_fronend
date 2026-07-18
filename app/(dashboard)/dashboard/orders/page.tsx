@@ -1,11 +1,18 @@
 import { Suspense } from 'react';
-import { OrdersList } from '@/features/orders/components/orders-list';
+import { OrdersListContent } from '@/features/orders/components/orders-list-content';
 import { OrdersListSkeleton } from '@/features/orders/skeletons/orders-list-skeleton';
 
-export default function OrdersPage() {
+interface OrdersPageProps {
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+  }>;
+}
+
+export default function OrdersPage({ searchParams }: OrdersPageProps) {
   return (
     <Suspense fallback={<OrdersListSkeleton />}>
-      <OrdersList />
+      <OrdersListContent searchParams={searchParams} />
     </Suspense>
   );
 }

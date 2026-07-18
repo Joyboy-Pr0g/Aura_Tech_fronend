@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState, useTransition, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { MoreHorizontal, Search, Archive, Users } from 'lucide-react';
+import Link from 'next/link';
+import { MoreHorizontal, Search, Archive, Users, ExternalLink, Plus } from 'lucide-react';
 import { User, Role, UserStatus } from '@/lib/types/entities';
 import { CursorPage } from '@/lib/types/api';
 import { formatDateTime } from '@/lib/utils/format';
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils/cn';
 import { Badge } from '@/components/ui/badge';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { TogglePill } from '@/components/ui/toggle-pill';
 import { ConfirmModal } from '@/components/ui/models/confirm';
 import { AdminPageHeader } from '@/components/ui/admin-page-header';
@@ -32,6 +34,7 @@ import {
   softDeleteAdminUser,
   resetPasswordAdminUser,
 } from '@/features/admin/services/admin-users-client';
+import { CreateUserFormModal } from '@/features/admin/components/users/create-user-form-modal';
 
 const ROLES: Role[] = ['admin', 'sub_admin', 'customer'];
 const PAGE_SIZE = 20;
@@ -69,6 +72,7 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
   const debouncedSearch = useDebounce<string>(searchInput);
   const [actionId, setActionId] = useState<string | null>(null);
   const [includeDeleted, setIncludeDeleted] = useState(initialIncludeDeleted ?? false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isInitialRender = useRef(true);
 
@@ -96,7 +100,6 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
       return;
     }
 
-    console.log('applyFilters');
     applyFilters(roleFilter, debouncedSearch, includeDeleted);
   }, [
     roleFilter,
@@ -114,8 +117,10 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
         include_deleted: includeDeleted,
       });
       setUsers(page.items);
+      setNextCursor(page.next_cursor);
+      setHasMore(page.has_more);
     });
-  }, [roleFilter, debouncedSearch, includeDeleted, applyFilters]);
+  }, [roleFilter, debouncedSearch, includeDeleted]);
 
 
   const loadMore = () => {
@@ -229,34 +234,40 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
         title={t('admin.users')}
         countLabel={t('admin.usersCount', { count: users.length })}
         filters={
-          <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="relative w-full max-w-2xl">
-              <Search size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/30" />
-              <Input
-                type="search"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder={t('admin.searchUsers')}
-                className="input-dark ps-9 w-full"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="input-dark w-full sm:w-auto sm:min-w-[160px]"
-              >
-                <option value="">{t('admin.allRoles')}</option>
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>{t(`admin.role.${role}`)}</option>
-                ))}
-              </select>
-              <TogglePill
-                checked={includeDeleted}
-                onCheckedChange={(checked) => setIncludeDeleted(checked as boolean)}
-                label={t('admin.includeDeleted')}
-                icon={<Archive size={15} />}
-              />
+          <div className="space-y-3">
+            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="relative w-full max-w-xl">
+                <Search size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-white/30" />
+                <Input
+                  type="search"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder={t('admin.searchUsers')}
+                  className="input-dark ps-9 w-full"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="input-dark w-full sm:w-auto sm:min-w-[160px]"
+                >
+                  <option value="">{t('admin.allRoles')}</option>
+                  {ROLES.map((role) => (
+                    <option key={role} value={role}>{t(`admin.role.${role}`)}</option>
+                  ))}
+                </select>
+                <TogglePill
+                  checked={includeDeleted}
+                  onCheckedChange={(checked) => setIncludeDeleted(checked as boolean)}
+                  label={t('admin.includeDeleted')}
+                  icon={<Archive size={15} />}
+                />
+                <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
+                <Plus size={16} className="me-1" />
+                {t('admin.addUser')}
+              </Button>
+              </div>
             </div>
           </div>
         }
@@ -272,26 +283,40 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 text-left text-white/50">
+                  <tr className="admin-table-head">
                     <th className="px-5 py-4 font-medium">{t('admin.userName')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.userEmail')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.userPhone')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.userRole')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.userStatus')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.userJoined')}</th>
-                    <th className="px-5 py-4 font-medium text-right">{t('admin.actions')}</th>
+                    <th className="admin-table-actions-head">{t('admin.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
                     <tr key={user.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                      <td className="px-5 py-4 font-medium text-white">{user.full_name}</td>
+                      <td className="px-5 py-4 font-medium text-white">
+                        <Link href={`/admin/users/${user.id}`} className="hover:text-primary-400">
+                          {user.full_name}
+                        </Link>
+                      </td>
                       <td className="px-5 py-4 text-white/70">{user.email}</td>
                       <td className="px-5 py-4 text-white/50">{user.phone ?? '—'}</td>
                       <td className="px-5 py-4">{renderRoleBadge(user.role)}</td>
                       <td className="px-5 py-4">{renderStatusBadge(user.deleted_at ? 'soft_deleted' : user.status)}</td>
                       <td className="px-5 py-4 text-white/50">{formatDateTime(user.created_at)}</td>
-                      <td className="px-5 py-4 text-right">{renderActions(user)}</td>
+                      <td className="admin-table-actions-cell">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/users/${user.id}`}
+                            className="rounded-lg border border-white/10 p-2 text-white/50 hover:text-white hover:bg-white/5"
+                          >
+                            <ExternalLink size={16} />
+                          </Link>
+                          {renderActions(user)}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -304,10 +329,20 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
               <div key={user.id} className="card-dark p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-white truncate">{user.full_name}</p>
+                    <Link href={`/admin/users/${user.id}`} className="font-semibold text-white truncate hover:text-primary-400 block">
+                      {user.full_name}
+                    </Link>
                     <p className="text-sm text-white/50 truncate">{user.email}</p>
                   </div>
-                  {renderActions(user)}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="rounded-lg border border-white/10 p-2 text-white/50 hover:text-white hover:bg-white/5"
+                    >
+                      <ExternalLink size={16} />
+                    </Link>
+                    {renderActions(user)}
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {renderRoleBadge(user.role)}
@@ -346,6 +381,12 @@ export function AdminUsersPanel({ initial, initialRole, initialSearch, initialIn
           cancelVariant="outline"
         />
       )}
+
+      <CreateUserFormModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSuccess={refreshList}
+      />
     </div>
   );
 }

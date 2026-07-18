@@ -3,6 +3,7 @@ import { Product, User } from '@/lib/types/entities';
 export interface ProductReview {
   id: string;
   product_id: string;
+  order_item_id?: string;
   customer_id: string;
   title: string;
   content: string;
@@ -35,6 +36,7 @@ export interface ProductQuestion {
   id: string;
   question: string;
   helpful_count: number;
+  is_published?: boolean;
   created_at: string;
   customer?: Pick<User, 'id' | 'full_name'>;
   answers: QuestionAnswer[];

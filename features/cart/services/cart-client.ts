@@ -22,6 +22,14 @@ export async function removeCartItem(itemId: string) {
   await clientFetch(`/api/cart/items/${itemId}`, { method: 'DELETE' });
 }
 
+export async function editCartQuantity(itemId: string, quantity: number) {
+  const res = await clientFetch<Cart>('/api/cart/edit-quantity', {
+    method: 'POST',
+    body: { itemId, quantity },
+  });
+  return res.data;
+}
+
 export async function clearCart() {
   await clientFetch('/api/cart', { method: 'DELETE' });
 }
@@ -50,6 +58,10 @@ export async function deleteAddress(id: string) {
   await clientFetch(`/api/addresses/${id}`, { method: 'DELETE' });
 }
 
+export async function setDefaultAddress(id: string) {
+  await clientFetch(`/api/addresses/${id}/default`, { method: 'PATCH' });
+}
+
 export async function getPaymentMethods() {
   const res = await clientFetch<PaymentMethod[]>('/api/payments/methods');
   return res.data!;
@@ -64,6 +76,11 @@ export async function submitPayment(orderId: string, file: File, paymentMethodId
     body: form,
   });
   return res.data!;
+}
+
+export async function getPaymentForOrder(orderId: string): Promise<Payment | null> {
+  const res = await clientFetch<Payment>(`/api/payments/orders/${orderId}`);
+  return res.data ?? null;
 }
 
 export async function getPendingPayments(limit = 20, cursor?: string) {

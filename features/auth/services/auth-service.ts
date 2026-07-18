@@ -22,9 +22,10 @@ export async function login(data: LoginInput): Promise<User> {
 }
 
 export async function register(data: RegisterInput): Promise<User> {
+  const { confirm_password: _confirmPassword, ...payload } = data;
   const res = await clientFetch<AuthResponse>('/api/auth/register', {
     method: 'POST',
-    body: data,
+    body: payload,
   });
   return res.data!.user;
 }
@@ -62,6 +63,29 @@ export async function sendEmailVerification(data: SendEmailVerificationInput): P
 
 export async function verifyEmailChange(data: VerifyEmailChangeInput): Promise<void> {
   await clientFetch('/api/auth/email-verification/verify', {
+    method: 'POST',
+    body: data,
+  });
+}
+
+export async function sendRegistrationEmailVerification(
+  data: SendEmailVerificationInput,
+): Promise<void> {
+  await clientFetch('/api/auth/registration/email-verification/send', {
+    method: 'POST',
+    body: data,
+  });
+}
+
+export async function verifyRegistrationEmail(data: VerifyEmailChangeInput): Promise<void> {
+  await clientFetch('/api/auth/registration/email-verification/verify', {
+    method: 'POST',
+    body: data,
+  });
+}
+
+export async function forgotPassword(data: SendEmailVerificationInput): Promise<void> {
+  await clientFetch('/api/auth/forgot-password', {
     method: 'POST',
     body: data,
   });

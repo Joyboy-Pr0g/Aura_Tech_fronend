@@ -6,6 +6,8 @@ import { ButtonLink } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SearchBar } from '@/features/home/components/search-bar';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { WebsiteSettings } from '@/lib/types/entities';
+import { splitWebsiteTitle } from '@/lib/website-settings/defaults';
 
 const TRUST_ITEMS = [
   { icon: Truck, key: 'home.trust.delivery' as const },
@@ -13,8 +15,10 @@ const TRUST_ITEMS = [
   { icon: Headphones, key: 'home.trust.support' as const },
 ];
 
-export function HeroSection() {
+export function HeroSection({ settings }: { settings: WebsiteSettings }) {
   const { t } = useLocale();
+  const { primary, secondary } = splitWebsiteTitle(settings.title);
+  const heroTitle = secondary ? `${primary} ${secondary}` : primary;
 
   return (
     <section className="relative min-h-[85vh] flex items-center">
@@ -26,14 +30,16 @@ export function HeroSection() {
           </Badge>
 
           <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-              {t('home.welcome')}{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] to-[#0066FF]">
-                AURA TECH
-              </span>
-            </h1>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+                {t('home.welcome')}{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] to-[#0066FF] inline-block">
+                  {heroTitle}
+                </span>
+              </h1>
+            </div>
             <p className="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
-              {t('home.heroDesc')}
+              {settings.description}
             </p>
           </div>
 
