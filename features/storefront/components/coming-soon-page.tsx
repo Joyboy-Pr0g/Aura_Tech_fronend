@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Clock3, Globe, Instagram, Facebook } from 'lucide-react';
+import { Clock3, Globe, Instagram } from 'lucide-react';
 import { HomePageBackground } from '@/components/backgrounds/home-page-background';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,23 @@ import {
 } from '@/lib/website-settings/defaults';
 
 const SOCIAL_LINKS = [
-  { href: FALLBACK_WEBSITE_SETTINGS.instagram!, icon: Instagram, label: 'Instagram' },
-  { href: FALLBACK_WEBSITE_SETTINGS.facebook!, icon: Facebook, label: 'Facebook' },
   {
-    href: formatWhatsappLink(FALLBACK_WEBSITE_SETTINGS.whatsapp!),
+    href: 'https://www.instagram.com/auratech.stor?igsh=MWwzdWs0bHloYzBy',
+    icon: Instagram,
+    label: 'Instagram',
+    badge: null,
+  },
+  {
+    href: 'https://www.tiktok.com/@auratech.stor?_r=1&_t=ZS-987hZ8gQZMO',
+    icon: null,
+    label: 'TikTok',
+    badge: 'TT',
+  },
+  {
+    href: formatWhatsappLink('+967770584331'),
     icon: null,
     label: 'WhatsApp',
+    badge: 'WA',
   },
 ] as const;
 
@@ -84,7 +95,7 @@ export function ComingSoonPage() {
             </div>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              {SOCIAL_LINKS.map(({ href, icon: Icon, label }) => (
+              {SOCIAL_LINKS.map(({ href, icon: Icon, label, badge }) => (
                 <a
                   key={label}
                   href={href}
@@ -92,7 +103,11 @@ export function ComingSoonPage() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 transition-colors hover:border-primary-500/40 hover:bg-primary-500/10 hover:text-primary-300"
                 >
-                  {Icon ? <Icon className="h-4 w-4" /> : <span className="text-xs font-semibold">WA</span>}
+                  {Icon ? (
+                    <Icon className="h-4 w-4" />
+                  ) : (
+                    <span className="text-xs font-semibold">{badge}</span>
+                  )}
                   {label}
                 </a>
               ))}
