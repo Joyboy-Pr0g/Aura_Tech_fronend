@@ -28,6 +28,15 @@ export const ar: Record<TranslationKey, string> = {
   'nav.toggleMenu': 'فتح القائمة',
   'nav.toggleLanguage': 'تبديل اللغة',
 
+  // Storefront coming soon
+  'storefront.comingSoon.badge': 'قريباً',
+  'storefront.comingSoon.title': 'شيء رائع في الطريق',
+  'storefront.comingSoon.description':
+    'نضع اللمسات الأخيرة على AuraTech. سيفتح المتجر قريباً بعد ربط الخادم الخلفي.',
+  'storefront.comingSoon.progress': 'جاري تجهيز المتجر',
+  'storefront.comingSoon.contact': 'لديك أسئلة؟ تواصل معنا على',
+  'storefront.comingSoon.staffLogin': 'دخول فريق العمل',
+
   // Notifications
   'notifications.title': 'الإشعارات',
   'notifications.subtitle': 'تحديثات الطلبات والتنبيهات',

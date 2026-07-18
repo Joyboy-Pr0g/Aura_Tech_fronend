@@ -26,6 +26,15 @@ export const en = {
   'nav.toggleMenu': 'Toggle menu',
   'nav.toggleLanguage': 'Toggle language',
 
+  // Storefront coming soon
+  'storefront.comingSoon.badge': 'Launching Soon',
+  'storefront.comingSoon.title': 'Something great is on the way',
+  'storefront.comingSoon.description':
+    'We are putting the final touches on AuraTech. The store will be live soon once our backend is connected.',
+  'storefront.comingSoon.progress': 'Store setup in progress',
+  'storefront.comingSoon.contact': 'Questions? Reach us at',
+  'storefront.comingSoon.staffLogin': 'Staff login',
+
   // Notifications
   'notifications.title': 'Notifications',
   'notifications.subtitle': 'Your order updates and alerts',
