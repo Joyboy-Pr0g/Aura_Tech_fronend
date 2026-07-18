@@ -6,12 +6,29 @@ import { AppProviders } from '@/components/app-providers';
 import { getRootMetadata } from '@/lib/seo/metadata';
 import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
 import { withWebsiteSettingsDefaults } from '@/lib/website-settings/defaults';
+import { Analytics } from '@vercel/analytics/next';
+import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
+import { ComingSoonGate } from '@/features/storefront/components/coming-soon-gate';
+
+const COMING_SOON_METADATA: Metadata = {
+  title: 'AuraTech — Coming Soon',
+  description: 'AuraTech is launching soon. Premium gaming and tech gear for Yemen.',
+  robots: 'noindex, nofollow',
+};
 
 export async function generateMetadata(): Promise<Metadata> {
+  if (isStorefrontComingSoon()) {
+    return COMING_SOON_METADATA;
+  }
+
   return getRootMetadata();
 }
 
 export async function generateViewport(): Promise<Viewport> {
+  if (isStorefrontComingSoon()) {
+    return { themeColor: '#00d9ff' };
+  }
+
   const settings = withWebsiteSettingsDefaults(await getWebsiteSettingsServer());
   return {
     themeColor: settings.theme_color ?? '#00d9ff',
@@ -30,9 +47,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased bg-dark-950 text-white min-h-screen overflow-x-hidden">
         <LocaleProvider>
-          {children}
+          <ComingSoonGate>{children}</ComingSoonGate>
           <AppProviders />
           <Toaster />
+          <Analytics />
         </LocaleProvider>
       </body>
     </html>
