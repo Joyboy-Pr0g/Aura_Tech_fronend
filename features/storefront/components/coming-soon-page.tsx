@@ -94,8 +94,8 @@ export function ComingSoonPage() {
               <p className="mt-3 text-sm text-white/40">{t('storefront.comingSoon.progress')}</p>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <p>{t('storefront.comingSoon.contact')}{' '}</p>
+            <div className="mt-10 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-center gap-3">
+              <p className="text-sm text-white/40 sm:text-base">{t('storefront.comingSoon.contact')}{' '}</p>
               {SOCIAL_LINKS.map(({ href, icon: Icon, label, badge }) => (
                 <a
                   key={label}
