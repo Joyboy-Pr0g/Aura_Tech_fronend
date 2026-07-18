@@ -3,5 +3,9 @@ import { proxyToBackend } from '@/lib/api/route-handler';
 import { endpoints } from '@/lib/api/endpoints';
 
 export async function POST(request: NextRequest) {
-  return proxyToBackend(request, { path: endpoints.visits.root, method: 'POST' });
+  return proxyToBackend(request, {
+    path: endpoints.visits.root,
+    method: 'POST',
+    requireAuth: false,
+  });
 }

@@ -21,8 +21,12 @@ export async function getProductsServer(params?: {
 }
 
 export async function getTrendingProductsServer(limit = 12): Promise<Product[]> {
-  const res = await serverFetch<Product[]>('/products/trending', { searchParams: { limit } }, ['products', 'trending']);
-  return res.data ?? [];
+  try {
+    const res = await serverFetch<Product[]>('/products/trending', { searchParams: { limit } }, ['products', 'trending']);
+    return res.data ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getProductBySlugServer(slug: string): Promise<Product | null> {

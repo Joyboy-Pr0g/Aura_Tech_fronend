@@ -101,9 +101,14 @@ export function buildPageMetadata(
 }
 
 export async function getRootMetadata(): Promise<Metadata> {
-  const { getWebsiteSettingsServer } = await import('@/features/website-settings/services/website-settings-server');
-  const settings = await getWebsiteSettingsServer();
-  return buildSiteMetadata(settings);
+  try {
+    const { getWebsiteSettingsServer } = await import('@/features/website-settings/services/website-settings-server');
+    const settings = await getWebsiteSettingsServer();
+    return buildSiteMetadata(settings);
+  } catch {
+    const { FALLBACK_WEBSITE_SETTINGS } = await import('@/lib/website-settings/defaults');
+    return buildSiteMetadata(FALLBACK_WEBSITE_SETTINGS);
+  }
 }
 
 export async function getPageMetadataFromSettings(

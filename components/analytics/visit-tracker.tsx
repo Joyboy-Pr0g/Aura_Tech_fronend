@@ -20,7 +20,7 @@ export function VisitTracker() {
   const lastPath = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!pathname || pathname.startsWith('/admin')) return;
+    if (!pathname || pathname.startsWith('/admin') || pathname === '/coming-soon') return;
     if (lastPath.current === pathname) return;
     lastPath.current = pathname;
 

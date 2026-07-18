@@ -38,17 +38,22 @@ export async function fetchBackend<T = unknown>(
   const preparedBody = prepareBody(body);
   const isJsonBody = preparedBody !== undefined && !(body instanceof FormData);
 
-  const response = await fetch(buildUrl(path, searchParams), {
-    ...rest,
-    body: preparedBody,
-    headers: {
-      ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-    cache: 'no-store',
-    next:{tags: tags ?? []},
-  });
+  let response: Response;
+  try {
+    response = await fetch(buildUrl(path, searchParams), {
+      ...rest,
+      body: preparedBody,
+      headers: {
+        ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+      cache: 'no-store',
+      next: { tags: tags ?? [] },
+    });
+  } catch {
+    throw new ApiError('Service unavailable', 503);
+  }
 
   let payload: ApiResponse<T>;
   try {

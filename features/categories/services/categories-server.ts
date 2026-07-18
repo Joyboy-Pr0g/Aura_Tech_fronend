@@ -3,8 +3,12 @@ import { Category } from '@/lib/types/entities';
 import { endpoints } from '@/lib/api/endpoints';
 
 export async function getCategoriesServer(): Promise<Category[]> {
-  const res = await serverFetch<Category[]>(endpoints.categories.root);
-  return res.data ?? [];
+  try {
+    const res = await serverFetch<Category[]>(endpoints.categories.root);
+    return res.data ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getCategoryBySlugServer(slug: string): Promise<Category | null> {
