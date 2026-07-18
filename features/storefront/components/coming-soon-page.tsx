@@ -95,6 +95,7 @@ export function ComingSoonPage() {
             </div>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <p>{t('storefront.comingSoon.contact')}{' '}</p>
               {SOCIAL_LINKS.map(({ href, icon: Icon, label, badge }) => (
                 <a
                   key={label}
@@ -112,16 +113,6 @@ export function ComingSoonPage() {
                 </a>
               ))}
             </div>
-
-            <p className="mt-8 text-sm text-white/45">
-              {t('storefront.comingSoon.contact')}{' '}
-              <a
-                href={`mailto:${FALLBACK_WEBSITE_SETTINGS.website_email}`}
-                className="text-primary-400 hover:text-primary-300"
-              >
-                {FALLBACK_WEBSITE_SETTINGS.website_email}
-              </a>
-            </p>
 
             <Link
               href="/login"
