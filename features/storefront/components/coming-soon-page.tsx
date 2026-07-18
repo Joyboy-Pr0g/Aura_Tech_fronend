@@ -113,13 +113,6 @@ export function ComingSoonPage() {
                 </a>
               ))}
             </div>
-
-            <Link
-              href="/login"
-              className="mt-6 text-xs text-white/30 transition-colors hover:text-white/50"
-            >
-              {t('storefront.comingSoon.staffLogin')}
-            </Link>
           </div>
         </main>
       </div>
