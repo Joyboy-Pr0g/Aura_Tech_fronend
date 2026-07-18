@@ -9,7 +9,10 @@ const EXCLUDED_PATH_PREFIXES = [
 ] as const;
 
 export function isStorefrontComingSoon(): boolean {
-  return process.env.STOREFRONT_COMING_SOON === 'true';
+  return (
+    process.env.STOREFRONT_COMING_SOON === 'true' ||
+    process.env.NEXT_PUBLIC_STOREFRONT_COMING_SOON === 'true'
+  );
 }
 
 export function shouldShowComingSoonForPath(pathname: string): boolean {

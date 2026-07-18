@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (shouldShowComingSoonForPath(pathname)) {
-    return NextResponse.rewrite(new URL('/coming-soon', request.url));
+    return NextResponse.redirect(new URL('/coming-soon', request.url));
   }
 
   const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;

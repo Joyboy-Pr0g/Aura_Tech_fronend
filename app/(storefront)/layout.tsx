@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { VisitTracker } from '@/components/analytics/visit-tracker';
@@ -8,7 +9,7 @@ import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
   if (isStorefrontComingSoon()) {
-    return null;
+    redirect('/coming-soon');
   }
 
   const [user, settings] = await Promise.all([getSession(), getWebsiteSettingsServer()]);

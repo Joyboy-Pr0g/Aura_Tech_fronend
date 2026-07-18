@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { HomePageBackground } from '@/components/backgrounds/home-page-background';
 import { HeroSection } from '@/features/home/components/hero-section';
@@ -6,6 +7,7 @@ import { FeaturedProductsSection } from '@/features/home/components/featured-pro
 import { NewsletterSection } from '@/features/home/components/newsletter-section';
 import { getCategoriesServer } from '@/features/categories/services/categories-server';
 import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
+import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
 
 async function CategoriesSection() {
@@ -14,6 +16,10 @@ async function CategoriesSection() {
 }
 
 export default async function HomePage() {
+  if (isStorefrontComingSoon()) {
+    redirect('/coming-soon');
+  }
+
   const settings = await getWebsiteSettingsServer();
 
   return (
