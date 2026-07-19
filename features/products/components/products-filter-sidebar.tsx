@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { Category } from '@/lib/types/entities';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { useDebounce } from '@/lib/hooks/use-debounce';
 import { buildProductsHref } from '@/lib/products/search-params';
+
 interface ProductsFilterSidebarProps {
   categories: Category[];
   brands: string[];
@@ -24,19 +25,25 @@ export function ProductsFilterSidebar({
 }: ProductsFilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
+  const priceFocusedRef = useRef(false);
   const { t } = useLocale();
   const [pending, startTransition] = useTransition();
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
       startTransition(() => {
-        router.push(buildProductsHref(searchParams, updates));
+        router.push(buildProductsHref(searchParamsRef.current, updates));
       });
     },
-    [router, searchParams],
+    [router],
   );
 
   const clearFilters = () => {
+    priceFocusedRef.current = false;
+    setMinPriceInput('');
+    setMaxPriceInput('');
     startTransition(() => {
       router.push('/products');
     });
@@ -61,21 +68,24 @@ export function ProductsFilterSidebar({
   const debouncedMaxPrice = useDebounce(maxPriceInput, 500);
 
   useEffect(() => {
+    if (priceFocusedRef.current) return;
     setMinPriceInput(minPrice);
     setMaxPriceInput(maxPriceParam);
   }, [minPrice, maxPriceParam]);
 
   useEffect(() => {
-    if (debouncedMinPrice === minPrice) return;
-    updateParams({ min_price: debouncedMinPrice || null });
-  }, [debouncedMinPrice, minPrice, updateParams]);
+    const minMatches = debouncedMinPrice === minPrice;
+    const maxMatches = debouncedMaxPrice === maxPriceParam;
+    if (minMatches && maxMatches) return;
 
-  useEffect(() => {
-    if (debouncedMaxPrice === maxPriceParam) return;
-    updateParams({ max_price: debouncedMaxPrice || null });
-  }, [debouncedMaxPrice, maxPriceParam, updateParams]);
+    updateParams({
+      min_price: debouncedMinPrice || null,
+      max_price: debouncedMaxPrice || null,
+    });
+  }, [debouncedMinPrice, debouncedMaxPrice, minPrice, maxPriceParam, updateParams]);
 
-  return (    <aside className={cn('space-y-6', className)}>
+  return (
+    <aside className={cn('space-y-6', className)}>
       <div>
         <h3 className="text-sm font-semibold text-white mb-3">{t('filters.category')}</h3>
         <select
@@ -136,21 +146,36 @@ export function ProductsFilterSidebar({
         <div className="flex gap-2">
           <Input
             type="number"
+            inputMode="numeric"
             placeholder={t('filters.min')}
             min={0}
             value={minPriceInput}
             onChange={(e) => setMinPriceInput(e.target.value)}
+            onFocus={() => {
+              priceFocusedRef.current = true;
+            }}
+            onBlur={() => {
+              priceFocusedRef.current = false;
+            }}
             className="bg-dark-900"
           />
           <Input
             type="number"
+            inputMode="numeric"
             placeholder={t('filters.max')}
             min={0}
             max={maxPrice}
             value={maxPriceInput}
             onChange={(e) => setMaxPriceInput(e.target.value)}
+            onFocus={() => {
+              priceFocusedRef.current = true;
+            }}
+            onBlur={() => {
+              priceFocusedRef.current = false;
+            }}
             className="bg-dark-900"
-          />        </div>
+          />
+        </div>
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer">

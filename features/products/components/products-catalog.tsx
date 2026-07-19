@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Product, Category, ProductBrand } from '@/lib/types/entities';
 import { ProductsFilterSidebar } from '@/features/products/components/products-filter-sidebar';
 import { SortOption } from '@/features/products/components/products-grid';
@@ -10,8 +10,9 @@ import { Container } from '@/components/ui/container';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { Filter } from 'lucide-react';
 
-interface ProductsCatalogProps {
-  products: Product[];
+const DESKTOP_FILTERS_QUERY = '(min-width: 1024px)';
+
+interface ProductsCatalogProps {  products: Product[];
   hasMore: boolean;
   nextCursor: string | null;
   categories: Category[];
@@ -38,7 +39,27 @@ export function ProductsCatalog({
   const { t } = useLocale();
   const [sort, setSort] = useState<SortOption>('relevance');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DESKTOP_FILTERS_QUERY);
+    const updateViewport = () => setIsDesktop(mediaQuery.matches);
+
+    updateViewport();
+    mediaQuery.addEventListener('change', updateViewport);
+    return () => mediaQuery.removeEventListener('change', updateViewport);
+  }, []);
+
+  const brandNames = brands.map((brand) => brand.brand);
+  const filterSidebar = (
+    <Suspense fallback={<p className="text-white/40 text-sm">{t('common.loading')}</p>}>
+      <ProductsFilterSidebar
+        categories={categories}
+        brands={brandNames}
+        maxPrice={maxPrice}
+      />
+    </Suspense>
+  );
   const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'relevance', label: t('products.sort.relevance') },
     { value: 'price_asc', label: t('products.sort.priceAsc') },
@@ -61,13 +82,13 @@ export function ProductsCatalog({
         </div>
 
         <div className="flex gap-8">
-          <div className="hidden lg:block w-64 shrink-0 mt-12">
-            <div className="sticky top-24 card-dark p-5">
-              <Suspense fallback={<p className="text-white/40 text-sm">{t('common.loading')}</p>}>
-                <ProductsFilterSidebar categories={categories} brands={brands.map(brand => brand.brand)} maxPrice={maxPrice} />
-              </Suspense>
+          {isDesktop ? (
+            <div className="w-64 shrink-0 mt-12">
+              <div className="sticky top-24 card-dark p-5">
+                {filterSidebar}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-4 mb-6">
@@ -89,14 +110,11 @@ export function ProductsCatalog({
               </select>
             </div>
 
-            {filtersOpen && (
-              <div className="lg:hidden card-dark p-5 mb-6">
-                <Suspense fallback={null}>
-                  <ProductsFilterSidebar categories={categories} brands={brands.map(brand => brand.brand)} maxPrice={maxPrice} />
-                </Suspense>
+            {!isDesktop && filtersOpen ? (
+              <div className="card-dark p-5 mb-6">
+                {filterSidebar}
               </div>
-            )}
-
+            ) : null}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               <ProductsInfiniteGrid
                 initialProducts={products}
