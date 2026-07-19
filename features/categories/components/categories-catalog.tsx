@@ -40,7 +40,7 @@ export function CategoriesCatalog({ categories }: CategoriesCatalogProps) {
         const children = category.children ?? [];
         const hasChildren = children.length > 0;
         const isExpanded = expandedId === category.id;
-        const parentHref = buildCategoryProductsPath(category.slug, null);
+        const parentHref = buildCategoryProductsPath(category.slug, null, category.id);
 
         return (
           <Card key={category.id} className="flex h-full flex-col overflow-hidden border-white/10">
@@ -105,7 +105,7 @@ export function CategoriesCatalog({ categories }: CategoriesCatalogProps) {
                       {children.map((child) => (
                         <Link
                           key={child.id}
-                          href={buildCategoryProductsPath(category.slug, child.slug)}
+                          href={buildCategoryProductsPath(category.slug, child.slug, category.id)}
                           className="group flex items-center gap-3 rounded-xl border border-white/5 bg-dark-900/50 p-2.5 transition-colors hover:border-primary-500/30 hover:bg-primary-500/5"
                         >
                           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-dark-800">
