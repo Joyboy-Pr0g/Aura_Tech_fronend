@@ -1,9 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/products/category/:slug/:subCategory',
+        destination: '/products?category=:slug&sub_category=:subCategory',
+      },
+      {
+        source: '/products/category/:slug',
+        destination: '/products?category=:slug',
+      },
+    ];
   },
   async headers() {
     return [

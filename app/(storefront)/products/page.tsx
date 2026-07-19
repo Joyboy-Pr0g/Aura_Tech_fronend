@@ -6,6 +6,7 @@ import { ProductsCatalog } from '@/features/products/components/products-catalog
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
 import { getAuthToken } from '@/lib/auth/session';
 import { getPageMetadataFromSettings } from '@/lib/seo/metadata';
+import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 
 const PAGE_SIZE = 12;
 
@@ -40,7 +41,7 @@ export async function generateMetadata({ searchParams }: ProductsPageProps): Pro
     return getPageMetadataFromSettings({
       title: activeCategory.name,
       description: activeCategory.description ?? `Shop ${activeCategory.name} at AURA TECH.`,
-      path: `/products?category=${activeCategory.slug}`,
+      path: buildCategoryProductsPath(activeCategory.slug),
       image: activeCategory.image_url,
     });
   }

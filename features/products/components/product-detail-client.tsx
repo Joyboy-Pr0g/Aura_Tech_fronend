@@ -23,6 +23,7 @@ import { ProductReviewsTab } from '@/features/engagement/components/product-revi
 import { ProductQaTab } from '@/features/engagement/components/product-qa-tab';
 import { useCartUiStore } from '@/lib/stores/cart-ui-store';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductImage } from '@/components/ui/product-image';
@@ -148,9 +149,9 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     { value: 'qa', label: t('product.tab.qa') },
   ];
 
-  const categoryHref = `/products?category=${encodeURIComponent(product.category.slug)}`;
+  const categoryHref = buildCategoryProductsPath(product.category.slug);
   const subCategoryHref = product.sub_category
-    ? `/products?category=${encodeURIComponent(product.category.slug)}&sub_category=${encodeURIComponent(product.sub_category.slug)}`
+    ? buildCategoryProductsPath(product.category.slug, product.sub_category.slug)
     : null;
 
   return (

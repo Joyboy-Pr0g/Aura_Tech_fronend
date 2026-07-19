@@ -58,6 +58,8 @@ export const en = {
   'home.heroDesc': 'Your ultimate gaming gear — laptops, smartphones, and accessories built for performance.',
   'home.shopNow': 'Shop Now',
   'home.browseCategories': 'Browse Categories',
+  'home.categoriesBadge': 'Browse',
+  'home.browseAllProducts': 'Browse all products',
   'home.trending': 'Trending Now',
   'home.categories': 'Shop by Category',
   'home.featured': 'Featured Products',
@@ -76,6 +78,22 @@ export const en = {
   'home.trust.delivery': 'Nationwide Delivery',
   'home.trust.payments': 'Secure Payments',
   'home.trust.support': 'Expert Support',
+  'home.seo.slide1Badge': 'About AuraTech',
+  'home.seo.slide2Badge': 'Products',
+  'home.seo.slide3Badge': 'Service',
+  'home.seo.slide4Badge': 'Get started',
+  'home.seo.heading': 'Why shop mobile gaming gear at {brand}',
+  'home.seo.intro':
+    'Welcome to {brand} — {metaTitle}. We help gamers across Yemen find premium mobile gaming phones, performance accessories, and reliable support in one trusted storefront. Whether you are building a portable competitive setup or upgrading everyday gear, our team curates products for real-world performance and long-term value.',
+  'home.seo.productsHeading': 'Curated gaming products for every player',
+  'home.seo.productsBody':
+    'Explore smartphones, gaming laptops, headsets, controllers, chargers, and essential accessories from leading brands. Use Shop by Category to discover collections for mobile gaming, competitive play, and daily tech needs. Every listing includes clear specifications, stock availability, and secure checkout so you can compare options with confidence before you buy.',
+  'home.seo.serviceHeading': 'Nationwide delivery, secure payments, and expert support',
+  'home.seo.serviceBody':
+    '{brand} combines fast delivery across Yemen with secure payment methods and responsive customer support in Arabic and English. From order updates to product questions, we help you choose gear that matches your budget and gaming style without compromising quality, authenticity, or after-sales care.',
+  'home.seo.ctaHeading': 'Start exploring our mobile gaming store today',
+  'home.seo.ctaBody':
+    'As Yemen\'s premium gaming store, {brand} makes it easy to shop trending products, discover new arrivals, and stay informed with practical buying guidance. Browse Trending Now for popular picks, visit our full product catalog, or contact our team if you need personalized recommendations for your next upgrade.',
 
   // Products catalog
   'products.title': 'Products',

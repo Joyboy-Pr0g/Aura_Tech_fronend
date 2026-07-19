@@ -27,6 +27,7 @@ export function buildSiteMetadata(
   const description = s.meta_description?.trim() || s.description || '';
   const ogImage = absoluteAssetUrl(siteUrl, s.og_image_url || s.header_logo_url);
   const favicon = s.favicon_url?.trim() || resolveWebsiteLogo(null);
+  const iconUrl = favicon.startsWith('http') ? favicon : absoluteAssetUrl(siteUrl, favicon);
   const keywords = s.meta_keywords
     ?.split(',')
     .map((item) => item.trim())
@@ -42,7 +43,8 @@ export function buildSiteMetadata(
     keywords: keywords?.length ? keywords : undefined,
     robots: s.robots ?? 'index, follow',
     icons: {
-      icon: favicon.startsWith('http') ? favicon : absoluteAssetUrl(siteUrl, favicon),
+      icon: iconUrl,
+      apple: iconUrl,
     },
     openGraph: {
       type: 'website',

@@ -11,6 +11,7 @@ import { useLocale } from '@/lib/i18n/locale-provider';
 import { cn } from '@/lib/utils/cn';
 import { ProductImage } from '@/components/ui/product-image';
 import { Button } from '@/components/ui/button';
+import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 
 interface CategoriesSliderProps {
   categories: Category[];
@@ -27,11 +28,11 @@ export function CategoriesSlider({ categories }: CategoriesSliderProps) {
   if (categories.length === 0) return null;
 
   return (
-    <section className="py-16 lg:py-20">
+    <section id="shop-by-category" className="py-16 lg:py-20">
       <Container>
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <Badge variant='secondary' className='mb-3'>{t('home.categories')}</Badge>
+            <Badge variant='secondary' className='mb-3'>{t('home.categoriesBadge')}</Badge>
             <h2 className='text-3xl font-bold text-white'>{t('home.categories')}</h2>
           </div>
           <div className='flex items-center gap-2'>
@@ -62,7 +63,7 @@ export function CategoriesSlider({ categories }: CategoriesSliderProps) {
         >
           {categories.map((category) => (
             <Link key={category.id}
-              href={`/products?category=${category.slug}`}
+              href={buildCategoryProductsPath(category.slug)}
               className='snap-start shrink-0 w-[200px] sm:w-[220px]'
             >
               <Card className={cn(

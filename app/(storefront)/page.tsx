@@ -33,7 +33,7 @@ export default async function HomePage() {
         <Suspense fallback={<div className="py-20"><ProductGridSkeleton count={8} /></div>}>
           <FeaturedProductsSection />
         </Suspense>
-        <NewsletterSection />
+        {/* <NewsletterSection /> */}
       </div>
     </div>
   );

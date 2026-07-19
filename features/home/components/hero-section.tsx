@@ -4,7 +4,7 @@ import { ArrowRight, Sparkles, Truck, Shield, Headphones } from 'lucide-react';
 import { Container } from '@/components/ui/container';
 import { ButtonLink } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { SearchBar } from '@/features/home/components/search-bar';
+import { HomeSeoSlider } from '@/features/home/components/home-seo-slider';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { WebsiteSettings } from '@/lib/types/entities';
 import { splitWebsiteTitle } from '@/lib/website-settings/defaults';
@@ -43,14 +43,14 @@ export function HeroSection({ settings }: { settings: WebsiteSettings }) {
             </p>
           </div>
 
-          <SearchBar size="large" className="max-w-2xl mx-auto" />
+          <HomeSeoSlider settings={settings} />
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <ButtonLink href="/products" size="md">
               {t('home.shopNow')}
               <ArrowRight className="h-4 w-4" />
             </ButtonLink>
-            <ButtonLink href="/products" variant="outline" size="md">
+            <ButtonLink href="#shop-by-category" variant="outline" size="md">
               {t('home.browseCategories')}
             </ButtonLink>
           </div>

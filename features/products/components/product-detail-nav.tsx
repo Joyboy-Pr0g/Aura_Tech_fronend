@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Box,ShapesIcon, Home } from 'lucide-react';
 import { TranslatedBreadcrumb } from '@/components/ui/translated-breadcrumb';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 
 interface ProductDetailNavProps {
   productTitle: string;
@@ -23,7 +24,7 @@ export function ProductDetailNav({ productTitle, category, subCategory, productS
   if (category) {
     breadcrumbItems.push({
       labelKey: category.name,
-      href: `/products?category=${encodeURIComponent(category.slug)}`,
+      href: buildCategoryProductsPath(category.slug),
       icon: ShapesIcon,
     });
   }
@@ -31,7 +32,7 @@ export function ProductDetailNav({ productTitle, category, subCategory, productS
   if (subCategory && category) {
     breadcrumbItems.push({
       labelKey: subCategory.name,
-      href: `/products?category=${encodeURIComponent(category.slug)}&sub_category=${encodeURIComponent(subCategory.slug)}`,
+      href: buildCategoryProductsPath(category.slug, subCategory.slug),
       icon: ShapesIcon,
     });
   }

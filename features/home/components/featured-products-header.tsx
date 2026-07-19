@@ -25,7 +25,7 @@ export function FeaturedProductsHeader({ trending = false }: { trending?: boolea
         href="/products"
         className="hidden sm:flex items-center gap-1 text-sm text-primary-400 hover:text-primary-300 transition-colors"
       >
-        {t('home.viewAll')}
+        {t('home.browseAllProducts')}
         <ArrowRight className="h-4 w-4 rtl:rotate-180" />
       </Link>
     </div>
