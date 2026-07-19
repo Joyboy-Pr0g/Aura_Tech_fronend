@@ -333,11 +333,12 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button
               onClick={handleAddToCart}
               disabled={!variantInStock || adding}
-              className="flex-1 gap-2"
+              size="lg"
+              className="w-full gap-2 sm:flex-1 sm:h-11 sm:px-6 sm:text-sm"
             >
               <ShoppingCart className="h-4 w-4" />
               {adding ? t('product.adding') : t('product.addToCart')}
@@ -348,7 +349,8 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                 variant="outline"
                 onClick={handleStockReminder}
                 disabled={reminding}
-                className="flex-1 gap-2"
+                size="lg"
+                className="w-full gap-2 sm:flex-1 sm:h-11 sm:px-6 sm:text-sm"
               >
                 <Bell className="h-4 w-4" />
                 {reminding ? t('product.reminding') : t('product.notifyWhenAvailable')}
@@ -357,7 +359,11 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
             <Button
               variant="outline"
               onClick={handleWishlist}
-              className={cn('gap-2', wishlisted && 'text-danger border-danger/30')}
+              size="lg"
+              className={cn(
+                'w-full gap-2 sm:w-auto sm:h-11 sm:px-6 sm:text-sm',
+                wishlisted && 'text-danger border-danger/30',
+              )}
             >
               <Heart className={cn('h-4 w-4', wishlisted && 'fill-danger')} />
               {t('product.wishlist')}
