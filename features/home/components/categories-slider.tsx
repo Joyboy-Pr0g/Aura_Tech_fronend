@@ -63,7 +63,7 @@ export function CategoriesSlider({ categories }: CategoriesSliderProps) {
         >
           {categories.map((category) => (
             <Link key={category.id}
-              href={buildCategoryProductsPath(category.slug)}
+              href={buildCategoryProductsPath(category.slug, null)}
               className='snap-start shrink-0 w-[200px] sm:w-[220px]'
             >
               <Card className={cn(

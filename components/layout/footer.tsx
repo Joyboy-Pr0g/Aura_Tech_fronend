@@ -15,6 +15,7 @@ import {
 
 const FOOTER_LINKS = {
   shop: [
+    { href: '/categories', labelKey: 'footer.categories' as const },
     { href: '/products', labelKey: 'footer.allProducts' as const },
     { href: '/products?category_id=laptops', labelKey: 'footer.laptops' as const },
     { href: '/products?category_id=smartphones', labelKey: 'footer.smartphones' as const },

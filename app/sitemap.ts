@@ -17,6 +17,7 @@ const STATIC_STOREFRONT_ROUTES: Array<{
 }> = [
   { path: '', priority: 1, changeFrequency: 'daily' },
   { path: '/products', priority: 0.9, changeFrequency: 'daily' },
+  { path: '/categories', priority: 0.85, changeFrequency: 'weekly' },
   { path: '/blogs', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/about', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/contact', priority: 0.6, changeFrequency: 'monthly' },

@@ -97,6 +97,14 @@ export const ar: Record<TranslationKey, string> = {
   'home.seo.ctaBody':
     'بصفتنا متجر الألعاب الفاخر في اليمن، يجعل {brand} من السهل تصفح المنتجات الرائجة، واكتشاف الوصول الجديد، والبقاء على اطلاع بإرشادات شراء عملية. تصفّح «الأكثر رواجاً» للاختيارات الشائعة، أو زُر كتالوج المنتجات الكامل، أو تواصل مع فريقنا للحصول على توصيات مخصصة لترقيتك القادمة.',
 
+  'categories.title': 'جميع الفئات',
+  'categories.badge': 'تصفح',
+  'categories.subtitle': 'استكشف كتالوج الألعاب حسب الفئة. اضغط على الفئة للتسوق، أو وسّع لعرض الفئات الفرعية.',
+  'categories.viewProducts': 'عرض المنتجات',
+  'categories.subcategories': 'الفئات الفرعية',
+  'categories.toggleSubcategories': 'عرض الفئات الفرعية لـ {name}',
+  'categories.empty': 'لا توجد فئات متاحة بعد.',
+
   // Products
   'products.title': 'المنتجات',
   'products.catalog': 'السجل',
@@ -140,6 +148,8 @@ export const ar: Record<TranslationKey, string> = {
   'product.noSpecs': 'لا توجد مواصفات.',
   'product.unavailable': 'غير متوفر حالياً',
   'product.availableCount': '{count} متوفر',
+  'product.stockForMain': 'المنتج الأساسي',
+  'product.stockForVariant': '{label}',
   'product.fromPrice': 'من {price}',
   'product.priceVaries': 'يختلف السعر حسب الخيار',
   'product.sku': 'رمز المنتج',
@@ -968,6 +978,7 @@ export const ar: Record<TranslationKey, string> = {
   'footer.company': 'الشركة',
   'footer.account': 'الحساب',
   'footer.allProducts': 'كل المنتجات',
+  'footer.categories': 'الفئات',
   'footer.laptops': 'أجهزة لابتوب',
   'footer.smartphones': 'هواتف ذكية',
   'footer.accessories': 'إكسسوارات',

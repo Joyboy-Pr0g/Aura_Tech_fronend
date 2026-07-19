@@ -38,10 +38,14 @@ export async function generateMetadata({ searchParams }: ProductsPageProps): Pro
   const activeCategory = subCategory ?? category;
 
   if (activeCategory) {
+    const metadataPath = subCategory && category
+      ? buildCategoryProductsPath(category.slug, subCategory.slug)
+      : buildCategoryProductsPath(activeCategory.slug, null);
+
     return getPageMetadataFromSettings({
       title: activeCategory.name,
       description: activeCategory.description ?? `Shop ${activeCategory.name} at AURA TECH.`,
-      path: buildCategoryProductsPath(activeCategory.slug),
+      path: metadataPath,
       image: activeCategory.image_url,
     });
   }

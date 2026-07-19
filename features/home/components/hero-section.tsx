@@ -50,7 +50,7 @@ export function HeroSection({ settings }: { settings: WebsiteSettings }) {
               {t('home.shopNow')}
               <ArrowRight className="h-4 w-4" />
             </ButtonLink>
-            <ButtonLink href="#shop-by-category" variant="outline" size="md">
+            <ButtonLink href="/categories" variant="outline" size="md">
               {t('home.browseCategories')}
             </ButtonLink>
           </div>

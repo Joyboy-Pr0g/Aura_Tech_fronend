@@ -40,7 +40,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <ProductDetailNav
           productTitle={product.title}
           productSlug={product.slug}
-          category={product.category ? { name: product.category.name, slug: product.category.slug } : undefined}
+          category={
+            product.category
+              ? { id: product.category.id, name: product.category.name, slug: product.category.slug }
+              : undefined
+          }
           subCategory={
             product.sub_category
               ? { name: product.sub_category.name, slug: product.sub_category.slug }

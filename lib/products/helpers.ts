@@ -10,15 +10,20 @@ export function getVariantAvailableStock(variant: ProductVariant): number {
   return Math.max(0, variant.stock_quantity - variant.reserved_quantity);
 }
 
-export function getAvailableStock(product: Product): number {
-  if (product.variants?.length) {
-    return product.variants.reduce(
-      (total, variant) => total + getVariantAvailableStock(variant),
-      0,
-    );
-  }
-
+export function getMainProductStock(product: Product): number {
   return Math.max(0, product.stock_quantity - product.reserved_quantity);
+}
+
+export function getAvailableStock(product: Product): number {
+  const mainStock = getMainProductStock(product);
+  if (!product.variants?.length) return mainStock;
+
+  const variantStock = product.variants.reduce(
+    (total, variant) => total + getVariantAvailableStock(variant),
+    0,
+  );
+
+  return mainStock + variantStock;
 }
 
 export function getDisplayPrice(product: Product, variant?: ProductVariant | null): number {
@@ -29,16 +34,15 @@ export function getDisplayPrice(product: Product, variant?: ProductVariant | nul
 }
 
 export function getDisplayStock(product: Product, variant?: ProductVariant | null): number {
-  if (product.variants?.length) {
-    if (variant) return getVariantAvailableStock(variant);
-    return getAvailableStock(product);
-  }
-
-  return Math.max(0, product.stock_quantity - product.reserved_quantity);
+  if (variant) return getVariantAvailableStock(variant);
+  return getMainProductStock(product);
 }
 
 export function isInStock(product: Product, variant?: ProductVariant | null): boolean {
-  return getDisplayStock(product, variant) > 0;
+  if (arguments.length >= 2) {
+    return getDisplayStock(product, variant) > 0;
+  }
+  return getAvailableStock(product) > 0;
 }
 
 export function getVariantLabel(variant: ProductVariant): string {

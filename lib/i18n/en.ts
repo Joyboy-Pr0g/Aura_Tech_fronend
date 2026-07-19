@@ -95,6 +95,14 @@ export const en = {
   'home.seo.ctaBody':
     'As Yemen\'s premium gaming store, {brand} makes it easy to shop trending products, discover new arrivals, and stay informed with practical buying guidance. Browse Trending Now for popular picks, visit our full product catalog, or contact our team if you need personalized recommendations for your next upgrade.',
 
+  'categories.title': 'All Categories',
+  'categories.badge': 'Browse',
+  'categories.subtitle': 'Explore our gaming catalog by category. Tap a category to shop, or expand to view subcategories.',
+  'categories.viewProducts': 'View products',
+  'categories.subcategories': 'Subcategories',
+  'categories.toggleSubcategories': 'Show subcategories for {name}',
+  'categories.empty': 'No categories available yet.',
+
   // Products catalog
   'products.title': 'Products',
   'products.catalog': 'Catalog',
@@ -138,6 +146,8 @@ export const en = {
   'product.noSpecs': 'No specifications listed.',
   'product.unavailable': 'Currently unavailable',
   'product.availableCount': '{count} available',
+  'product.stockForMain': 'main product',
+  'product.stockForVariant': '{label}',
   'product.fromPrice': 'From {price}',
   'product.priceVaries': 'Price varies by selected option',
   'product.sku': 'SKU',
@@ -967,6 +977,7 @@ export const en = {
   'footer.company': 'Company',
   'footer.account': 'Account',
   'footer.allProducts': 'All Products',
+  'footer.categories': 'Categories',
   'footer.laptops': 'Laptops',
   'footer.smartphones': 'Smartphones',
   'footer.accessories': 'Accessories',

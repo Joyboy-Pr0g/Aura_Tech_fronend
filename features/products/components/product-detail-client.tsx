@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/utils/format';
 import {
   getDisplayPrice,
   getDisplayStock,
+  getMainProductStock,
   getVariantLabel,
   getProductPriceRange,
   getVariantAvailableStock,
@@ -43,7 +44,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
 
   const variants = product.variants ?? [];
   const hasVariants = variants.length > 0;
-  const mainProductStock = getDisplayStock(product, null);
+  const mainProductStock = getMainProductStock(product);
   const priceRange = useMemo(() => getProductPriceRange(product), [product]);
 
   const [quantity, setQuantity] = useState(1);
@@ -66,6 +67,9 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
   const displayPrice = getDisplayPrice(product, selectedVariant);
   const available = getDisplayStock(product, selectedVariant);
   const variantInStock = isInStock(product, selectedVariant);
+  const stockScopeLabel = selectedVariant
+    ? t('product.stockForVariant', { label: getVariantLabel(selectedVariant) })
+    : t('product.stockForMain');
   const featureEntries = Object.entries(product.features ?? {});
 
   useEffect(() => {
@@ -74,6 +78,10 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     const nextImage = getDefaultDetailImage(product, variant);
     if (nextImage) setActiveImage(nextImage);
   }, [selectedVariantId, product, variants]);
+
+  useEffect(() => {
+    setQuantity((current) => Math.min(current, Math.max(available, 1)));
+  }, [available]);
 
   useEffect(() => {
     setWishlisted(product.is_wishlisted ?? false);
@@ -149,9 +157,17 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     { value: 'qa', label: t('product.tab.qa') },
   ];
 
-  const categoryHref = buildCategoryProductsPath(product.category.slug);
+  const categoryHref = buildCategoryProductsPath(
+    product.category.slug,
+    null,
+    product.category.id,
+  );
   const subCategoryHref = product.sub_category
-    ? buildCategoryProductsPath(product.category.slug, product.sub_category.slug)
+    ? buildCategoryProductsPath(
+        product.category.slug,
+        product.sub_category.slug,
+        product.category.id,
+      )
     : null;
 
   return (
@@ -222,7 +238,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
 
           <Badge variant={variantInStock ? 'success' : 'danger'} className="text-sm px-3 py-1">
             {variantInStock
-              ? `${t('common.inStock')} — ${t('product.availableCount', { count: available })}`
+              ? `${t('common.inStock')} — ${t('product.availableCount', { count: available })} (${stockScopeLabel})`
               : t('product.unavailable')}
           </Badge>
 
@@ -243,6 +259,9 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                   >
                     <span className="block font-medium">{t('product.mainProduct')}</span>
                     <span className="block text-xs mt-0.5 opacity-80">{formatCurrency(Number(product.price))}</span>
+                    <span className="block text-xs mt-0.5 text-white/45">
+                      {t('product.availableCount', { count: mainProductStock })}
+                    </span>
                   </button>
                 )}
                 {variants.map((variant) => {
@@ -270,9 +289,11 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                       {variantPrice !== Number(product.price) && (
                         <span className="block text-xs mt-0.5 opacity-80">{formatCurrency(variantPrice)}</span>
                       )}
-                      {outOfStock && (
-                        <span className="block text-xs mt-0.5 text-danger">{t('common.outOfStock')}</span>
-                      )}
+                      <span className={cn('block text-xs mt-0.5', outOfStock ? 'text-danger' : 'text-white/45')}>
+                        {outOfStock
+                          ? t('common.outOfStock')
+                          : t('product.availableCount', { count: variantStock })}
+                      </span>
                     </button>
                   );
                 })}

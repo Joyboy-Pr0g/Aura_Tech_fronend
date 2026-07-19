@@ -1,7 +1,18 @@
-export function buildCategoryProductsPath(categorySlug: string, subCategorySlug?: string | null): string {
-  const category = encodeURIComponent(categorySlug);
-  if (subCategorySlug?.trim()) {
-    return `/products/category/${category}/${encodeURIComponent(subCategorySlug.trim())}`;
+export function buildCategoryProductsPath(
+  categorySlug: string,
+  subCategorySlug?: string | null,
+): string {
+  const params = new URLSearchParams();
+  const slug = categorySlug?.trim();
+
+  if (slug) {
+    params.set('category', slug);
   }
-  return `/products/category/${category}`;
+
+  if (subCategorySlug?.trim()) {
+    params.set('sub_category', subCategorySlug.trim());
+  }
+
+  const query = params.toString();
+  return query ? `/products?${query}` : '/products';
 }

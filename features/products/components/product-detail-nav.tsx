@@ -8,7 +8,7 @@ import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 
 interface ProductDetailNavProps {
   productTitle: string;
-  category?: { name: string; slug: string };
+  category?: { id: string; name: string; slug: string };
   subCategory?: { name: string; slug: string };
   productSlug: string;
 }
@@ -24,7 +24,7 @@ export function ProductDetailNav({ productTitle, category, subCategory, productS
   if (category) {
     breadcrumbItems.push({
       labelKey: category.name,
-      href: buildCategoryProductsPath(category.slug),
+      href: buildCategoryProductsPath(category.slug, undefined, category.id),
       icon: ShapesIcon,
     });
   }
@@ -32,7 +32,7 @@ export function ProductDetailNav({ productTitle, category, subCategory, productS
   if (subCategory && category) {
     breadcrumbItems.push({
       labelKey: subCategory.name,
-      href: buildCategoryProductsPath(category.slug, subCategory.slug),
+      href: buildCategoryProductsPath(category.slug, subCategory.slug, category.id),
       icon: ShapesIcon,
     });
   }
