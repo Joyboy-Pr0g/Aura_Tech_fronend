@@ -974,12 +974,17 @@ export const ar: Record<TranslationKey, string> = {
   'footer.about': 'من نحن',
   'footer.blog': 'المدونة',
   'footer.contact': 'تواصل معنا',
+  'footer.privacy': 'سياسة الخصوصية',
+  'footer.terms': 'شروط الخدمة',
   'footer.signIn': 'تسجيل الدخول',
   'footer.register': 'إنشاء حساب',
   'footer.myAccount': 'حسابي',
   'footer.social': 'رابط اجتماعي',
   'footer.rights': 'جميع الحقوق محفوظة.',
   'footer.location': 'صنعاء، اليمن',
+
+  'legal.badge': 'قانوني',
+  'legal.lastUpdated': 'آخر تحديث',
 
   // About
   'about.badge': 'من نحن',

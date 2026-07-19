@@ -973,12 +973,17 @@ export const en = {
   'footer.about': 'About Us',
   'footer.blog': 'Blog',
   'footer.contact': 'Contact',
+  'footer.privacy': 'Privacy Policy',
+  'footer.terms': 'Terms of Service',
   'footer.signIn': 'Sign In',
   'footer.register': 'Register',
   'footer.myAccount': 'My Account',
   'footer.social': 'Social link',
   'footer.rights': 'All rights reserved.',
   'footer.location': "Sana'a, Yemen",
+
+  'legal.badge': 'Legal',
+  'legal.lastUpdated': 'Last updated',
 
   // About
   'about.badge': 'About us',

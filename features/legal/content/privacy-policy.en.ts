@@ -1,0 +1,211 @@
+import type { LegalDocument } from '../types';
+
+export const privacyPolicyEn: LegalDocument = {
+  id: 'privacy-policy',
+  locale: 'en',
+  title: 'Privacy Policy',
+  subtitle:
+    'How AURA TECH collects, uses, and protects your personal information when you shop for mobile gaming products at auratechplus.com.',
+  lastUpdated: 'March 19, 2026',
+  intro: [
+    'AURA TECH ("we," "us," or "our") operates https://www.auratechplus.com, a Yemen-focused mobile gaming e-commerce platform where customers browse digital and physical gaming products, place orders, and complete purchases through manual bank transfer. We are committed to handling your personal information responsibly, transparently, and in accordance with applicable privacy laws. This Privacy Policy explains what data we collect, why we collect it, how we store and protect it, and what choices you have regarding your information.',
+    'By creating an account, placing an order, subscribing to updates, or otherwise using our website and services, you acknowledge that you have read and understood this Privacy Policy. If you do not agree with our practices, please discontinue use of our platform. We encourage you to review this document periodically, as we may update it to reflect changes in our business, technology partners, or legal obligations.',
+  ],
+  sections: [
+    {
+      id: 'introduction',
+      title: 'Introduction',
+      paragraphs: [
+        'This Privacy Policy applies to all visitors, registered users, and customers who interact with AURA TECH through our website, customer support channels, email communications, and push notifications. It covers information collected online and information you provide when completing a purchase, verifying a bank transfer, or contacting our team.',
+        'AURA TECH is a mobile gaming e-commerce business serving customers primarily in Yemen and the broader region. Our platform is designed to make it easy to discover gaming titles, in-game credits, accessories, and related products while offering payment options suited to local banking practices, including manual bank transfer settlement.',
+        'We process personal data only where we have a lawful basis to do so—such as fulfilling a contract with you, complying with legal obligations, pursuing legitimate business interests like fraud prevention and service improvement, or obtaining your consent where required. This policy describes those processing activities in plain language so you can make informed decisions about sharing your information with us.',
+        'Throughout this document, "personal information" or "personal data" means any information that identifies you or could reasonably be linked to you, either alone or in combination with other data. Non-personal or aggregated information that cannot identify an individual is not covered by the rights described herein, though we still handle such data responsibly.',
+      ],
+    },
+    {
+      id: 'data-we-collect',
+      title: 'Information We Collect',
+      paragraphs: [
+        'We collect information that you provide directly, information generated through your use of our services, and limited information from trusted third-party providers that help us operate auratechplus.com securely and efficiently. The categories below describe the main types of data we may process.',
+        'When you register for an account, we typically collect your full name, email address, phone number, and account credentials. You may also provide a delivery address, preferred language, and communication preferences. If you contact customer support, we retain the content of your messages, attachments you send, and metadata such as the date and channel of contact.',
+        'When you place an order, we collect product selections, order totals, currency, order status, and payment-related details associated with manual bank transfer processing. This may include the bank name, transfer reference number, payer name as shown on the receipt, and proof-of-payment images or documents you upload for verification. We do not store full bank account numbers or online banking passwords on our servers.',
+        'We automatically collect certain technical information when you visit our website, including your IP address, browser type and version, device type, operating system, referring URLs, pages viewed, session duration, and general interaction events. This data helps us diagnose errors, improve performance, and understand how visitors navigate our mobile gaming catalog.',
+        'If you enable push notifications, we collect a device token and related identifiers necessary to deliver alerts about order updates, promotions, or account activity through Firebase Cloud Messaging. You can disable push notifications at any time through your device or browser settings.',
+      ],
+      bullets: [
+        'Identity and contact details: name, email address, phone number, and shipping or billing address where applicable.',
+        'Account information: username, hashed password, account preferences, and authentication session data.',
+        'Order and transaction data: cart contents, order history, payment method type (manual bank transfer), transfer references, and verification documents you submit.',
+        'Communications: support tickets, email correspondence, marketing subscription status, and notification preferences.',
+        'Technical and usage data: IP address, device identifiers, browser information, log files, and analytics events.',
+        'Media you provide: product review content, profile images if offered, and payment proof uploads processed via Cloudinary.',
+        'Marketing and analytics identifiers: cookie IDs, Google Analytics client IDs, and similar pseudonymous tracking data where enabled.',
+      ],
+    },
+    {
+      id: 'how-we-use-data',
+      title: 'How We Use Your Information',
+      paragraphs: [
+        'We use the personal information we collect to deliver the core e-commerce experience you expect from AURA TECH, to keep your account secure, and to communicate with you about orders and service updates. We do not sell your personal data to third parties for their independent marketing purposes.',
+        'Order fulfillment is our primary use of your information. We process your name, contact details, product selections, and payment verification data to confirm bank transfers, allocate digital goods or arrange physical delivery, update order status, and resolve disputes or chargeback inquiries. Without this information, we cannot complete purchases or provide after-sales support.',
+        'We use account and usage data to authenticate you, maintain session security, detect suspicious login attempts, and prevent fraudulent orders or abuse of promotional offers. Our infrastructure, hosted on Hetzner servers in Germany and protected by Cloudflare, relies on accurate logging and device signals to identify automated attacks and protect customer accounts.',
+        'We analyze aggregated and pseudonymous usage patterns to improve website navigation, optimize product discovery for mobile gamers, measure campaign effectiveness, and prioritize features our customers value most. Where analytics tools such as Google Analytics or Vercel Analytics are enabled, they help us understand traffic sources and page performance without necessarily identifying you by name in standard reporting views.',
+        'We send transactional emails through Brevo (formerly Sendinblue), our production email service provider, for purposes such as order confirmations, payment instructions, password resets, and security alerts. These messages are essential to service delivery and are not promotional in nature unless clearly labeled as such.',
+      ],
+      ordered: [
+        'Create and manage your AURA TECH account and authenticate your access to protected areas of the website.',
+        'Process orders, verify manual bank transfer payments, deliver digital products, and coordinate physical shipments where applicable.',
+        'Provide customer support, respond to inquiries, and investigate reported issues or policy violations.',
+        'Send service-related notifications, including email updates and optional Firebase push alerts about orders and account activity.',
+        'Maintain platform security, prevent fraud, enforce our Terms of Service, and comply with applicable legal requirements.',
+        'Conduct analytics and performance monitoring to improve our mobile gaming storefront, subject to your cookie and tracking preferences.',
+        'Deliver marketing communications only where permitted by law and in accordance with your opt-in or opt-out choices.',
+      ],
+    },
+    {
+      id: 'data-retention',
+      title: 'Data Retention',
+      paragraphs: [
+        'We retain personal information only for as long as necessary to fulfill the purposes described in this Privacy Policy, unless a longer retention period is required or permitted by law. Our retention practices balance your privacy with operational needs such as order recordkeeping, tax compliance, and dispute resolution.',
+        'Active customer accounts and associated order history are generally retained for the lifetime of the account while you continue to use AURA TECH. If your account remains inactive—meaning you have not logged in, placed an order, or otherwise interacted with our services—for a continuous period of two (2) years, we may delete or anonymize your personal data, except where we must retain certain records for legal, accounting, or fraud-prevention purposes.',
+        'You may request deletion of your personal information at any time by contacting privacy@auratechplus.com, subject to exceptions described in the "Your Privacy Rights" section. Upon a verified deletion request, we will remove or anonymize data that we are not legally obligated to retain, such as completed order records required for financial auditing or regulatory compliance.',
+        'Support correspondence, server logs, and security incident records may be retained for defined periods based on operational necessity. Backup systems hosted in Germany may retain copies for a limited window before automated purging. Anonymized or aggregated statistics derived from personal data may be kept indefinitely because they no longer identify individuals.',
+      ],
+      callout: {
+        title: 'Retention summary',
+        body: 'Inactive accounts: up to 2 years of inactivity before deletion or anonymization, unless legal obligations require longer retention. On-request deletion: honored where applicable law permits, typically within 30 days of verification, with confirmation sent to your registered email.',
+      },
+    },
+    {
+      id: 'data-security',
+      title: 'Data Security',
+      paragraphs: [
+        'Protecting your personal information is a priority for AURA TECH. We implement administrative, technical, and organizational measures designed to safeguard data against unauthorized access, alteration, disclosure, or destruction. While no online service can guarantee absolute security, we continuously review and improve our controls as threats and technologies evolve.',
+        'All communication between your browser and auratechplus.com is encrypted using HTTPS (TLS). Sensitive credentials such as passwords are stored using industry-standard hashing algorithms rather than plain text. Access to production systems and customer databases on our Hetzner infrastructure in Germany is restricted to authorized personnel who require such access to perform their job functions, and is protected by strong authentication and least-privilege policies.',
+        'Cloudflare sits in front of our website to provide distributed denial-of-service (DDoS) mitigation, web application firewall protections, bot management, and additional transport security features. Payment proof images and other user-uploaded media are processed and stored through Cloudinary with access controls appropriate to the sensitivity of the content.',
+        'We monitor systems for anomalous activity, maintain audit logs where feasible, and apply security patches to server software in a timely manner. Employee and contractor access to personal data is governed by confidentiality obligations. Third-party vendors that process data on our behalf are selected based on their security practices and contractual commitments to protect information.',
+        'In the unlikely event of a personal data breach that poses a risk to your rights and freedoms, we will notify affected individuals and relevant supervisory authorities without undue delay and, where feasible, within forty-eight (48) hours of becoming aware of the breach, in accordance with applicable data protection requirements. Notifications will describe the nature of the incident, likely consequences, and measures we are taking to address it.',
+      ],
+      bullets: [
+        'HTTPS/TLS encryption for data in transit between your device and our servers.',
+        'Encryption and hashing for sensitive data at rest, including password credentials.',
+        'Cloudflare protection against common web threats, malicious traffic, and availability attacks.',
+        'Role-based access controls and secure hosting on Hetzner data centers in Germany.',
+        'Regular review of vendor security practices for Brevo, Firebase, Cloudinary, and analytics providers.',
+        'Incident response procedures including 48-hour breach notification where required by law.',
+      ],
+    },
+    {
+      id: 'your-rights',
+      title: 'Your Privacy Rights',
+      paragraphs: [
+        'Depending on your location and applicable law, you may have certain rights regarding the personal information we hold about you. AURA TECH respects these rights and provides mechanisms for you to exercise them in a straightforward manner. We may need to verify your identity before fulfilling a request to prevent unauthorized disclosure or deletion of another person\'s data.',
+        'You have the right to access the personal information we process about you and to receive a copy in a commonly used, machine-readable format where technically feasible. You may request correction of inaccurate or incomplete data, such as an outdated phone number or delivery address, either through your account settings or by contacting our privacy team.',
+        'You may request deletion of your personal data when it is no longer necessary for the purposes for which it was collected, when you withdraw consent where consent was the legal basis, or when you object to processing and no overriding legitimate grounds exist. Certain exceptions apply—for example, we may retain order records required for tax or legal compliance even after an account is closed.',
+        'Where we rely on your consent for specific processing activities, such as optional marketing emails or non-essential analytics cookies, you may withdraw that consent at any time without affecting the lawfulness of processing based on consent before its withdrawal. You also have the right to opt out of direct marketing communications by using the unsubscribe link in any promotional email or by updating your preferences in your account.',
+        'Residents of the European Economic Area and other jurisdictions with comprehensive privacy laws may additionally have the right to restrict processing, object to certain processing based on legitimate interests, and lodge a complaint with a supervisory authority. We will respond to verified rights requests within the timelines required by applicable law, and in any case we aim to respond within seven (7) business days with either a fulfillment of your request or an explanation of any limitations.',
+      ],
+      bullets: [
+        'Access: request confirmation of whether we process your data and obtain a copy of the information we hold.',
+        'Download: receive your data in a portable format where technically feasible, such as order history exports.',
+        'Delete: request erasure of personal data subject to legal and contractual retention exceptions.',
+        'Opt out of marketing: unsubscribe from promotional emails and disable non-essential communications.',
+        'Update: correct inaccurate personal information through your account or by contacting support.',
+        'Restrict or object: limit certain processing activities where provided by applicable privacy regulations.',
+      ],
+    },
+    {
+      id: 'cookies-analytics',
+      title: 'Cookies and Analytics',
+      paragraphs: [
+        'Like most e-commerce websites, AURA TECH uses cookies and similar technologies—such as local storage, session tokens, and pixel tags—to enable core functionality, remember your preferences, and understand how visitors use our mobile gaming storefront. Cookies are small text files stored on your device that help us recognize your browser on return visits.',
+        'Strictly necessary cookies are required for the website to function properly. They support features such as maintaining your shopping cart, keeping you logged in, applying security measures through Cloudflare, and remembering your language selection. Because these cookies are essential, they cannot be disabled without impairing site functionality.',
+        'Analytics cookies help us measure traffic, identify popular product categories, and diagnose performance issues. We may use Google Analytics to collect pseudonymous information about page views, session duration, referral sources, and device categories. We may also use Vercel Analytics, when enabled, to monitor frontend performance and Core Web Vitals in aggregate form. These tools may set their own cookies or use similar identifiers subject to their respective privacy policies.',
+        'Functional and preference cookies remember choices you make, such as dismissing a banner or saving display settings, to provide a more personalized experience. Marketing cookies, if used, help us measure the effectiveness of advertising campaigns and may be set only with your consent where required by law.',
+        'You can manage cookie preferences through our cookie consent banner where available, through your browser settings, or by using industry opt-out tools provided by analytics vendors. Blocking certain cookies may limit personalization and prevent us from fully understanding how to improve the site, but core shopping and checkout features will remain available where technically possible.',
+      ],
+      bullets: [
+        'Essential cookies: authentication, cart persistence, security (Cloudflare), and session management.',
+        'Analytics cookies: Google Analytics for traffic and behavior insights; Vercel Analytics optionally for performance monitoring.',
+        'Preference cookies: language, region, and interface customization settings.',
+        'Marketing cookies: used only where applicable and subject to consent requirements in your jurisdiction.',
+      ],
+    },
+    {
+      id: 'third-party-services',
+      title: 'Third-Party Services',
+      paragraphs: [
+        'AURA TECH relies on carefully selected third-party service providers to host our infrastructure, deliver communications, process media, and analyze website performance. These partners act as data processors on our behalf and are contractually required to handle personal information only according to our instructions and applicable privacy laws.',
+        'Our primary application and database infrastructure is hosted on Hetzner Online GmbH servers located in Germany. Customer account data, order records, and operational logs reside in this environment. Hetzner provides physical data center security, network connectivity, and hardware maintenance under its own compliance frameworks.',
+        'Cloudflare provides content delivery, DNS, DDoS protection, and security services in front of auratechplus.com. Cloudflare may process IP addresses, request headers, and related technical data to filter malicious traffic and optimize delivery. Their processing occurs globally according to Cloudflare\'s infrastructure design.',
+        'We use Brevo as our production email delivery platform for transactional and, where permitted, marketing messages. Brevo processes recipient email addresses, message content, and delivery metadata. Please note that SendGrid is not used in our production environment; all production email flows through Brevo.',
+        'Firebase Cloud Messaging (Google) delivers push notifications to devices that opt in. Firebase processes device tokens and message payloads necessary for notification delivery. Product images, payment proof uploads, and other user media are stored and transformed through Cloudinary, which processes files on our behalf according to configured access rules.',
+        'Google Analytics and, when enabled, Vercel Analytics collect usage and performance data as described in the Cookies and Analytics section. Each third party maintains its own privacy policy governing how it handles information. We encourage you to review those policies if you wish to understand their independent practices. We do not authorize third parties to use your personal data for their own unrelated purposes.',
+      ],
+      bullets: [
+        'Hetzner (Germany): website and database hosting.',
+        'Cloudflare: CDN, DNS, security, and performance optimization.',
+        'Brevo: production email delivery (transactional and marketing where permitted).',
+        'Firebase: push notification delivery for opted-in devices.',
+        'Cloudinary: image and document storage for product media and user uploads.',
+        'Google Analytics: website usage analytics and reporting.',
+        'Vercel Analytics (optional): frontend performance and Web Vitals monitoring when enabled.',
+      ],
+    },
+    {
+      id: 'children-privacy',
+      title: 'Children\'s Privacy',
+      paragraphs: [
+        'AURA TECH\'s mobile gaming e-commerce platform is intended for adults aged eighteen (18) years and older. We do not knowingly collect, solicit, or market personal information from anyone under the age of 18. If you are under 18, you must not create an account, place an order, or provide any personal information through our website or services.',
+        'Mobile gaming products available on auratechplus.com may include titles rated for various age groups, but purchasing and account registration are restricted to adult users who can enter into binding contracts and complete manual bank transfer payments independently or with lawful guardian authorization documented through our support process.',
+        'If we learn that we have inadvertently collected personal information from a person under 18 without verified parental consent where required, we will take prompt steps to delete that information from our active systems and backups where reasonably practicable. Parents or guardians who believe their child has provided personal data to us should contact privacy@auratechplus.com so we can investigate and take appropriate action.',
+        'We encourage parents and guardians to supervise minors\' internet activity and to educate them about sharing personal information online. Our platform is not designed to appeal to children as a primary audience, and we do not knowingly engage in behavioral advertising directed at minors.',
+      ],
+    },
+    {
+      id: 'international-users',
+      title: 'International Users and Data Transfers',
+      paragraphs: [
+        'AURA TECH is based in Yemen and serves customers who access auratechplus.com from Yemen and other countries. Because our infrastructure and several service providers operate internationally, your personal information may be transferred to, stored in, or accessed from jurisdictions outside your country of residence, including Germany where our Hetzner servers are located.',
+        'When personal data is transferred from the European Economic Area, the United Kingdom, or other regions with data transfer restrictions, we implement appropriate safeguards such as Standard Contractual Clauses approved by relevant authorities, vendor data processing agreements, and technical measures including encryption in transit and at rest. These safeguards are designed to ensure that your information receives a level of protection consistent with applicable law.',
+        'If you are located in the European Economic Area or United Kingdom, the General Data Protection Regulation (GDPR) and UK GDPR may provide you with additional rights regarding access, rectification, erasure, restriction, portability, objection, and complaint to a supervisory authority. Our legal bases for processing typically include contract performance (fulfilling your orders), legitimate interests (security and service improvement), legal obligation, and consent where required.',
+        'Customers in Yemen should be aware that local data protection frameworks may differ from those in the European Union. Regardless of jurisdiction, we apply the practices described in this Privacy Policy uniformly and strive to honor privacy rights requests in good faith. Cross-border bank transfer verification may involve sharing limited payment details with financial institutions subject to their own privacy obligations.',
+        'By using our services, you acknowledge that your information may be processed in Germany and other countries where our providers maintain facilities. If you do not agree to such transfers, please discontinue use of our platform or contact us to discuss available alternatives, which may be limited by technical and legal constraints.',
+      ],
+    },
+    {
+      id: 'marketing-communications',
+      title: 'Marketing Communications',
+      paragraphs: [
+        'With your consent where required by law, AURA TECH may send promotional emails about new mobile gaming releases, limited-time offers, restocked products, and platform updates that we believe may interest you. Marketing messages are distinct from transactional communications such as order confirmations and payment instructions, which may be sent regardless of marketing opt-in status because they are necessary to provide our services.',
+        'We use Brevo to manage email lists, delivery, and unsubscribe processing for marketing campaigns. When you subscribe through our website, checkout flow, or account settings, we record your email address, subscription timestamp, and consent method where applicable. We do not purchase third-party email lists or send unsolicited marketing to addresses obtained without a lawful basis.',
+        'Every promotional email includes a clear unsubscribe link or instructions for opting out. You may also opt out at any time by emailing privacy@auratechplus.com or adjusting notification preferences in your account dashboard. Opt-out requests are processed promptly, typically within seven (7) business days, though you may receive a final transactional message confirming your preference change.',
+        'Push notifications about promotions or new products are sent only if you explicitly enable them on your device. Disabling push notifications in your operating system settings or through in-app controls will stop marketing pushes while allowing essential order alerts if separately configured.',
+        'Even after you opt out of marketing, we may still contact you with non-promotional messages related to your account, security, legal notices, or active orders. We may also continue to display contextual product information on our website based on your browsing activity, which is separate from direct marketing communications.',
+      ],
+    },
+    {
+      id: 'contact-privacy',
+      title: 'Contact Us About Privacy',
+      paragraphs: [
+        'If you have questions, concerns, or requests related to this Privacy Policy or our handling of your personal information, please contact our privacy team using the details below. We welcome inquiries from customers, regulators, and business partners and are committed to addressing privacy matters promptly and professionally.',
+        'When submitting a rights request—such as access, correction, deletion, or marketing opt-out—please include sufficient information for us to verify your identity and locate your account or order records. We may ask for additional confirmation to protect against fraudulent requests. Once verified, we aim to respond within seven (7) business days, though complex requests may require additional time as permitted by law.',
+        'For general customer support unrelated to privacy rights, you may also use our standard support channels available on auratechplus.com. Privacy-specific inquiries receive priority routing to ensure timely handling.',
+      ],
+      callout: {
+        title: 'Privacy contact',
+        body: 'Email: privacy@auratechplus.com — Website: https://www.auratechplus.com — Response time: we aim to acknowledge and respond to privacy inquiries within 7 business days.',
+      },
+    },
+    {
+      id: 'policy-changes',
+      title: 'Changes to This Privacy Policy',
+      paragraphs: [
+        'We may update this Privacy Policy from time to time to reflect changes in our business practices, technology stack, legal requirements, or regulatory guidance. When we make material changes, we will take reasonable steps to notify you, such as posting a prominent notice on auratechplus.com, updating the "Last Updated" date at the top of this document, or sending an email to registered users where appropriate.',
+        'Material changes may include new categories of data collected, new third-party processors, changes to retention periods, or modifications to your rights and how to exercise them. We encourage you to review this page periodically so you remain informed about how we protect your information.',
+        'Your continued use of AURA TECH after the effective date of an updated Privacy Policy constitutes acceptance of the revised terms, except where further consent is required by applicable law. If you disagree with a change, you may close your account and request deletion of your personal data subject to retention exceptions described above.',
+        'Previous versions of this Privacy Policy may be available upon request by contacting privacy@auratechplus.com. We maintain internal records of policy revisions to demonstrate compliance with transparency obligations under GDPR and other applicable frameworks.',
+      ],
+    },
+  ],
+};

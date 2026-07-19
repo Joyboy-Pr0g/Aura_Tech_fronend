@@ -24,6 +24,8 @@ const FOOTER_LINKS = {
     { href: '/about', labelKey: 'footer.about' as const },
     { href: '/blogs', labelKey: 'footer.blog' as const },
     { href: '/contact', labelKey: 'footer.contact' as const },
+    { href: '/privacy-policy', labelKey: 'footer.privacy' as const },
+    { href: '/terms-of-service', labelKey: 'footer.terms' as const },
   ],
   account: [
     { href: '/login', labelKey: 'footer.signIn' as const },
@@ -125,9 +127,23 @@ export function Footer({ settings }: FooterProps) {
         <Separator className="my-8" />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} {settings.title}. {t('footer.rights')}
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+            <p className="text-xs text-white/40">
+              © {new Date().getFullYear()}{' '}
+              <Link href="https://www.injazdev.com/" className="hover:text-primary-400 transition-colors">
+                Injaz Dev
+              </Link>
+              . {t('footer.rights')}
+            </p>
+            <div className="flex items-center gap-4 text-xs">
+              <Link href="/privacy-policy" className="text-white/40 hover:text-primary-400 transition-colors">
+                {t('footer.privacy')}
+              </Link>
+              <Link href="/terms-of-service" className="text-white/40 hover:text-primary-400 transition-colors">
+                {t('footer.terms')}
+              </Link>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             {socialLinks.map(({ href, icon: Icon, label }) => (
               <a

@@ -20,6 +20,8 @@ const STATIC_STOREFRONT_ROUTES: Array<{
   { path: '/blogs', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/about', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/contact', priority: 0.6, changeFrequency: 'monthly' },
+  { path: '/privacy-policy', priority: 0.4, changeFrequency: 'yearly' },
+  { path: '/terms-of-service', priority: 0.4, changeFrequency: 'yearly' },
 ];
 
 async function resolveSiteUrl(): Promise<string> {
