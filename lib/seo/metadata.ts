@@ -16,6 +16,53 @@ function absoluteAssetUrl(siteUrl: string, asset?: string | null): string {
   return `${siteUrl}${value.startsWith('/') ? value : `/${value}`}`;
 }
 
+// ← ADD THIS NEW FUNCTION FOR ORGANIZATION SCHEMA
+export function buildOrganizationSchema(settings: WebsiteSettings) {
+  const s = withWebsiteSettingsDefaults(settings);
+  const siteUrl = getSiteUrl(s);
+  const logoUrl = absoluteAssetUrl(siteUrl, s.header_logo_url);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: s.title || 'AURA TECH',
+    url: siteUrl,
+    logo: logoUrl,
+    image: logoUrl,
+    description: s.description || s.meta_description,
+    sameAs: [
+      s.facebook,
+      s.instagram,
+      s.tiktok,
+      s.twitter_handle ? `https://twitter.com/${s.twitter_handle}` : undefined,
+    ].filter(Boolean),
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Customer Support',
+      email: s.website_email || 'support@auratechplus.com',
+      telephone: s.website_phone || undefined,
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'YE',
+    },
+  };
+}
+
+// ← ADD THIS NEW FUNCTION
+export async function getRootOrganizationSchema() {
+  try {
+    const { getWebsiteSettingsServer } = await import(
+      '@/features/website-settings/services/website-settings-server'
+    );
+    const settings = await getWebsiteSettingsServer();
+    return buildOrganizationSchema(settings);
+  } catch {
+    const { FALLBACK_WEBSITE_SETTINGS } = await import('@/lib/website-settings/defaults');
+    return buildOrganizationSchema(FALLBACK_WEBSITE_SETTINGS);
+  }
+}
+
 export function buildSiteMetadata(
   settings: WebsiteSettings,
   overrides?: Metadata,
@@ -104,7 +151,9 @@ export function buildPageMetadata(
 
 export async function getRootMetadata(): Promise<Metadata> {
   try {
-    const { getWebsiteSettingsServer } = await import('@/features/website-settings/services/website-settings-server');
+    const { getWebsiteSettingsServer } = await import(
+      '@/features/website-settings/services/website-settings-server'
+    );
     const settings = await getWebsiteSettingsServer();
     return buildSiteMetadata(settings);
   } catch {
@@ -116,7 +165,9 @@ export async function getRootMetadata(): Promise<Metadata> {
 export async function getPageMetadataFromSettings(
   page: Parameters<typeof buildPageMetadata>[1],
 ): Promise<Metadata> {
-  const { getWebsiteSettingsServer } = await import('@/features/website-settings/services/website-settings-server');
+  const { getWebsiteSettingsServer } = await import(
+    '@/features/website-settings/services/website-settings-server'
+  );
   const settings = await getWebsiteSettingsServer();
   return buildPageMetadata(settings, page);
 }

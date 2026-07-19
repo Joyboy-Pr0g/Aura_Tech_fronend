@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/Toaster';
 import { LocaleProvider } from '@/lib/i18n/locale-provider';
 import { AppProviders } from '@/components/app-providers';
-import { getRootMetadata } from '@/lib/seo/metadata';
+import { getRootMetadata, getRootOrganizationSchema } from '@/lib/seo/metadata'; // ← Updated import
 import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -25,10 +25,22 @@ export async function generateViewport(): Promise<Viewport> {
   return { themeColor: '#00d9ff' };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // ← ADD THIS: Get organization schema
+  const organizationSchema = await getRootOrganizationSchema();
+
   return (
     <html lang="ar" dir="rtl" className="dark" suppressHydrationWarning>
       <head>
+        {/* ← ADD THIS: Organization Schema Script */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        
+        {/* ← Keep your existing script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var l=localStorage.getItem('aura-locale');if(l==='en'||l==='ar'){document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';}}catch(e){}})();`,
