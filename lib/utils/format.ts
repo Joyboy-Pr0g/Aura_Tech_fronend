@@ -1,5 +1,5 @@
 export function formatCurrency(amount: number | string): string {
-  return `${Number(amount).toLocaleString('ar-YE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ريال`;
+  return `${Number(amount).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
 }
 
 export function formatDate(dateStr: string): string {
