@@ -8,11 +8,12 @@ interface ProxyOptions {
   method?: string;
   requireAuth?: boolean;
   searchParams?: Record<string, string>;
+  revalidateOnSuccess?: () => void;
 }
 
 export async function proxyToBackend(
   request: NextRequest,
-  { path, method, requireAuth = true, searchParams }: ProxyOptions,
+  { path, method, requireAuth = true, searchParams, revalidateOnSuccess }: ProxyOptions,
 ): Promise<NextResponse> {
   try {
     const token = await getAuthToken();
@@ -52,6 +53,8 @@ export async function proxyToBackend(
       body,
       searchParams: queryParams,
     });
+
+    revalidateOnSuccess?.();
 
     return NextResponse.json(response);
   } catch (err) {

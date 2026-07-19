@@ -1,14 +1,32 @@
 import { ApiResponse } from '@/lib/types/api';
 import { ApiError } from '@/lib/errors/api-error';
 import { parseApiResponse } from '@/lib/api/parse-response';
+import { CACHE, type CacheProfile } from '@/lib/api/cache';
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? 'http://localhost:3000/api';
 
 export interface FetchBackendOptions extends Omit<RequestInit, 'body'> {
   token?: string;
   clientIp?: string;
+  cacheProfile?: CacheProfile;
+  revalidate?: number;
   body?: BodyInit | Record<string, unknown> | null;
   searchParams?: Record<string, string | number | boolean | undefined>;
+}
+
+function resolveFetchCache(
+  options: FetchBackendOptions,
+  tags?: string[],
+): Pick<RequestInit, 'cache' | 'next'> {
+  const tagList = tags ?? [];
+  const profile = options.cacheProfile ?? 'none';
+  const seconds = options.revalidate ?? CACHE[profile];
+
+  if (seconds <= 0) {
+    return { cache: 'no-store', next: { tags: tagList } };
+  }
+
+  return { next: { revalidate: seconds, tags: tagList } };
 }
 
 function buildUrl(path: string, searchParams?: FetchBackendOptions['searchParams']): string {
@@ -36,14 +54,16 @@ export async function fetchBackend<T = unknown>(
   options: FetchBackendOptions = {},
   tags?: string[],
 ): Promise<ApiResponse<T>> {
-  const { token, clientIp, body, searchParams, headers, ...rest } = options;
+  const { token, clientIp, body, searchParams, headers, cacheProfile, revalidate, ...rest } = options;
   const preparedBody = prepareBody(body);
   const isJsonBody = preparedBody !== undefined && !(body instanceof FormData);
+  const fetchCache = resolveFetchCache({ cacheProfile, revalidate }, tags);
 
   let response: Response;
   try {
     response = await fetch(buildUrl(path, searchParams), {
       ...rest,
+      ...fetchCache,
       body: preparedBody,
       headers: {
         Accept: 'application/json',
@@ -52,8 +72,6 @@ export async function fetchBackend<T = unknown>(
         ...(clientIp ? { 'X-Forwarded-For': clientIp } : {}),
         ...headers,
       },
-      cache: 'no-store',
-      next: { tags: tags ?? [] },
     });
   } catch {
     throw new ApiError('Service unavailable', 503);

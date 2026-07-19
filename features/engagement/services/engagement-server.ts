@@ -4,11 +4,18 @@ import { Product } from '@/lib/types/entities';
 import { ProductReview } from '@/features/engagement/types';
 
 export async function getWishlistServer(): Promise<Product[]> {
-  const res = await serverFetch<Product[]>(endpoints.engagement.wishlists,{},['wishlist']);
+  const res = await serverFetch<Product[]>(
+    endpoints.engagement.wishlists,
+    { cacheProfile: 'none' },
+    ['wishlist'],
+  );
   return res.data ?? [];
 }
 
 export async function getMyReviewsServer(): Promise<ProductReview[]> {
-  const res = await serverFetch<ProductReview[]>(endpoints.engagement.reviewsMy);
+  const res = await serverFetch<ProductReview[]>(
+    endpoints.engagement.reviewsMy,
+    { cacheProfile: 'none' },
+  );
   return res.data ?? [];
 }

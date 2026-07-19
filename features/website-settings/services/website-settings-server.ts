@@ -8,7 +8,11 @@ import {
 
 export async function getWebsiteSettingsServer(): Promise<WebsiteSettings> {
   try {
-    const res = await fetchBackend<WebsiteSettings>(endpoints.websiteSettings.root);
+    const res = await fetchBackend<WebsiteSettings>(
+      endpoints.websiteSettings.root,
+      { cacheProfile: 'static' },
+      ['website-settings'],
+    );
     if (!res.data) return FALLBACK_WEBSITE_SETTINGS;
     return withWebsiteSettingsDefaults(res.data);
   } catch {

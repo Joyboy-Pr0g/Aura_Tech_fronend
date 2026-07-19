@@ -10,6 +10,7 @@ export async function getMyOrdersServer(params?: {
   cursor?: string;
 }) {
   const res = await serverFetch<Order[]>('/orders/my', {
+    cacheProfile: 'none',
     searchParams: {
       limit: params?.limit ?? 10,
       cursor: params?.cursor,
@@ -26,7 +27,7 @@ export async function getMyOrdersServer(params?: {
 
 export async function getMyOrderServer(orderNumber: string): Promise<Order | null> {
   try {
-    const res = await serverFetch<Order>(`/orders/my/${orderNumber}`);
+    const res = await serverFetch<Order>(`/orders/my/${orderNumber}`, { cacheProfile: 'none' });
     return res.data ?? null;
   } catch {
     return null;
@@ -35,7 +36,10 @@ export async function getMyOrderServer(orderNumber: string): Promise<Order | nul
 
 export async function getMyOrderStatusHistoryServer(orderNumber: string): Promise<OrderStatusHistoryEntry[]> {
   try {
-    const res = await serverFetch<OrderStatusHistoryEntry[]>(endpoints.engagement.orderHistory(orderNumber));
+    const res = await serverFetch<OrderStatusHistoryEntry[]>(
+      endpoints.engagement.orderHistory(orderNumber),
+      { cacheProfile: 'none' },
+    );
     return res.data ?? [];
   } catch {
     return [];

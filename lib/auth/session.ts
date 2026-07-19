@@ -32,7 +32,10 @@ export const getSession = async (): Promise<User | null> => {
   if (!token) return null;
 
   try {
-    const response = await fetchBackend<User>(endpoints.auth.me, { token });
+    const response = await fetchBackend<User>(endpoints.auth.me, {
+      token,
+      cacheProfile: 'none',
+    });
     return response.data ?? null;
   } catch {
     return null;

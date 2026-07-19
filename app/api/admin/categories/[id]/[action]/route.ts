@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/api/route-handler';
 import { endpoints } from '@/lib/api/endpoints';
+import { revalidateCategoryStorefront } from '@/lib/storefront/revalidate';
 
 const ALLOWED_ACTIONS = ['activate', 'deactivate', 'soft-delete', 'restore', 'unassign-parent'] as const;
 
@@ -19,5 +20,6 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   return proxyToBackend(request, {
     path: endpoints.admin.categoryAction(id, action as (typeof ALLOWED_ACTIONS)[number]),
     method: 'POST',
+    revalidateOnSuccess: () => revalidateCategoryStorefront({ id }),
   });
 }

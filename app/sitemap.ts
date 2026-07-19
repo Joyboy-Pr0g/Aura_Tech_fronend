@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { CACHE } from '@/lib/api/cache';
 import { getBlogsServer } from '@/features/blogs/services/blogs-server';
 import { getProductsServer } from '@/features/products/services/products-server';
 import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
@@ -6,7 +7,7 @@ import { getSiteUrl } from '@/lib/seo/metadata';
 import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
 import { FALLBACK_WEBSITE_SETTINGS } from '@/lib/website-settings/defaults';
 
-export const revalidate = 3600;
+export const revalidate = CACHE.catalog;
 
 type ChangeFrequency = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
 
