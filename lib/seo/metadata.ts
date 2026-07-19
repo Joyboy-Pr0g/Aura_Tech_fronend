@@ -20,7 +20,8 @@ function absoluteAssetUrl(siteUrl: string, asset?: string | null): string {
 export function buildOrganizationSchema(settings: WebsiteSettings) {
   const s = withWebsiteSettingsDefaults(settings);
   const siteUrl = getSiteUrl(s);
-  const logoUrl = absoluteAssetUrl(siteUrl, s.header_logo_url);
+  const logoUrl = `${siteUrl}/favicon.ico`;
+  const ogImage = absoluteAssetUrl(siteUrl, s.og_image_url || s.header_logo_url);
 
   return {
     '@context': 'https://schema.org',
@@ -28,7 +29,7 @@ export function buildOrganizationSchema(settings: WebsiteSettings) {
     name: s.title || 'AURA TECH',
     url: siteUrl,
     logo: logoUrl,
-    image: logoUrl,
+    image: ogImage,
     description: s.description || s.meta_description,
     sameAs: [
       s.facebook,
@@ -73,8 +74,6 @@ export function buildSiteMetadata(
   const title = s.meta_title?.trim() || siteName;
   const description = s.meta_description?.trim() || s.description || '';
   const ogImage = absoluteAssetUrl(siteUrl, s.og_image_url || s.header_logo_url);
-  const favicon = s.favicon_url?.trim() || resolveWebsiteLogo(null);
-  const iconUrl = favicon.startsWith('http') ? favicon : absoluteAssetUrl(siteUrl, favicon);
   const keywords = s.meta_keywords
     ?.split(',')
     .map((item) => item.trim())
@@ -90,8 +89,9 @@ export function buildSiteMetadata(
     keywords: keywords?.length ? keywords : undefined,
     robots: s.robots ?? 'index, follow',
     icons: {
-      icon: iconUrl,
-      apple: iconUrl,
+      icon: [{ url: '/favicon.ico', sizes: 'any' }],
+      apple: [{ url: '/favicon.ico', sizes: '180x180' }],
+      shortcut: ['/favicon.ico'],
     },
     openGraph: {
       type: 'website',
