@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { StorefrontErrorPage } from '@/features/storefront/components/storefront-error-page';
 
-export default function Error({
+export default function StorefrontError({
   error,
   reset,
 }: {
@@ -11,8 +11,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    console.error('[storefront]', error);
   }, [error]);
 
-  return <StorefrontErrorPage error={error} reset={reset} fullPage />;
+  return <StorefrontErrorPage error={error} reset={reset} />;
 }

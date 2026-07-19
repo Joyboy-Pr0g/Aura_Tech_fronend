@@ -35,6 +35,15 @@ export const en = {
   'storefront.comingSoon.contact': 'Questions? Reach us at',
   'storefront.comingSoon.staffLogin': 'Staff login',
 
+  // Storefront errors
+  'storefront.error.badge': 'Temporary issue',
+  'storefront.error.title': "We couldn't load this page",
+  'storefront.error.description':
+    'Our store may be updating or briefly unavailable. Please try again in a moment — your cart and account are safe.',
+  'storefront.error.retry': 'Try again',
+  'storefront.error.goHome': 'Back to home',
+  'storefront.error.support': 'Still having trouble? Reach us on',
+
   // Notifications
   'notifications.title': 'Notifications',
   'notifications.subtitle': 'Your order updates and alerts',

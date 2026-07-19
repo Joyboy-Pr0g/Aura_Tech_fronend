@@ -37,6 +37,15 @@ export const ar: Record<TranslationKey, string> = {
   'storefront.comingSoon.contact': 'لديك أسئلة؟ تواصل معنا على',
   'storefront.comingSoon.staffLogin': 'دخول فريق العمل',
 
+  // Storefront errors
+  'storefront.error.badge': 'مشكلة مؤقتة',
+  'storefront.error.title': 'تعذّر تحميل هذه الصفحة',
+  'storefront.error.description':
+    'قد يكون المتجر قيد التحديث أو غير متاح مؤقتاً. حاول مرة أخرى بعد قليل — سلة مشترياتك وحسابك في أمان.',
+  'storefront.error.retry': 'حاول مرة أخرى',
+  'storefront.error.goHome': 'العودة للرئيسية',
+  'storefront.error.support': 'ما زالت المشكلة قائمة؟ تواصل معنا عبر',
+
   // Notifications
   'notifications.title': 'الإشعارات',
   'notifications.subtitle': 'تحديثات الطلبات والتنبيهات',
