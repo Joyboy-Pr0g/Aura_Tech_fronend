@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { Category } from '@/lib/types/entities';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils/cn';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { useDebounce } from '@/lib/hooks/use-debounce';
 import { buildProductsHref } from '@/lib/products/search-params';
-
 interface ProductsFilterSidebarProps {
   categories: Category[];
   brands: string[];
@@ -55,8 +55,27 @@ export function ProductsFilterSidebar({
   const maxPriceParam = searchParams.get('max_price') ?? '';
   const inStock = searchParams.get('in_stock') === 'true';
 
-  return (
-    <aside className={cn('space-y-6', className)}>
+  const [minPriceInput, setMinPriceInput] = useState(minPrice);
+  const [maxPriceInput, setMaxPriceInput] = useState(maxPriceParam);
+  const debouncedMinPrice = useDebounce(minPriceInput, 500);
+  const debouncedMaxPrice = useDebounce(maxPriceInput, 500);
+
+  useEffect(() => {
+    setMinPriceInput(minPrice);
+    setMaxPriceInput(maxPriceParam);
+  }, [minPrice, maxPriceParam]);
+
+  useEffect(() => {
+    if (debouncedMinPrice === minPrice) return;
+    updateParams({ min_price: debouncedMinPrice || null });
+  }, [debouncedMinPrice, minPrice, updateParams]);
+
+  useEffect(() => {
+    if (debouncedMaxPrice === maxPriceParam) return;
+    updateParams({ max_price: debouncedMaxPrice || null });
+  }, [debouncedMaxPrice, maxPriceParam, updateParams]);
+
+  return (    <aside className={cn('space-y-6', className)}>
       <div>
         <h3 className="text-sm font-semibold text-white mb-3">{t('filters.category')}</h3>
         <select
@@ -119,8 +138,8 @@ export function ProductsFilterSidebar({
             type="number"
             placeholder={t('filters.min')}
             min={0}
-            value={minPrice}
-            onChange={(e) => updateParams({ min_price: e.target.value || null })}
+            value={minPriceInput}
+            onChange={(e) => setMinPriceInput(e.target.value)}
             className="bg-dark-900"
           />
           <Input
@@ -128,11 +147,10 @@ export function ProductsFilterSidebar({
             placeholder={t('filters.max')}
             min={0}
             max={maxPrice}
-            value={maxPriceParam}
-            onChange={(e) => updateParams({ max_price: e.target.value || null })}
+            value={maxPriceInput}
+            onChange={(e) => setMaxPriceInput(e.target.value)}
             className="bg-dark-900"
-          />
-        </div>
+          />        </div>
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer">
