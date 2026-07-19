@@ -7,7 +7,7 @@ export function getSiteUrl(settings: WebsiteSettings): string {
   if (fromSettings) return fromSettings.replace(/\/$/, '');
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (fromEnv) return fromEnv.replace(/\/$/, '');
-  return 'http://localhost:3001';
+  return 'https://www.auratechplus.com';
 }
 
 function absoluteAssetUrl(siteUrl: string, asset?: string | null): string {

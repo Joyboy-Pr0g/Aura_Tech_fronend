@@ -1,0 +1,16 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Private / non-indexable areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /forget-password
+Disallow: /coming-soon
+Disallow: /api/
+Disallow: /cart
+Disallow: /checkout
+
+Sitemap: https://www.auratechplus.com/sitemap.xml
