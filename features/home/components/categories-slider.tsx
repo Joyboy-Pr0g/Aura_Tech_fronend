@@ -39,18 +39,18 @@ export function CategoriesSlider({ categories }: CategoriesSliderProps) {
             <Button
               variant='outline'
               size='icon'
-              onClick={() => scroll('left')}
+              onClick={() => scroll('right')}
               aria-label={t('common.previous')}
             >
-              <ChevronLeft className='w-4 h-4' />
+              <ChevronRight className='w-4 h-4' />
             </Button>
             <Button
               variant='outline'
               size='icon'
-              onClick={() => scroll('right')}
+              onClick={() => scroll('left')}
               aria-label={t('common.next')}
             >
-              <ChevronRight className='w-4 h-4' />
+              <ChevronLeft className='w-4 h-4' />
             </Button>
           </div>
 

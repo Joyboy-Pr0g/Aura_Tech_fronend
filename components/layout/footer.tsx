@@ -1,26 +1,20 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Container } from '@/components/ui/container';
 import { Separator } from '@/components/ui/separator';
 import { Facebook, Instagram, Mail, MessageCircle, Phone } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
-import { WebsiteSettings } from '@/lib/types/entities';
-import {
+import { Category, WebsiteSettings } from '@/lib/types/entities';
+import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';import {
   formatWhatsappLink,
   resolveWebsiteLogo,
   splitWebsiteTitle,
 } from '@/lib/website-settings/defaults';
 
 const FOOTER_LINKS = {
-  shop: [
-    { href: '/categories', labelKey: 'footer.categories' as const },
-    { href: '/products', labelKey: 'footer.allProducts' as const },
-    { href: '/products?category_id=laptops', labelKey: 'footer.laptops' as const },
-    { href: '/products?category_id=smartphones', labelKey: 'footer.smartphones' as const },
-    { href: '/products?category_id=accessories', labelKey: 'footer.accessories' as const },
-  ],
   company: [
     { href: '/about', labelKey: 'footer.about' as const },
     { href: '/blogs', labelKey: 'footer.blog' as const },
@@ -33,18 +27,22 @@ const FOOTER_LINKS = {
     { href: '/register', labelKey: 'footer.register' as const },
     { href: '/dashboard', labelKey: 'footer.myAccount' as const },
   ],
-};
-
+} as const;
 const SECTION_TITLE_KEYS = {
   shop: 'footer.shop',
   company: 'footer.company',
   account: 'footer.account',
 } as const;
 
-interface FooterProps {
-  settings: WebsiteSettings;
+interface FooterLink {
+  href: string;
+  label: string;
 }
 
+interface FooterProps {
+  settings: WebsiteSettings;
+  categories?: Category[];
+}
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
@@ -53,11 +51,37 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
-export function Footer({ settings }: FooterProps) {
+export function Footer({ settings, categories = [] }: FooterProps) {
   const { t } = useLocale();
   const logoSrc = resolveWebsiteLogo(settings.footer_logo_url);
   const { primary, secondary } = splitWebsiteTitle(settings.title);
 
+  const shopLinks = useMemo<FooterLink[]>(() => {
+    const rootCategories = categories.filter((category) => !category.parent_category_id);
+
+    return [
+      { href: '/categories', label: t('footer.categories') },
+      { href: '/products', label: t('footer.allProducts') },
+      ...rootCategories.map((category) => ({
+        href: buildCategoryProductsPath(category.slug, null, category.id),
+        label: category.name,
+      })),
+    ];
+  }, [categories, t]);
+
+  const footerSections = useMemo(
+    () => [
+      { key: 'shop' as const, links: shopLinks },
+      ...((Object.keys(FOOTER_LINKS) as Array<keyof typeof FOOTER_LINKS>).map((section) => ({
+        key: section,
+        links: FOOTER_LINKS[section].map((link) => ({
+          href: link.href,
+          label: t(link.labelKey),
+        })),
+      }))),
+    ],
+    [shopLinks, t],
+  );
   const socialLinks = [
     { href: settings.facebook, icon: Facebook, label: t('admin.websiteFacebook') },
     { href: settings.instagram, icon: Instagram, label: t('admin.websiteInstagram') },
@@ -104,26 +128,25 @@ export function Footer({ settings }: FooterProps) {
             </div>
           </div>
 
-          {(Object.keys(FOOTER_LINKS) as Array<keyof typeof FOOTER_LINKS>).map((section) => (
-            <div key={section}>
+          {footerSections.map((section) => (
+            <div key={section.key}>
               <h4 className="text-sm font-semibold text-white mb-4">
-                {t(SECTION_TITLE_KEYS[section])}
+                {t(SECTION_TITLE_KEYS[section.key])}
               </h4>
               <ul className="space-y-2">
-                {FOOTER_LINKS[section].map((link) => (
+                {section.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
                       className="text-sm text-white/50 hover:text-primary-400 transition-colors"
                     >
-                      {t(link.labelKey)}
+                      {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
+          ))}        </div>
 
         <Separator className="my-8" />
 

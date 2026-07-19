@@ -39,7 +39,7 @@ interface ProductDetailClientProps {
 
 export function ProductDetailClient({ product, isAuthenticated }: ProductDetailClientProps) {
   const router = useRouter();
-  const { t } = useLocale();
+  const { t, dir } = useLocale();
   const { setItemCount, openPanel } = useCartUiStore();
 
   const variants = product.variants ?? [];
@@ -87,6 +87,10 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     setWishlisted(product.is_wishlisted ?? false);
   }, [product.id, product.is_wishlisted]);
 
+  const handleVariantSelect = (variantId: string) => {
+    setSelectedVariantId((current) => (current === variantId ? '' : variantId));
+  };
+
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       router.push(`/login?redirect=/products/${product.slug}`);
@@ -96,8 +100,8 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     try {
       const cart = await addToCart({
         product_id: product.id,
-        variant_id: selectedVariantId || undefined,
         quantity,
+        ...(selectedVariantId ? { variant_id: selectedVariantId } : {}),
       });
       const count = cart.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
       setItemCount(count);
@@ -275,14 +279,14 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                     <button
                       key={variant.id}
                       type="button"
-                      disabled={outOfStock}
-                      onClick={() => setSelectedVariantId(variant.id)}
+                      disabled={outOfStock && !isSelected}
+                      onClick={() => handleVariantSelect(variant.id)}
                       className={cn(
                         'min-w-[5rem] px-3 py-2 rounded-lg border text-sm transition-colors text-start',
                         isSelected
                           ? 'border-primary-500 bg-primary-500/10 text-primary-400'
                           : 'border-white/10 text-white/70 hover:border-white/20',
-                        outOfStock && 'opacity-40 cursor-not-allowed',
+                        outOfStock && !isSelected && 'opacity-40 cursor-not-allowed',
                       )}
                     >
                       <span className="block font-medium">{label}</span>
@@ -371,41 +375,48 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
         </div>
       </div>
 
-      <Tabs.Root defaultValue="description" className="border-t border-white/10 pt-10">
-        <Tabs.List className="flex flex-wrap gap-1 border-b border-white/10 mb-6">
+      <Tabs.Root
+        dir={dir}
+        defaultValue="description"
+        className="w-full border-t border-white/10 pt-10 text-start"
+      >
+        <Tabs.List className="mb-6 flex w-full flex-wrap justify-start gap-1 border-b border-white/10">
           {tabs.map((tab) => (
             <Tabs.Trigger
               key={tab.value}
               value={tab.value}
-              className="px-4 py-2.5 text-sm font-medium text-white/50 data-[state=active]:text-primary-400 data-[state=active]:border-b-2 data-[state=active]:border-primary-400 -mb-px transition-colors"
+              className="-mb-px px-4 py-2.5 text-start text-sm font-medium text-white/50 transition-colors data-[state=active]:border-b-2 data-[state=active]:border-primary-400 data-[state=active]:text-primary-400"
             >
               {tab.label}
             </Tabs.Trigger>
           ))}
         </Tabs.List>
 
-        <Tabs.Content value="description" className="text-white/70 leading-relaxed max-w-3xl">
+        <Tabs.Content
+          value="description"
+          className="w-full max-w-3xl text-start leading-relaxed text-white/70 outline-none me-auto"
+        >
           {product.description}
         </Tabs.Content>
 
-        <Tabs.Content value="specs">
+        <Tabs.Content value="specs" className="w-full text-start outline-none">
           {featureEntries.length > 0 ? (
-            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl">
+            <dl className="grid w-full max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 me-auto">
               {featureEntries.map(([key, value]) => (
-                <div key={key} className="card-dark p-4">
+                <div key={key} className="card-dark p-4 text-start">
                   <dt className="text-xs uppercase tracking-wide text-white/40">
                     {key.replace(/_/g, ' ')}
                   </dt>
-                  <dd className="text-sm text-white mt-1">{value}</dd>
+                  <dd className="mt-1 text-sm text-white">{value}</dd>
                 </div>
               ))}
             </dl>
           ) : (
-            <p className="text-white/40 text-sm">{t('product.noSpecs')}</p>
+            <p className="text-sm text-white/40">{t('product.noSpecs')}</p>
           )}
         </Tabs.Content>
 
-        <Tabs.Content value="reviews">
+        <Tabs.Content value="reviews" className="w-full text-start outline-none">
           <ProductReviewsTab
             reviews={product.reviews}
             averageRating={product.average_rating}
@@ -413,7 +424,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
           />
         </Tabs.Content>
 
-        <Tabs.Content value="qa">
+        <Tabs.Content value="qa" className="w-full text-start outline-none">
           <ProductQaTab
             productId={product.id}
             isAuthenticated={isAuthenticated}

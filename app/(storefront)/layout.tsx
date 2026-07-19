@@ -5,6 +5,7 @@ import { VisitTracker } from '@/components/analytics/visit-tracker';
 import { PushTokenRegister } from '@/components/notifications/push-token-register';
 import { getSession } from '@/lib/auth/session';
 import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
+import { getCategoriesServer } from '@/features/categories/services/categories-server';
 import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +13,11 @@ export default async function StorefrontLayout({ children }: { children: React.R
     redirect('/coming-soon');
   }
 
-  const [user, settings] = await Promise.all([getSession(), getWebsiteSettingsServer()]);
+  const [user, settings, categories] = await Promise.all([
+    getSession(),
+    getWebsiteSettingsServer(),
+    getCategoriesServer(),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -20,7 +25,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
       <PushTokenRegister user={user} />
       <Header user={user} settings={settings} />
       <main className="flex-1">{children}</main>
-      <Footer settings={settings} />
+      <Footer settings={settings} categories={categories} />
     </div>
   );
 }
