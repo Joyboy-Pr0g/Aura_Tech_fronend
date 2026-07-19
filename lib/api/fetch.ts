@@ -1,10 +1,12 @@
 import { ApiResponse } from '@/lib/types/api';
 import { ApiError } from '@/lib/errors/api-error';
+import { parseApiResponse } from '@/lib/api/parse-response';
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? 'http://localhost:3000/api';
 
 export interface FetchBackendOptions extends Omit<RequestInit, 'body'> {
   token?: string;
+  clientIp?: string;
   body?: BodyInit | Record<string, unknown> | null;
   searchParams?: Record<string, string | number | boolean | undefined>;
 }
@@ -34,7 +36,7 @@ export async function fetchBackend<T = unknown>(
   options: FetchBackendOptions = {},
   tags?: string[],
 ): Promise<ApiResponse<T>> {
-  const { token, body, searchParams, headers, ...rest } = options;
+  const { token, clientIp, body, searchParams, headers, ...rest } = options;
   const preparedBody = prepareBody(body);
   const isJsonBody = preparedBody !== undefined && !(body instanceof FormData);
 
@@ -44,8 +46,10 @@ export async function fetchBackend<T = unknown>(
       ...rest,
       body: preparedBody,
       headers: {
+        Accept: 'application/json',
         ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(clientIp ? { 'X-Forwarded-For': clientIp } : {}),
         ...headers,
       },
       cache: 'no-store',
@@ -55,20 +59,5 @@ export async function fetchBackend<T = unknown>(
     throw new ApiError('Service unavailable', 503);
   }
 
-  let payload: ApiResponse<T>;
-  try {
-    payload = await response.json();
-  } catch {
-    throw new ApiError('Invalid response from server', response.status);
-  }
-
-  if (!response.ok || !payload.success) {
-    throw new ApiError(
-      payload.message ?? 'Request failed',
-      response.status,
-      payload.error?.details,
-    );
-  }
-
-  return payload;
+  return parseApiResponse<T>(response);
 }

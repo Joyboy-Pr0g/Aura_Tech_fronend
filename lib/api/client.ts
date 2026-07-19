@@ -1,5 +1,6 @@
 import { ApiResponse } from '@/lib/types/api';
-import { ApiError, getErrorMessage } from '@/lib/errors/api-error';
+import { getErrorMessage } from '@/lib/errors/api-error';
+import { parseApiResponse } from '@/lib/api/parse-response';
 
 export { getErrorMessage };
 
@@ -43,26 +44,12 @@ export async function clientFetch<T = unknown>(
     ...rest,
     body: preparedBody,
     headers: {
+      Accept: 'application/json',
       ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
       ...headers,
     },
     credentials: 'include',
   });
 
-  let payload: ApiResponse<T>;
-  try {
-    payload = await response.json();
-  } catch {
-    throw new ApiError('Invalid response from server', response.status);
-  }
-
-  if (!response.ok || !payload.success) {
-    throw new ApiError(
-      payload.message ?? 'Request failed',
-      response.status,
-      payload.error?.details,
-    );
-  }
-
-  return payload;
+  return parseApiResponse<T>(response);
 }

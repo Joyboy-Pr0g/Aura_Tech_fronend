@@ -40,9 +40,15 @@ export async function proxyToBackend(
 
     const queryParams = searchParams ?? Object.fromEntries(request.nextUrl.searchParams);
 
+    const clientIp =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? request.headers.get('x-real-ip')
+      ?? undefined;
+
     const response = await fetchBackend(path, {
       method: method ?? request.method,
       token,
+      clientIp,
       body,
       searchParams: queryParams,
     });
