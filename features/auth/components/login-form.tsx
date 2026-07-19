@@ -23,12 +23,15 @@ import { Alert } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingBag } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { TurnstileField } from '@/components/security/turnstile-field';
+import { useTurnstile } from '@/features/auth/hooks/use-turnstile';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useLocale();
   const [error, setError] = useState('');
+  const { enabled: turnstileEnabled, token: turnstileToken, setToken: setTurnstileToken, reset: resetTurnstile, registerReset, isReady: turnstileReady } = useTurnstile();
   const loginSchema = useMemo(() => createLoginSchema(t), [t]);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
@@ -37,8 +40,14 @@ export function LoginForm() {
 
   const onSubmit = async (values: LoginInput) => {
     setError('');
+
+    if (turnstileEnabled && !turnstileToken) {
+      setError(t('auth.turnstileRequired'));
+      return;
+    }
+
     try {
-      const user = await login(values);
+      const user = await login(values, turnstileToken);
       const redirect = searchParams.get('redirect');
       if (redirect) {
         router.push(redirect);
@@ -47,6 +56,7 @@ export function LoginForm() {
       }
       router.refresh();
     } catch (err) {
+      resetTurnstile();
       setError(getErrorMessage(err));
     }
   };
@@ -105,7 +115,13 @@ export function LoginForm() {
             )}
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full mt-2">
+          <TurnstileField
+            onTokenChange={setTurnstileToken}
+            onResetReady={registerReset}
+            className="pt-1"
+          />
+
+          <Button type="submit" disabled={isSubmitting || !turnstileReady} className="w-full mt-2">
             {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
           </Button>
         </form>

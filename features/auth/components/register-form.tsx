@@ -28,11 +28,14 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { TurnstileField } from '@/components/security/turnstile-field';
+import { useTurnstile } from '@/features/auth/hooks/use-turnstile';
 
 export function RegisterForm() {
   const router = useRouter();
   const { t } = useLocale();
   const [error, setError] = useState('');
+  const { enabled: turnstileEnabled, token: turnstileToken, setToken: setTurnstileToken, reset: resetTurnstile, registerReset, isReady: turnstileReady } = useTurnstile();
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [verificationModalOpen, setVerificationModalOpen] = useState(false);
   const [sendingVerification, setSendingVerification] = useState(false);
@@ -81,11 +84,17 @@ export function RegisterForm() {
       return;
     }
 
+    if (turnstileEnabled && !turnstileToken) {
+      setError(t('auth.turnstileRequired'));
+      return;
+    }
+
     try {
-      await registerUser(values);
+      await registerUser(values, turnstileToken);
       router.push('/dashboard');
       router.refresh();
     } catch (err) {
+      resetTurnstile();
       setError(getErrorMessage(err));
     }
   };
@@ -224,9 +233,15 @@ export function RegisterForm() {
               )}
             </div>
 
+            <TurnstileField
+              onTokenChange={setTurnstileToken}
+              onResetReady={registerReset}
+              className="pt-1"
+            />
+
             <Button
               type="submit"
-              disabled={form.formState.isSubmitting || !emailIsVerified}
+              disabled={form.formState.isSubmitting || !emailIsVerified || !turnstileReady}
               className="w-full mt-2"
             >
               {form.formState.isSubmitting ? t('auth.creating') : t('auth.createAccount')}

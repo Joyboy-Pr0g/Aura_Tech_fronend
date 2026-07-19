@@ -353,6 +353,8 @@ export const ar: Record<TranslationKey, string> = {
   'auth.verifyEmailDescription': 'أرسلنا رمزاً من 6 أرقام إلى {email}. أدخله أدناه لمتابعة التسجيل.',
   'auth.verifyEmailHint': 'تحقق من بريدك الإلكتروني قبل إنشاء الحساب.',
   'auth.emailNotVerified': 'يرجى التحقق من بريدك الإلكتروني قبل التسجيل.',
+  'auth.turnstileRequired': 'يرجى إكمال التحقق الأمني قبل المتابعة.',
+  'auth.turnstileFailed': 'فشل التحقق الأمني. يرجى المحاولة مرة أخرى.',
 
   // Settings
   'settings.title': 'إعدادات الحساب',

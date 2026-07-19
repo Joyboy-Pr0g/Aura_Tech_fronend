@@ -352,6 +352,8 @@ export const en = {
   'auth.verifyEmailDescription': 'We sent a 6-digit code to {email}. Enter it below to continue registration.',
   'auth.verifyEmailHint': 'Verify your email before creating your account.',
   'auth.emailNotVerified': 'Please verify your email before registering.',
+  'auth.turnstileRequired': 'Please complete the security check before continuing.',
+  'auth.turnstileFailed': 'Security verification failed. Please try again.',
 
   // Settings
   'settings.title': 'Account Settings',

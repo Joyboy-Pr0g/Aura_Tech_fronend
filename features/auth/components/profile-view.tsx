@@ -161,9 +161,9 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-xl font-semibold text-white truncate">{user.full_name}</h3>
-              <p className="text-sm text-white/60 truncate">{user.email}</p>
+              <p className="text-sm rtl:text-right text-white/60 truncate">{user.email}</p>
               {user.phone && (
-                <p className="text-sm text-white/50 truncate">{user.phone}</p>
+                <p className="text-sm rtl:text-right text-white/50 truncate">{user.phone}</p>
               )}
             </div>
             <div className="flex flex-wrap gap-2 sm:justify-end">
@@ -178,7 +178,7 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
         </div>
 
         <Tabs.Root defaultValue="profile" className="p-6">
-          <Tabs.List className="flex gap-1 border-b border-white/10 mb-6">
+          <Tabs.List className="flex rtl:flex-row-reverse gap-1 border-b border-white/10 mb-6">
             <Tabs.Trigger value="profile" className={tabTriggerClass}>
               <span className="inline-flex items-center gap-2">
                 <UserIcon className="h-4 w-4" />
@@ -196,18 +196,18 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
           <Tabs.Content value="profile" className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                <div className="flex items-center gap-2 text-white/40 mb-1">
+                <div className="flex rtl:flex-row-reverse items-center gap-2 text-white/40 mb-1">
                   <Shield className="h-4 w-4" />
                   <span className="text-xs uppercase tracking-wide">{t('settings.role')}</span>
                 </div>
-                <p className="text-white capitalize">{formatUserRole(user.role, t)}</p>
+                <p className="text-white capitalize rtl:text-right">{formatUserRole(user.role, t)}</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                <div className="flex items-center gap-2 text-white/40 mb-1">
+                <div className="flex rtl:flex-row-reverse items-center gap-2 text-white/40 mb-1">
                   <Shield className="h-4 w-4" />
                   <span className="text-xs uppercase tracking-wide">{t('settings.status')}</span>
                 </div>
-                <p className={cn('capitalize', user.status === 'active' ? 'text-success' : 'text-danger')}>
+                <p className={cn('capitalize rtl:text-right', user.status === 'active' ? 'text-success' : 'text-danger')}>
                   {formatUserStatus(user.status, t)}
                 </p>
               </div>
@@ -224,7 +224,7 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
                   <Input
                     id="full_name"
                     dir={dir}
-                    className={inputTextClass}
+                    className={cn(inputTextClass, 'rtl:text-right')}
                     error={!!profileForm.formState.errors.full_name}
                     {...profileForm.register('full_name')}
                   />
@@ -243,7 +243,7 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
                       id="phone"
                       type="tel"
                       dir={dir}
-                      className={cn('ps-10', inputTextClass)}
+                      className={cn('ps-10', inputTextClass, 'rtl:text-right')}
                       placeholder={t('settings.phonePlaceholder')}
                       error={!!profileForm.formState.errors.phone}
                       {...profileForm.register('phone')}
@@ -261,7 +261,7 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
                 <Label htmlFor="email">{t('settings.email')}</Label>
                 <div className="flex gap-2">
                   <div className="relative flex-1 min-w-0">
-                    <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+                    <Mail className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
                     <Input
                       id="email"
                       type="email"
@@ -307,14 +307,16 @@ export function ProfileView({ user: initialUser }: ProfileViewProps) {
                 )}
               </div>
 
-              <Button
-                type="submit"
-                disabled={profileForm.formState.isSubmitting || !profileForm.formState.isDirty || (emailChanged && !emailIsVerified)}
-              >
-                {profileForm.formState.isSubmitting
-                  ? t('settings.saving')
-                  : t('settings.saveProfile')}
-              </Button>
+              <div className="rtl:text-right">
+                <Button
+                  type="submit"
+                  disabled={profileForm.formState.isSubmitting || !profileForm.formState.isDirty || (emailChanged && !emailIsVerified)}
+                >
+                  {profileForm.formState.isSubmitting
+                    ? t('settings.saving')
+                    : t('settings.saveProfile')}
+                </Button>
+              </div>
             </form>
           </Tabs.Content>
 

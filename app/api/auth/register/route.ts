@@ -4,6 +4,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import { setAuthCookie } from '@/lib/auth/session';
 import { User } from '@/lib/types/entities';
 import { ApiError } from '@/lib/errors/api-error';
+import { assertTurnstileFromBody } from '@/lib/security/turnstile';
 
 interface AuthData {
   token: string;
@@ -12,10 +13,18 @@ interface AuthData {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
+    const turnstile = await assertTurnstileFromBody(body, request);
+    if (!turnstile.ok) {
+      return NextResponse.json(
+        { success: false, message: turnstile.message },
+        { status: 400 },
+      );
+    }
+
     const response = await fetchBackend<AuthData>(endpoints.auth.register, {
       method: 'POST',
-      body,
+      body: turnstile.payload,
     });
 
     const { token, user } = response.data!;

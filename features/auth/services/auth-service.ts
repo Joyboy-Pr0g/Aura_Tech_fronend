@@ -13,19 +13,19 @@ interface AuthResponse {
   user: User;
 }
 
-export async function login(data: LoginInput): Promise<User> {
+export async function login(data: LoginInput, turnstileToken?: string | null): Promise<User> {
   const res = await clientFetch<AuthResponse>('/api/auth/login', {
     method: 'POST',
-    body: data,
+    body: { ...data, turnstileToken },
   });
   return res.data!.user;
 }
 
-export async function register(data: RegisterInput): Promise<User> {
+export async function register(data: RegisterInput, turnstileToken?: string | null): Promise<User> {
   const { confirm_password: _confirmPassword, ...payload } = data;
   const res = await clientFetch<AuthResponse>('/api/auth/register', {
     method: 'POST',
-    body: payload,
+    body: { ...payload, turnstileToken },
   });
   return res.data!.user;
 }
