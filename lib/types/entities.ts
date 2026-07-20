@@ -355,6 +355,7 @@ export interface WebsiteSettings {
   default_locale: string | null;
   theme_color: string | null;
   robots: string | null;
+  sar_to_yer: number | string | null;
   created_at?: string;
   updated_at?: string;
 }

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Container } from '@/components/ui/container';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { Filter } from 'lucide-react';
+import { Reveal, SlideIn } from '@/lib/motion/reveal';
 
 const DESKTOP_FILTERS_QUERY = '(min-width: 1024px)';
 
@@ -70,7 +71,7 @@ export function ProductsCatalog({
   return (
     <div className="py-10 lg:py-14">
       <Container>
-        <div className="mb-10 space-y-6">
+        <Reveal className="mb-10 space-y-6">
           <div>
             <Badge variant="secondary" className="mb-3">{t('products.catalog')}</Badge>
             <h1 className="text-3xl lg:text-4xl font-bold text-white">{t('products.title')}</h1>
@@ -79,15 +80,15 @@ export function ProductsCatalog({
               {searchQuery && ` — "${searchQuery}"`}
             </p>
           </div>
-        </div>
+        </Reveal>
 
         <div className="flex gap-8">
           {isDesktop ? (
-            <div className="w-64 shrink-0 mt-12">
+            <SlideIn fromStart className="w-64 shrink-0 mt-12">
               <div className="sticky top-24 card-dark p-5">
                 {filterSidebar}
               </div>
-            </div>
+            </SlideIn>
           ) : null}
 
           <div className="flex-1 min-w-0">

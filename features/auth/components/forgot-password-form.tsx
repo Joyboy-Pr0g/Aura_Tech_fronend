@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { KeyRound, Mail } from 'lucide-react';
 import {
   createSendEmailVerificationSchema,
@@ -25,12 +25,22 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { TurnstileField } from '@/components/security/turnstile-field';
+import { useTurnstile } from '@/features/auth/hooks/use-turnstile';
 
 export function ForgotPasswordForm() {
   const { t } = useLocale();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const schema = useMemo(() => createSendEmailVerificationSchema(t), [t]);
+  const {
+    enabled: turnstileEnabled,
+    token: turnstileToken,
+    setToken: setTurnstileToken,
+    reset: resetTurnstile,
+    registerReset,
+    isReady: turnstileReady,
+  } = useTurnstile();
 
   const form = useForm<SendEmailVerificationInput>({
     resolver: zodResolver(schema),
@@ -39,10 +49,17 @@ export function ForgotPasswordForm() {
   const onSubmit = async (values: SendEmailVerificationInput) => {
     setError('');
     setSuccess(false);
+
+    if (turnstileEnabled && !turnstileToken) {
+      setError(t('auth.turnstileRequired'));
+      return;
+    }
+
     try {
-      await forgotPassword(values);
+      await forgotPassword(values, turnstileToken);
       setSuccess(true);
     } catch (err) {
+      resetTurnstile();
       setError(getErrorMessage(err));
     }
   };
@@ -86,7 +103,17 @@ export function ForgotPasswordForm() {
               )}
             </div>
 
-            <Button type="submit" disabled={form.formState.isSubmitting} className="w-full mt-2">
+            <TurnstileField
+              onTokenChange={setTurnstileToken}
+              onResetReady={registerReset}
+              className="pt-1"
+            />
+
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting || !turnstileReady}
+              className="w-full mt-2"
+            >
               {form.formState.isSubmitting
                 ? t('auth.sendingReset')
                 : t('auth.sendNewPassword')}

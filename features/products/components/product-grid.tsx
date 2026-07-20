@@ -1,7 +1,7 @@
 'use client';
 
 import { Product } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { getProductImageUrl, isInStock } from '@/lib/products/helpers';
 import { ProductImage } from '@/components/ui/product-image';
 import { Package } from 'lucide-react';
@@ -13,6 +13,7 @@ interface ProductGridProps {
 
 export function ProductGrid({ products }: ProductGridProps) {
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
 
   return (
     <div className="p-8 space-y-6">
@@ -48,7 +49,7 @@ export function ProductGrid({ products }: ProductGridProps) {
                   <p className="text-xs text-white/40">{p.brand} · {p.category?.name}</p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-primary-400">{formatCurrency(p.price)}</span>
+                  <span className="font-bold text-primary-400">{formatPrice(p.price)}</span>
                   <span className={`text-xs ${inStock ? 'text-success' : 'text-danger'}`}>
                     {inStock ? t('common.inStock') : t('common.outOfStock')}
                   </span>

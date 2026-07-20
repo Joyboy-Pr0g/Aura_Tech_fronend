@@ -31,6 +31,7 @@ export const FALLBACK_WEBSITE_SETTINGS: WebsiteSettings = {
   default_locale: 'ar_YE',
   theme_color: '#00d9ff',
   robots: 'index, follow',
+  sar_to_yer: null,
 };
 
 export function resolveWebsiteLogo(url?: string | null): string {

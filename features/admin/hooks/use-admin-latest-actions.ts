@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getAdminLatestActions } from '@/features/admin/services/admin-action-logs-client';
 import { AdminLatestAction } from '@/lib/types/entities';
 
-export function useAdminLatestActions(entityType: string, entityIds: string[]) {
+export function useAdminLatestActions(entityType: string, entityIds: string[], refreshKey = 0) {
   const [actions, setActions] = useState<Record<string, AdminLatestAction>>({});
   const idsKey = entityIds.join(',');
 
@@ -26,7 +26,7 @@ export function useAdminLatestActions(entityType: string, entityIds: string[]) {
     return () => {
       cancelled = true;
     };
-  }, [entityType, idsKey]);
+  }, [entityType, idsKey, refreshKey]);
 
   return actions;
 }

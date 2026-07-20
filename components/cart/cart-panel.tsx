@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCartUiStore } from '@/lib/stores/cart-ui-store';
 import { getCart, removeCartItem } from '@/features/cart/services/cart-client';
 import { Cart } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { getCartItemImageUrl } from '@/lib/cart/helpers';
 import { CartItemVariantMeta } from '@/features/cart/components/cart-item-variant-meta';
@@ -18,6 +18,7 @@ import { toast } from '@/components/ui/Toaster';
 export function CartPanel() {
   const { isPanelOpen, closePanel, setItemCount } = useCartUiStore();
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
@@ -108,7 +109,7 @@ export function CartPanel() {
                         </p>
                         <CartItemVariantMeta item={item} compact />
                         <p className="text-xs text-white/40">
-                          {item.quantity} × {formatCurrency(item.price_at_time)}
+                          {item.quantity} × {formatPrice(item.price_at_time)}
                         </p>
                       </div>
                       <button
@@ -128,7 +129,7 @@ export function CartPanel() {
                 <div className="flex items-center justify-between pt-4 border-t border-white/10">
                   <div>
                     <p className="text-xs text-white/40">{t('cart.subtotal')}</p>
-                    <p className="text-lg font-bold text-primary-400">{formatCurrency(subtotal)}</p>
+                    <p className="text-lg font-bold text-primary-400">{formatPrice(subtotal)}</p>
                   </div>
                   <div className="flex gap-2">
                     <Link

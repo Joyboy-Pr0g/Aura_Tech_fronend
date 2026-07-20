@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, Package, Eye } from 'lucide-react';
 import { Product } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { getProductImageUrl, isInStock } from '@/lib/products/helpers';
 import { addToWishlist, removeFromWishlist } from '@/features/engagement/services/engagement-client';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -31,6 +31,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const router = useRouter();
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const imageUrl = getProductImageUrl(product);
   const inStock = isInStock(product);
   const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
@@ -109,7 +110,7 @@ export function ProductCard({
             {product.title}
           </CardTitle>
           <div className="flex items-center justify-between pt-1">
-            <span className="font-bold text-primary-400">{formatCurrency(product.price)}</span>
+            <span className="font-bold text-primary-400">{formatPrice(product.price)}</span>
             <Badge variant={inStock ? 'success' : 'danger'}>
               {inStock ? t('common.inStock') : t('common.outOfStock')}
             </Badge>

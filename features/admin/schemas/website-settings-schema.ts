@@ -19,6 +19,14 @@ export function createWebsiteSettingsSchema(t: (key: string) => string) {
     default_locale: z.string().max(10).optional(),
     theme_color: z.string().max(20).optional(),
     robots: z.string().max(100).optional(),
+    sar_to_yer: z.preprocess(
+      (value) => {
+        if (value === '' || value === undefined || value === null) return null;
+        if (typeof value === 'number' && Number.isNaN(value)) return null;
+        return value;
+      },
+      z.union([z.number().positive().max(99999999.99), z.null()]).optional(),
+    ),
     remove_header_logo: z.boolean().optional(),
     remove_footer_logo: z.boolean().optional(),
     remove_favicon: z.boolean().optional(),

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import * as Tabs from '@radix-ui/react-tabs';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Product } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import {
   getDisplayPrice,
   getDisplayStock,
@@ -31,6 +32,8 @@ import { ProductImage } from '@/components/ui/product-image';
 import { toast } from '@/components/ui/Toaster';
 import { Minus, Plus, Heart, ShoppingCart, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { SlideIn, Stagger, staggerItemVariants, EASE_OUT_EXPO, Reveal } from '@/lib/motion/reveal';
+import { ProductImageZoom } from '@/features/products/components/product-image-zoom';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -40,6 +43,7 @@ interface ProductDetailClientProps {
 export function ProductDetailClient({ product, isAuthenticated }: ProductDetailClientProps) {
   const router = useRouter();
   const { t, dir } = useLocale();
+  const formatPrice = useFormatPrice();
   const { setItemCount, openPanel } = useCartUiStore();
 
   const variants = product.variants ?? [];
@@ -174,19 +178,24 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
       )
     : null;
 
+  const galleryFromStart = dir !== 'rtl';
+
   return (
     <div className="space-y-10 lg:space-y-14">
       <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
-        <div className="space-y-4">
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-dark-800 border border-white/10">
-            <ProductImage src={activeImage} alt={product.title} fill priority sizes="(max-width: 1024px) 100vw, 50vw" />
-          </div>
+        <SlideIn fromStart={galleryFromStart} immediate className="space-y-4">
+          {activeImage ? (
+            <ProductImageZoom src={activeImage} alt={product.title} priority />
+          ) : (
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-dark-800 border border-white/10" />
+          )}
           {galleryImages.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <Stagger immediate className="flex gap-2 overflow-x-auto pb-1">
               {galleryImages.map((img) => (
-                <button
+                <motion.button
                   key={img.public_id}
                   type="button"
+                  variants={staggerItemVariants}
                   onClick={() => setActiveImage(img.url)}
                   aria-label={product.title}
                   className={cn(
@@ -196,13 +205,13 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                   )}
                 >
                   <ProductImage src={img.url} alt="" fill className="object-cover" sizes="80px" />
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </Stagger>
           )}
-        </div>
+        </SlideIn>
 
-        <div className="space-y-6">
+        <SlideIn fromStart={!galleryFromStart} delay={0.1} immediate className="space-y-6">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <Link href={categoryHref}>
@@ -230,10 +239,10 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
           </div>
 
           <div className="space-y-1">
-            <p className="text-3xl font-bold text-primary-400">{formatCurrency(displayPrice)}</p>
+            <p className="text-3xl font-bold text-primary-400">{formatPrice(displayPrice)}</p>
             {priceRange && (
               <p className="text-sm text-white/40">
-                {t('product.fromPrice', { price: formatCurrency(priceRange.min) })}
+                {t('product.fromPrice', { price: formatPrice(priceRange.min) })}
                 {' — '}
                 {t('product.priceVaries')}
               </p>
@@ -262,7 +271,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                     )}
                   >
                     <span className="block font-medium">{t('product.mainProduct')}</span>
-                    <span className="block text-xs mt-0.5 opacity-80">{formatCurrency(Number(product.price))}</span>
+                    <span className="block text-xs mt-0.5 opacity-80">{formatPrice(Number(product.price))}</span>
                     <span className="block text-xs mt-0.5 text-white/45">
                       {t('product.availableCount', { count: mainProductStock })}
                     </span>
@@ -291,7 +300,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                     >
                       <span className="block font-medium">{label}</span>
                       {variantPrice !== Number(product.price) && (
-                        <span className="block text-xs mt-0.5 opacity-80">{formatCurrency(variantPrice)}</span>
+                        <span className="block text-xs mt-0.5 opacity-80">{formatPrice(variantPrice)}</span>
                       )}
                       <span className={cn('block text-xs mt-0.5', outOfStock ? 'text-danger' : 'text-white/45')}>
                         {outOfStock
@@ -378,9 +387,10 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
               {t('product.signInPurchase')}
             </p>
           )}
-        </div>
+        </SlideIn>
       </div>
 
+      <Reveal delay={0.05}>
       <Tabs.Root
         dir={dir}
         defaultValue="description"
@@ -402,42 +412,73 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
           value="description"
           className="w-full max-w-3xl text-start leading-relaxed text-white/70 outline-none me-auto"
         >
-          {product.description}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+          >
+            {product.description}
+          </motion.div>
         </Tabs.Content>
 
         <Tabs.Content value="specs" className="w-full text-start outline-none">
-          {featureEntries.length > 0 ? (
-            <dl className="grid w-full max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 me-auto">
-              {featureEntries.map(([key, value]) => (
-                <div key={key} className="card-dark p-4 text-start">
-                  <dt className="text-xs uppercase tracking-wide text-white/40">
-                    {key.replace(/_/g, ' ')}
-                  </dt>
-                  <dd className="mt-1 text-sm text-white">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : (
-            <p className="text-sm text-white/40">{t('product.noSpecs')}</p>
-          )}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+          >
+            {featureEntries.length > 0 ? (
+              <dl className="grid w-full max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 me-auto">
+                {featureEntries.map(([key, value], index) => (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.04, duration: 0.35, ease: EASE_OUT_EXPO }}
+                    className="card-dark p-4 text-start"
+                  >
+                    <dt className="text-xs uppercase tracking-wide text-white/40">
+                      {key.replace(/_/g, ' ')}
+                    </dt>
+                    <dd className="mt-1 text-sm text-white">{value}</dd>
+                  </motion.div>
+                ))}
+              </dl>
+            ) : (
+              <p className="text-sm text-white/40">{t('product.noSpecs')}</p>
+            )}
+          </motion.div>
         </Tabs.Content>
 
         <Tabs.Content value="reviews" className="w-full text-start outline-none">
-          <ProductReviewsTab
-            reviews={product.reviews}
-            averageRating={product.average_rating}
-            ratingCount={product.rating_count}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+          >
+            <ProductReviewsTab
+              reviews={product.reviews}
+              averageRating={product.average_rating}
+              ratingCount={product.rating_count}
+            />
+          </motion.div>
         </Tabs.Content>
 
         <Tabs.Content value="qa" className="w-full text-start outline-none">
-          <ProductQaTab
-            productId={product.id}
-            isAuthenticated={isAuthenticated}
-            questions={product.questions}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+          >
+            <ProductQaTab
+              productId={product.id}
+              isAuthenticated={isAuthenticated}
+              questions={product.questions}
+            />
+          </motion.div>
         </Tabs.Content>
       </Tabs.Root>
+      </Reveal>
     </div>
   );
 }

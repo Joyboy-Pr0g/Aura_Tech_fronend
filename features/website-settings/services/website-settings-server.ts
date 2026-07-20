@@ -1,12 +1,13 @@
 import { fetchBackend } from '@/lib/api/fetch';
 import { endpoints } from '@/lib/api/endpoints';
 import { WebsiteSettings } from '@/lib/types/entities';
+import { cache } from 'react';
 import {
   FALLBACK_WEBSITE_SETTINGS,
   withWebsiteSettingsDefaults,
 } from '@/lib/website-settings/defaults';
 
-export async function getWebsiteSettingsServer(): Promise<WebsiteSettings> {
+export const getWebsiteSettingsServer = cache(async (): Promise<WebsiteSettings> => {
   try {
     const res = await fetchBackend<WebsiteSettings>(
       endpoints.websiteSettings.root,
@@ -18,4 +19,4 @@ export async function getWebsiteSettingsServer(): Promise<WebsiteSettings> {
   } catch {
     return FALLBACK_WEBSITE_SETTINGS;
   }
-}
+});

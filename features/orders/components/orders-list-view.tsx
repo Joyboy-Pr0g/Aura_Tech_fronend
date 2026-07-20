@@ -7,7 +7,8 @@ import { Package, Search, Star } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Order, OrderStatus } from '@/lib/types/entities';
 import { CursorPage } from '@/lib/types/api';
-import { formatCurrency, formatDate, ORDER_STATUS_COLORS } from '@/lib/utils/format';
+import { formatDate, ORDER_STATUS_COLORS } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { getProductImageUrl } from '@/lib/products/helpers';
 import { ProductImage } from '@/components/ui/product-image';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ export function OrdersListView({
   initialStatus,
 }: OrdersListViewProps) {
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -172,7 +174,7 @@ export function OrdersListView({
                   <div className="flex items-center gap-2.5 shrink-0">
                     <div className="text-end">
                       <p className="text-[10px] uppercase tracking-wide text-white/35">{t('order.total')}</p>
-                      <p className="text-sm font-bold text-primary-400">{formatCurrency(order.total)}</p>
+                      <p className="text-sm font-bold text-primary-400">{formatPrice(order.total)}</p>
                     </div>
                     <Link
                       href={`/dashboard/orders/${order.order_number}`}

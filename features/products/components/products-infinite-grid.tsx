@@ -8,6 +8,7 @@ import { clientFetch } from '@/lib/api/client';
 import { SortOption } from '@/features/products/components/products-grid';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { getProducts } from '@/features/products/services/products-client';
+import { StaggerItem } from '@/lib/motion/reveal';
 
 interface ProductsInfiniteGridProps {
   initialProducts: Product[];
@@ -94,16 +95,20 @@ export function ProductsInfiniteGrid({
 
   if (sorted.length === 0) {
     return (
-      <Card className="p-12 text-center col-span-full">
-        <p className="text-white/50">{t('products.noResults')}</p>
-      </Card>
+      <StaggerItem className="col-span-full">
+        <Card className="p-12 text-center">
+          <p className="text-white/50">{t('products.noResults')}</p>
+        </Card>
+      </StaggerItem>
     );
   }
 
   return (
     <>
       {sorted.map((product) => (
-        <ProductCard key={product.id} product={product} showWishlist isAuthenticated={isAuthenticated} />
+        <StaggerItem key={product.id}>
+          <ProductCard product={product} showWishlist isAuthenticated={isAuthenticated} />
+        </StaggerItem>
       ))}
       {hasMore && (
         <div ref={sentinelRef} className="col-span-full flex justify-center py-8">

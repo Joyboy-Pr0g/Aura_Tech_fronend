@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
 
 const variants = {
@@ -47,9 +48,17 @@ export interface ButtonLinkProps extends React.ComponentPropsWithoutRef<typeof L
   size?: keyof typeof sizes;
 }
 
-export function ButtonLink({ className, variant = 'primary', size = 'md', ...props }: ButtonLinkProps) {
+export function ButtonLink({ href, className, variant = 'primary', size = 'md', ...props }: ButtonLinkProps) {
+  const router = useRouter();
   return (
     <Link
+      href={href}
+      onMouseEnter={() => {
+        if (typeof href === 'string') {
+          console.log("hover");
+          router.prefetch(href);
+        }
+      }}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50',

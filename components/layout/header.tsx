@@ -17,6 +17,7 @@ import { useCartUiStore } from '@/lib/stores/cart-ui-store';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { getCart } from '@/features/cart/services/cart-client';
 import { resolveWebsiteLogo, splitWebsiteTitle } from '@/lib/website-settings/defaults';
+import { CurrencyToggle } from '@/components/layout/currency-toggle';
 
 interface HeaderProps {
   user?: UserType | null;
@@ -32,7 +33,7 @@ export function Header({ user, settings }: HeaderProps) {
   const { primary, secondary } = splitWebsiteTitle(settings.title);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || user.role !== 'customer') {
       setItemCount(0);
       return;
     }
@@ -69,6 +70,7 @@ export function Header({ user, settings }: HeaderProps) {
 
             {/* Actions — end side (left in RTL) */}
             <div className="flex items-center gap-2 ms-auto">
+              <CurrencyToggle className="hidden sm:flex" />
               <button
                 type="button"
                 onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
@@ -122,6 +124,9 @@ export function Header({ user, settings }: HeaderProps) {
           {/* Mobile search */}
           <div className={cn('md:hidden pb-3', !mobileOpen && 'hidden')}>
             <HeaderSearch />
+            <div className="flex items-center gap-2 mt-3 sm:hidden">
+              <CurrencyToggle className="flex-1 justify-center" />
+            </div>
             {!user && (
               <div className="flex gap-2 mt-3 sm:hidden">
                 <ButtonLink href="/login" variant="outline" className="flex-1">

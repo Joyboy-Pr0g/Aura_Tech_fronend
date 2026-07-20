@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ChevronLeft, Layers } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Category } from '@/lib/types/entities';
 import { Container } from '@/components/ui/container';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { ProductImage } from '@/components/ui/product-image';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 import { cn } from '@/lib/utils/cn';
+import { Reveal, StaggerItem, EASE_OUT_EXPO } from '@/lib/motion/reveal';
 
 interface CategoriesCatalogProps {
   categories: Category[];
@@ -28,9 +30,11 @@ export function CategoriesCatalog({ categories }: CategoriesCatalogProps) {
 
   if (roots.length === 0) {
     return (
-      <p className="rounded-2xl border border-white/10 bg-dark-900/60 px-6 py-10 text-center text-sm text-white/50">
-        {t('categories.empty')}
-      </p>
+      <Reveal>
+        <p className="rounded-2xl border border-white/10 bg-dark-900/60 px-6 py-10 text-center text-sm text-white/50">
+          {t('categories.empty')}
+        </p>
+      </Reveal>
     );
   }
 
@@ -43,99 +47,116 @@ export function CategoriesCatalog({ categories }: CategoriesCatalogProps) {
         const parentHref = buildCategoryProductsPath(category.slug, null, category.id);
 
         return (
-          <Card key={category.id} className="flex h-full flex-col overflow-hidden border-white/10">
-            <Link
-              href={parentHref}
-              className="group block transition-colors hover:bg-white/[0.03]"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-dark-800">
-                {category.image_url ? (
-                  <ProductImage
-                    src={category.image_url}
-                    alt={category.name}
-                    fill
-                    className="transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Layers className="h-10 w-10 text-primary-400/40" />
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4">
-                <h2 className="line-clamp-2 text-base font-semibold text-white transition-colors group-hover:text-primary-400 sm:text-lg">
-                  {category.name}
-                </h2>
-                {category.description ? (
-                  <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-white/50">
-                    {category.description}
-                  </p>
-                ) : null}
-                <span className="mt-2 inline-flex text-xs font-medium text-primary-400">
-                  {t('categories.viewProducts')}
-                </span>
-              </div>
-            </Link>
-
-            {hasChildren ? (
-              <>
-                <div className="mt-auto border-t border-white/5 px-3 py-2 sm:px-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 w-full justify-between px-2 text-white/70 hover:text-white"
-                    aria-expanded={isExpanded}
-                    aria-label={t('categories.toggleSubcategories', { name: category.name })}
-                    onClick={() => setExpandedId(isExpanded ? null : category.id)}
-                  >
-                    <span className="text-xs font-medium uppercase tracking-wide">
-                      {t('categories.subcategories')}
-                    </span>
-                    <ChevronDown
-                      className={cn('h-4 w-4 transition-transform duration-300', isExpanded && 'rotate-180')}
+          <StaggerItem key={category.id}>
+            <Card className="flex h-full flex-col overflow-hidden border-white/10 transition-colors hover:border-primary-500/25">
+              <Link
+                href={parentHref}
+                className="group block transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-dark-800">
+                  {category.image_url ? (
+                    <ProductImage
+                      src={category.image_url}
+                      alt={category.name}
+                      fill
+                      className="transition-transform duration-500 group-hover:scale-105"
                     />
-                  </Button>
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Layers className="h-10 w-10 text-primary-400/40" />
+                    </div>
+                  )}
                 </div>
 
-                {isExpanded ? (
-                  <div className="border-t border-white/5 bg-dark-950/40 px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
-                    <div className="space-y-2">
-                      {children.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={buildCategoryProductsPath(category.slug, child.slug, category.id)}
-                          className="group flex items-center gap-3 rounded-xl border border-white/5 bg-dark-900/50 p-2.5 transition-colors hover:border-primary-500/30 hover:bg-primary-500/5"
-                        >
-                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-dark-800">
-                            {child.image_url ? (
-                              <ProductImage
-                                src={child.image_url}
-                                alt={child.name}
-                                fill
-                                className="transition-transform duration-500 group-hover:scale-105"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center">
-                                <Layers className="h-4 w-4 text-primary-400/40" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="truncate text-sm font-medium text-white group-hover:text-primary-400">
-                              {child.name}
-                            </h3>
-                          </div>
-                          <ChevronLeft className="h-4 w-4 shrink-0 text-white/25 rtl:rotate-180 group-hover:text-primary-400" />
-                        </Link>
-                      ))}
-                    </div>
+                <div className="p-4">
+                  <h2 className="line-clamp-2 text-base font-semibold text-white transition-colors group-hover:text-primary-400 sm:text-lg">
+                    {category.name}
+                  </h2>
+                  {category.description ? (
+                    <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-white/50">
+                      {category.description}
+                    </p>
+                  ) : null}
+                  <span className="mt-2 inline-flex text-xs font-medium text-primary-400">
+                    {t('categories.viewProducts')}
+                  </span>
+                </div>
+              </Link>
+
+              {hasChildren ? (
+                <>
+                  <div className="mt-auto border-t border-white/5 px-3 py-2 sm:px-4">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-full justify-between px-2 text-white/70 hover:text-white"
+                      aria-expanded={isExpanded}
+                      aria-label={t('categories.toggleSubcategories', { name: category.name })}
+                      onClick={() => setExpandedId(isExpanded ? null : category.id)}
+                    >
+                      <span className="text-xs font-medium uppercase tracking-wide">
+                        {t('categories.subcategories')}
+                      </span>
+                      <ChevronDown
+                        className={cn('h-4 w-4 transition-transform duration-300', isExpanded && 'rotate-180')}
+                      />
+                    </Button>
                   </div>
-                ) : null}
-              </>
-            ) : null}
-          </Card>
+
+                  <AnimatePresence initial={false}>
+                    {isExpanded ? (
+                      <motion.div
+                        key="subcategories"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
+                        className="overflow-hidden border-t border-white/5 bg-dark-950/40"
+                      >
+                        <div className="space-y-2 px-3 pb-3 pt-2 sm:px-4 sm:pb-4">
+                          {children.map((child, childIndex) => (
+                            <motion.div
+                              key={child.id}
+                              initial={{ opacity: 0, x: -12 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: childIndex * 0.05, duration: 0.3, ease: EASE_OUT_EXPO }}
+                            >
+                              <Link
+                                href={buildCategoryProductsPath(category.slug, child.slug, category.id)}
+                                className="group flex items-center gap-3 rounded-xl border border-white/5 bg-dark-900/50 p-2.5 transition-colors hover:border-primary-500/30 hover:bg-primary-500/5"
+                              >
+                                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-dark-800">
+                                  {child.image_url ? (
+                                    <ProductImage
+                                      src={child.image_url}
+                                      alt={child.name}
+                                      fill
+                                      className="transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center">
+                                      <Layers className="h-4 w-4 text-primary-400/40" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <h3 className="truncate text-sm font-medium text-white group-hover:text-primary-400">
+                                    {child.name}
+                                  </h3>
+                                </div>
+                                <ChevronLeft className="h-4 w-4 shrink-0 text-white/25 rtl:rotate-180 group-hover:text-primary-400" />
+                              </Link>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </>
+              ) : null}
+            </Card>
+          </StaggerItem>
         );
       })}
     </div>
@@ -146,13 +167,13 @@ export function CategoriesPageHeader() {
   const { t } = useLocale();
 
   return (
-    <div className="mb-10 max-w-3xl">
+    <Reveal className="mb-10 max-w-3xl">
       <Badge variant="secondary" className="mb-3">
         {t('categories.badge')}
       </Badge>
       <h1 className="text-3xl font-bold text-white lg:text-4xl">{t('categories.title')}</h1>
       <p className="mt-3 text-base leading-relaxed text-white/50">{t('categories.subtitle')}</p>
-    </div>
+    </Reveal>
   );
 }
 

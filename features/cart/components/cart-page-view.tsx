@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Cart } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { toast } from '@/components/ui/Toaster';
 import { clearCart, editCartQuantity, removeCartItem } from '@/features/cart/services/cart-client';
 import { Trash2, ShoppingCart, Minus, Plus } from 'lucide-react';
@@ -22,6 +22,7 @@ interface CartPageViewProps {
 export function CartPageView({ cart: initialCart }: CartPageViewProps) {
   const router = useRouter();
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
   const items = initialCart?.items ?? [];
@@ -103,7 +104,7 @@ export function CartPageView({ cart: initialCart }: CartPageViewProps) {
               </Link>
               <CartItemVariantMeta item={item} className="mt-1" />
               <p className="text-sm text-white/40 mt-1">
-                {formatCurrency(item.price_at_time)} {t('cart.each')}
+                {formatPrice(item.price_at_time)} {t('cart.each')}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-xs text-white/50">{t('cart.qty')}:</span>
@@ -130,7 +131,7 @@ export function CartPageView({ cart: initialCart }: CartPageViewProps) {
             </div>
             <div className="text-end flex flex-col justify-between">
               <p className="font-bold text-primary-400">
-                {formatCurrency(Number(item.price_at_time) * item.quantity)}
+                {formatPrice(Number(item.price_at_time) * item.quantity)}
               </p>
               <button
                 type="button"
@@ -152,7 +153,7 @@ export function CartPageView({ cart: initialCart }: CartPageViewProps) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-white/60">
               <span>{t('cart.subtotal')}</span>
-              <span>{formatCurrency(subtotal)}</span>
+              <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between text-white/60">
               <span>{t('cart.shipping')}</span>
@@ -161,7 +162,7 @@ export function CartPageView({ cart: initialCart }: CartPageViewProps) {
           </div>
           <div className="flex justify-between pt-4 border-t border-white/10">
             <span className="font-semibold text-white">{t('order.total')}</span>
-            <span className="text-xl font-bold text-primary-400">{formatCurrency(subtotal)}</span>
+            <span className="text-xl font-bold text-primary-400">{formatPrice(subtotal)}</span>
           </div>
           <ButtonLink href="/checkout" className="w-full">{t('cart.checkout')}</ButtonLink>
         </Card>

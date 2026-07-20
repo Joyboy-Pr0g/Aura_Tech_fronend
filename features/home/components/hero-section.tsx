@@ -8,6 +8,8 @@ import { HomeSeoSlider } from '@/features/home/components/home-seo-slider';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { WebsiteSettings } from '@/lib/types/entities';
 import { splitWebsiteTitle } from '@/lib/website-settings/defaults';
+import { motion } from 'framer-motion';
+import { Stagger, staggerItemVariants } from '@/lib/motion/reveal';
 
 const TRUST_ITEMS = [
   { icon: Truck, key: 'home.trust.delivery' as const },
@@ -23,13 +25,15 @@ export function HeroSection({ settings }: { settings: WebsiteSettings }) {
   return (
     <section className="relative min-h-[85vh] flex items-center">
       <Container className="relative py-16 lg:py-24">
-        <div className="max-w-3xl mx-auto text-center space-y-8">
-          <Badge variant="default" className="gap-1.5 px-3 py-1">
-            <Sparkles className="h-3 w-3" />
-            {t('home.badge')}
-          </Badge>
+        <Stagger immediate className="max-w-3xl mx-auto text-center space-y-8">
+          <motion.div variants={staggerItemVariants}>
+            <Badge variant="default" className="gap-1.5 px-3 py-1">
+              <Sparkles className="h-3 w-3" />
+              {t('home.badge')}
+            </Badge>
+          </motion.div>
 
-          <div className="space-y-4">
+          <motion.div variants={staggerItemVariants} className="space-y-4">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white">
                 {t('home.welcome')}{' '}
@@ -41,11 +45,16 @@ export function HeroSection({ settings }: { settings: WebsiteSettings }) {
             <p className="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
               {settings.description}
             </p>
-          </div>
+          </motion.div>
 
-          <HomeSeoSlider settings={settings} />
+          <motion.div variants={staggerItemVariants}>
+            <HomeSeoSlider settings={settings} />
+          </motion.div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <motion.div
+            variants={staggerItemVariants}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
             <ButtonLink href="/products" size="md">
               {t('home.shopNow')}
               <ArrowRight className="h-4 w-4" />
@@ -53,9 +62,12 @@ export function HeroSection({ settings }: { settings: WebsiteSettings }) {
             <ButtonLink href="/categories" variant="outline" size="md">
               {t('home.browseCategories')}
             </ButtonLink>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
+          <motion.div
+            variants={staggerItemVariants}
+            className="flex flex-wrap items-center justify-center gap-6 pt-4"
+          >
             {TRUST_ITEMS.map(({ icon: Icon, key }) => (
               <div key={key} className="flex items-center gap-2 text-sm text-white/50">
                 <Badge variant="secondary" className="gap-1.5 px-3 py-1">
@@ -64,8 +76,8 @@ export function HeroSection({ settings }: { settings: WebsiteSettings }) {
                 </Badge>
               </div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </Stagger>
       </Container>
     </section>
   );

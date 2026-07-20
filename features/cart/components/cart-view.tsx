@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Cart, CustomerAddress } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { toast } from '@/components/ui/Toaster';
 import { removeCartItem } from '@/features/cart/services/cart-client';
 import { Trash2, ShoppingCart } from 'lucide-react';
@@ -18,6 +18,7 @@ interface CartViewProps {
 export function CartView({ cart: initialCart, addresses }: CartViewProps) {
   const router = useRouter();
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const cart = initialCart;
   const [selectedAddr, setSelectedAddr] = useState(
     addresses.find((a) => a.is_default)?.id ?? '',
@@ -63,10 +64,10 @@ export function CartView({ cart: initialCart, addresses }: CartViewProps) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-white truncate">{item.product?.title ?? t('reviews.product')}</p>
-                  <p className="text-sm text-white/40">{t('cart.qty')}: {item.quantity} × {formatCurrency(item.price_at_time)}</p>
+                  <p className="text-sm text-white/40">{t('cart.qty')}: {item.quantity} × {formatPrice(item.price_at_time)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-white">{formatCurrency(Number(item.price_at_time) * item.quantity)}</p>
+                  <p className="font-semibold text-white">{formatPrice(Number(item.price_at_time) * item.quantity)}</p>
                   <button onClick={() => handleRemove(item.id)} className="text-danger/60 hover:text-danger mt-1">
                     <Trash2 size={16} />
                   </button>
@@ -107,7 +108,7 @@ export function CartView({ cart: initialCart, addresses }: CartViewProps) {
             <div className="flex items-center justify-between pt-2 border-t border-white/10">
               <div>
                 <span className="text-white/50 text-sm">{t('cart.subtotal')}</span>
-                <p className="text-xl font-bold text-white">{formatCurrency(subtotal)}</p>
+                <p className="text-xl font-bold text-white">{formatPrice(subtotal)}</p>
               </div>
               <button onClick={handleCheckout} className="btn-primary">
                 {t('checkout.placeOrder')}

@@ -25,6 +25,9 @@ export const en = {
   'nav.contact': 'Contact',
   'nav.toggleMenu': 'Toggle menu',
   'nav.toggleLanguage': 'Toggle language',
+  'nav.toggleCurrency': 'Toggle currency',
+  'nav.currencySar': 'SAR',
+  'nav.currencyYer': 'YER',
 
   // Storefront coming soon
   'storefront.comingSoon.badge': 'Launching Soon',
@@ -823,6 +826,8 @@ export const en = {
   'admin.websiteMetaKeywords': 'Meta keywords',
   'admin.websiteDefaultLocale': 'Open Graph locale',
   'admin.websiteThemeColor': 'Theme color',
+  'admin.websiteSarToYer': 'SAR to YER exchange rate',
+  'admin.websiteSarToYerHint': 'Used to show Yemeni prices on the storefront (e.g. 140 or 139.5). Leave empty to hide YER option.',
   'admin.websiteRobots': 'Robots directive',
   'admin.websiteTwitterCard': 'Twitter card type',
   'admin.websiteTwitterHandle': 'Twitter / X handle',

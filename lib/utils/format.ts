@@ -1,17 +1,54 @@
-export function formatCurrency(amount: number | string): string {
+export type DisplayCurrency = 'SAR' | 'YER';
+
+export function convertSarToYer(amountSar: number | string, rate: number): number {
+  const base = Number(amountSar);
+  if (!Number.isFinite(base) || !Number.isFinite(rate) || rate <= 0) return base;
+  return Math.round(base * rate * 100) / 100;
+}
+
+export function formatSar(amount: number | string): string {
   return `${Number(amount).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
 }
 
+export function formatYer(amount: number | string): string {
+  return `${Number(amount).toLocaleString('ar-YE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ر.ي`;
+}
+
+export function formatDisplayPrice(
+  amountSar: number | string,
+  currency: DisplayCurrency,
+  sarToYer?: number | string | null,
+): string {
+  const rate = sarToYer != null ? Number(sarToYer) : null;
+  if (currency === 'YER' && rate != null && rate > 0) {
+    return formatYer(convertSarToYer(amountSar, rate));
+  }
+  return formatSar(amountSar);
+}
+
+export function formatCurrency(amount: number | string): string {
+  return formatSar(amount);
+}
+
+const AR_DATE_LOCALE = 'ar-SA';
+
+const AR_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  calendar: 'gregory',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+
 export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-GB', {
-    year: 'numeric', month: 'short', day: 'numeric',
-  });
+  return new Date(dateStr).toLocaleDateString(AR_DATE_LOCALE, AR_DATE_OPTIONS);
 }
 
 export function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-GB', {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+  return new Date(dateStr).toLocaleString(AR_DATE_LOCALE, {
+    ...AR_DATE_OPTIONS,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
   });
 }
 

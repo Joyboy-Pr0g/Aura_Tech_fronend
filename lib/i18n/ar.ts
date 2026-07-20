@@ -27,6 +27,9 @@ export const ar: Record<TranslationKey, string> = {
   'nav.contact': 'تواصل معنا',
   'nav.toggleMenu': 'فتح القائمة',
   'nav.toggleLanguage': 'تبديل اللغة',
+  'nav.toggleCurrency': 'تبديل العملة',
+  'nav.currencySar': 'ر.س',
+  'nav.currencyYer': 'ر.ي',
 
   // Storefront coming soon
   'storefront.comingSoon.badge': 'قريباً',
@@ -824,6 +827,8 @@ export const ar: Record<TranslationKey, string> = {
   'admin.websiteMetaKeywords': 'كلمات مفتاحية',
   'admin.websiteDefaultLocale': 'لغة Open Graph',
   'admin.websiteThemeColor': 'لون السمة',
+  'admin.websiteSarToYer': 'سعر صرف الريال السعودي إلى الريال اليمني',
+  'admin.websiteSarToYerHint': 'يُستخدم لعرض الأسعار بالريال اليمني في المتجر (مثل 140 أو 139.5). اتركه فارغاً لإخفاء خيار الر.ي.',
   'admin.websiteRobots': 'تعليمات Robots',
   'admin.websiteTwitterCard': 'نوع بطاقة Twitter',
   'admin.websiteTwitterHandle': 'حساب Twitter / X',

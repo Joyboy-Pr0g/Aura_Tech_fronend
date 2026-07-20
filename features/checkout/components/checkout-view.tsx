@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Cart, CustomerAddress, OrderPaymentType, PaymentMethod, ShippingFee } from '@/lib/types/entities';
-import { formatCurrency } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { checkout } from '@/features/orders/services/orders-client';
 import { submitPayment } from '@/features/cart/services/cart-client';
 import { validateCoupon, type ValidateCouponResult } from '@/features/coupons/services/coupons-client';
@@ -36,6 +36,7 @@ export function CheckoutView({
 }: CheckoutViewProps) {
   const router = useRouter();
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const [step, setStep] = useState(0);
   const [selectedAddr, setSelectedAddr] = useState(addresses.find((a) => a.is_default)?.id ?? '');
   const [selectedShippingFeeId, setSelectedShippingFeeId] = useState(shippingFees[0]?.id ?? '');
@@ -90,20 +91,20 @@ export function CheckoutView({
     <div className={cn('space-y-2 text-sm', emphasizeTotal && 'pt-2')}>
       <div className="flex justify-between text-white/70">
         <span>{t('cart.subtotal')}</span>
-        <span>{formatCurrency(subtotal)}</span>
+        <span>{formatPrice(subtotal)}</span>
       </div>
       {selectedShippingFee && (
         <div className="flex justify-between text-white/50">
           <span>
             {t('cart.shipping')} ({selectedShippingFee.delivery_way} · {selectedShippingFee.duration})
           </span>
-          <span>{formatCurrency(shippingCost)}</span>
+          <span>{formatPrice(shippingCost)}</span>
         </div>
       )}
       {appliedCoupon && discountAmount > 0 && (
         <div className="flex justify-between text-emerald-400/90">
           <span>{t('checkout.couponDiscount')} ({appliedCoupon.code})</span>
-          <span>-{formatCurrency(discountAmount)}</span>
+          <span>-{formatPrice(discountAmount)}</span>
         </div>
       )}
       <div className={cn(
@@ -111,7 +112,7 @@ export function CheckoutView({
         emphasizeTotal ? 'text-lg pt-2 border-t border-white/10' : 'text-lg',
       )}>
         <span>{t('order.total')}</span>
-        <span>{formatCurrency(total)}</span>
+        <span>{formatPrice(total)}</span>
       </div>
     </div>
   );
@@ -229,7 +230,7 @@ export function CheckoutView({
                     <span className="text-sm text-white/50">{fee.duration}</span>
                   </div>
                 </div>
-                <span className="text-primary-400 shrink-0">{formatCurrency(Number(fee.price))}</span>
+                <span className="text-primary-400 shrink-0">{formatPrice(Number(fee.price))}</span>
               </label>
             ))
           )}
@@ -365,7 +366,7 @@ export function CheckoutView({
                 <p className="text-sm text-emerald-400">
                   {t('checkout.couponApplied', { code: appliedCoupon.code })}
                   {' · '}
-                  -{formatCurrency(discountAmount)}
+                  -{formatPrice(discountAmount)}
                 </p>
                 <Button type="button" variant="outline" size="sm" onClick={handleRemoveCoupon}>
                   {t('checkout.removeCoupon')}
@@ -424,7 +425,7 @@ export function CheckoutView({
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-white/70">
                 <span>{item.product?.title} × {item.quantity}</span>
-                <span>{formatCurrency(Number(item.price_at_time) * item.quantity)}</span>
+                <span>{formatPrice(Number(item.price_at_time) * item.quantity)}</span>
               </div>
             ))}
             {renderOrderTotals(true)}

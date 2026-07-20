@@ -84,9 +84,12 @@ export async function verifyRegistrationEmail(data: VerifyEmailChangeInput): Pro
   });
 }
 
-export async function forgotPassword(data: SendEmailVerificationInput): Promise<void> {
+export async function forgotPassword(
+  data: SendEmailVerificationInput,
+  turnstileToken?: string | null,
+): Promise<void> {
   await clientFetch('/api/auth/forgot-password', {
     method: 'POST',
-    body: data,
+    body: { ...data, turnstileToken },
   });
 }

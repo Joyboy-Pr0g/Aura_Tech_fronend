@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils/cn';
 import { ProductImage } from '@/components/ui/product-image';
 import { Button } from '@/components/ui/button';
 import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
+import { Reveal, StaggerItem } from '@/lib/motion/reveal';
 
 interface CategoriesSliderProps {
   categories: Category[];
@@ -30,66 +31,69 @@ export function CategoriesSlider({ categories }: CategoriesSliderProps) {
   return (
     <section id="shop-by-category" className="py-16 lg:py-20">
       <Container>
-        <div className="flex items-center justify-between gap-4 mb-8">
+        <Reveal className="flex items-center justify-between gap-4 mb-8">
           <div>
-            <Badge variant='secondary' className='mb-3'>{t('home.categoriesBadge')}</Badge>
-            <h2 className='text-3xl font-bold text-white'>{t('home.categories')}</h2>
+            <Badge variant="secondary" className="mb-3">{t('home.categoriesBadge')}</Badge>
+            <h2 className="text-3xl font-bold text-white">{t('home.categories')}</h2>
           </div>
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Button
-              variant='outline'
-              size='icon'
+              variant="outline"
+              size="icon"
               onClick={() => scroll('right')}
               aria-label={t('common.previous')}
             >
-              <ChevronRight className='w-4 h-4' />
+              <ChevronRight className="w-4 h-4" />
             </Button>
             <Button
-              variant='outline'
-              size='icon'
+              variant="outline"
+              size="icon"
               onClick={() => scroll('left')}
               aria-label={t('common.next')}
             >
-              <ChevronLeft className='w-4 h-4' />
+              <ChevronLeft className="w-4 h-4" />
             </Button>
           </div>
-
-        </div>
+        </Reveal>
 
         <div
           ref={scrollRef}
-          className='flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide'
+          className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none' }}
         >
-          {categories.map((category) => (
-            <Link key={category.id}
-              href={buildCategoryProductsPath(category.slug, null)}
-              className='snap-start shrink-0 w-[200px] sm:w-[220px]'
+          {categories.map((category, index) => (
+            <StaggerItem
+              key={category.id}
+              className="snap-start shrink-0 w-[200px] sm:w-[220px]"
             >
-              <Card className={cn(
-                'group h-full overflow-hidden transition-all duration-300',
-                'hover:border-primary-500/40 hover:shadow-lg hover:shadow-primary-500/10 hover:scale-[1.02]',
-              )}>
-                <div className="relative aspect-[4/3] bg-dark-800 flex items-center justify-center overflow-hidden">
-                  {category.image_url ? (
-                    <ProductImage
-                      src={category.image_url}
-                      alt={category.name}
-                      fill
-                      className="transition-transform duration-500 group-hover:scale-110"
-                    />
-                  ) : (
-                    <Layers className="h-10 w-10 text-primary-400/40" />
+              <Link href={buildCategoryProductsPath(category.slug, null)}>
+                <Card
+                  className={cn(
+                    'group h-full overflow-hidden transition-all duration-300',
+                    'hover:border-primary-500/40 hover:shadow-lg hover:shadow-primary-500/10 hover:scale-[1.02]',
                   )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-white group-hover:text-primary-400 transition-colors">
-                    {category.name}
-                  </h3>
-                </div>
-              </Card>
-
-            </Link>
+                  style={{ transitionDelay: `${index * 20}ms` }}
+                >
+                  <div className="relative aspect-[4/3] bg-dark-800 flex items-center justify-center overflow-hidden">
+                    {category.image_url ? (
+                      <ProductImage
+                        src={category.image_url}
+                        alt={category.name}
+                        fill
+                        className="transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <Layers className="h-10 w-10 text-primary-400/40" />
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-white group-hover:text-primary-400 transition-colors">
+                      {category.name}
+                    </h3>
+                  </div>
+                </Card>
+              </Link>
+            </StaggerItem>
           ))}
         </div>
       </Container>

@@ -43,6 +43,10 @@ function toFormValues(settings: WebsiteSettings): WebsiteSettingsFormValues {
     default_locale: settings.default_locale ?? 'en_US',
     theme_color: settings.theme_color ?? '#00d9ff',
     robots: settings.robots ?? 'index, follow',
+    sar_to_yer:
+      settings.sar_to_yer != null && settings.sar_to_yer !== ''
+        ? Number(settings.sar_to_yer)
+        : undefined,
     remove_header_logo: false,
     remove_footer_logo: false,
     remove_favicon: false,
@@ -131,6 +135,11 @@ export function AdminWebsiteSettingsPanel({ initialSettings }: AdminWebsiteSetti
       formData.append('default_locale', values.default_locale ?? 'en_US');
       formData.append('theme_color', values.theme_color ?? '#00d9ff');
       formData.append('robots', values.robots ?? 'index, follow');
+      if (values.sar_to_yer != null) {
+        formData.append('sar_to_yer', String(values.sar_to_yer));
+      } else {
+        formData.append('sar_to_yer', '');
+      }
       formData.append('remove_header_logo', String(values.remove_header_logo ?? false));
       formData.append('remove_footer_logo', String(values.remove_footer_logo ?? false));
       formData.append('remove_favicon', String(values.remove_favicon ?? false));
@@ -265,6 +274,20 @@ export function AdminWebsiteSettingsPanel({ initialSettings }: AdminWebsiteSetti
               {...register('description')}
             />
             {errors.description && <p className="text-sm text-danger">{errors.description.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sar_to_yer">{t('admin.websiteSarToYer')}</Label>
+            <Input
+              id="sar_to_yer"
+              type="number"
+              min="0.01"
+              step="0.1"
+              className="input-dark"
+              placeholder="140"
+              {...register('sar_to_yer', { valueAsNumber: true })}
+            />
+            <p className="text-xs text-white/40">{t('admin.websiteSarToYerHint')}</p>
+            {errors.sar_to_yer && <p className="text-sm text-danger">{errors.sar_to_yer.message}</p>}
           </div>
         </section>
 

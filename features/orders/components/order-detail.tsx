@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Order, OrderItem, PaymentMethod, RefundRequest } from '@/lib/types/entities';
 import { OrderStatusHistoryEntry } from '@/features/engagement/types';
-import { formatCurrency, formatDateTime, ORDER_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils/format';
+import { formatDateTime, ORDER_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils/format';
+import { useFormatPrice } from '@/lib/currency/currency-provider';
 import { getProductImageUrl } from '@/lib/products/helpers';
 import { OrderTimeline } from '@/components/orders/order-timeline';
 import { ProductImage } from '@/components/ui/product-image';
@@ -37,6 +38,7 @@ export function OrderDetail({
 }: OrderDetailProps) {
   const router = useRouter();
   const { t } = useLocale();
+  const formatPrice = useFormatPrice();
   const [uploading, setUploading] = useState(false);
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [reviewedIds, setReviewedIds] = useState<string[]>(reviewedProductIds);
@@ -147,9 +149,9 @@ export function OrderDetail({
 
         <div className="flex items-end justify-between gap-3 pt-1 border-t border-white/5">
           <p className="text-xs text-white/45">
-            {t('cart.qty')}: {item.quantity} × {formatCurrency(item.unit_price)}
+            {t('cart.qty')}: {item.quantity} × {formatPrice(item.unit_price)}
           </p>
-          <p className="font-semibold text-white shrink-0">{formatCurrency(item.total_price)}</p>
+          <p className="font-semibold text-white shrink-0">{formatPrice(item.total_price)}</p>
         </div>
 
         {canReview && (
@@ -212,25 +214,25 @@ export function OrderDetail({
         <div className="border-t border-white/10 pt-3 space-y-2 text-sm">
           <div className="flex justify-between text-white/60">
             <span>{t('order.subtotal')}</span>
-            <span>{formatCurrency(order.subtotal)}</span>
+            <span>{formatPrice(order.subtotal)}</span>
           </div>
           {order.shipping_fee && (
             <div className="flex justify-between text-white/60">
               <span>
                 {t('cart.shipping')} ({order.shipping_fee.delivery_way} · {order.shipping_fee.duration})
               </span>
-              <span>{formatCurrency(order.shipping_cost)}</span>
+              <span>{formatPrice(order.shipping_cost)}</span>
             </div>
           )}
           {!order.shipping_fee && order.shipping_cost > 0 && (
             <div className="flex justify-between text-white/60">
               <span>{t('cart.shipping')}</span>
-              <span>{formatCurrency(order.shipping_cost)}</span>
+              <span>{formatPrice(order.shipping_cost)}</span>
             </div>
           )}
           <div className="flex justify-between pt-2">
             <span className="font-bold text-white">{t('order.total')}</span>
-            <span className="font-bold text-primary-400 text-lg">{formatCurrency(order.total)}</span>
+            <span className="font-bold text-primary-400 text-lg">{formatPrice(order.total)}</span>
           </div>
         </div>
       </div>
@@ -363,7 +365,7 @@ export function OrderDetail({
               <div>
                 <p className="text-sm text-white/60 mb-3">
                   {t('order.transferHint')}{' '}
-                  <span className="text-primary-400 font-bold">{formatCurrency(order.total)}</span>
+                  <span className="text-primary-400 font-bold">{formatPrice(order.total)}</span>
                 </p>
                 <input
                   ref={fileRef}
@@ -401,7 +403,7 @@ export function OrderDetail({
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
                   <p className="text-xs uppercase tracking-wide text-white/40">{t('admin.shippingFeePrice')}</p>
-                  <p className="text-primary-400 font-semibold mt-1">{formatCurrency(Number(order.shipping_fee.price))}</p>
+                  <p className="text-primary-400 font-semibold mt-1">{formatPrice(Number(order.shipping_fee.price))}</p>
                 </div>
               </div>
             </div>
