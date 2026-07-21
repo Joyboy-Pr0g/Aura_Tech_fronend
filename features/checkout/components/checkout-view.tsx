@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Cart, CustomerAddress, OrderPaymentType, PaymentMethod, ShippingFee } from '@/lib/types/entities';
-import { useFormatPrice } from '@/lib/currency/currency-provider';
+import { useFormatPrice, useCurrency } from '@/lib/currency/currency-provider';
+import { convertSarToYer, formatYer } from '@/lib/utils/format';
 import { checkout } from '@/features/orders/services/orders-client';
 import { submitPayment } from '@/features/cart/services/cart-client';
 import { validateCoupon, type ValidateCouponResult } from '@/features/coupons/services/coupons-client';
@@ -37,12 +38,14 @@ export function CheckoutView({
   const router = useRouter();
   const { t } = useLocale();
   const formatPrice = useFormatPrice();
+  const { sarToYer, canUseYer } = useCurrency();
   const [step, setStep] = useState(0);
   const [selectedAddr, setSelectedAddr] = useState(addresses.find((a) => a.is_default)?.id ?? '');
   const [selectedShippingFeeId, setSelectedShippingFeeId] = useState(shippingFees[0]?.id ?? '');
   const [paymentType, setPaymentType] = useState<OrderPaymentType>('bank_transfer');
   const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
   const [receipt, setReceipt] = useState<File | null>(null);
+  const [payerAccountNumber, setPayerAccountNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<ValidateCouponResult | null>(null);
@@ -53,10 +56,16 @@ export function CheckoutView({
   const selectedShippingFee = shippingFees.find((fee) => fee.id === selectedShippingFeeId);
   const shippingCost = Number(selectedShippingFee?.price ?? 0);
   const discountAmount = appliedCoupon?.discount_amount ?? 0;
-  const total = Math.max(0, subtotal - discountAmount + shippingCost);  const isPayOnDelivery = paymentType === 'pay_on_delivery';
+  const total = Math.max(0, subtotal - discountAmount + shippingCost);
+  const isPayOnDelivery = paymentType === 'pay_on_delivery';
+  const totalYer = sarToYer != null ? convertSarToYer(total, sarToYer) : null;
 
-  const canContinuePaymentStep =
-    isPayOnDelivery || (Boolean(selectedPaymentMethodId) && Boolean(receipt));
+  const canContinuePaymentStep = true;
+
+  const canConfirmTransfer =
+    Boolean(selectedPaymentMethodId) &&
+    Boolean(receipt) &&
+    payerAccountNumber.replace(/\D/g, '').length >= 6;
 
   const handleApplyCoupon = async () => {
     const code = couponInput.trim();
@@ -117,13 +126,29 @@ export function CheckoutView({
     </div>
   );
 
-  const handlePlaceOrder = async () => {    if (!selectedAddr || !selectedShippingFeeId) {
+  const handlePlaceOrder = async () => {
+    if (!selectedAddr || !selectedShippingFeeId) {
       toast(t('checkout.missingFields'), 'error');
       return;
     }
-    if (!isPayOnDelivery && !selectedPaymentMethodId) {
-      toast(t('checkout.selectPaymentMethod'), 'error');
-      return;
+
+    if (!isPayOnDelivery) {
+      if (!selectedPaymentMethodId) {
+        toast(t('checkout.selectPaymentMethod'), 'error');
+        return;
+      }
+      if (!receipt) {
+        toast(t('checkout.missingReceipt'), 'error');
+        return;
+      }
+      if (payerAccountNumber.replace(/\D/g, '').length < 6) {
+        toast(t('checkout.missingPayerAccount'), 'error');
+        return;
+      }
+      if (!canUseYer || totalYer == null) {
+        toast(t('checkout.failed'), 'error');
+        return;
+      }
     }
 
     setLoading(true);
@@ -134,16 +159,24 @@ export function CheckoutView({
         shipping_fee_id: selectedShippingFeeId,
         payment_type: paymentType,
         coupon_code: appliedCoupon?.code,
-      });      if (!isPayOnDelivery && receipt && order?.id) {
-        await submitPayment(order.id, receipt, selectedPaymentMethodId);
+      });
+
+      if (!isPayOnDelivery && receipt && order?.id) {
+        await submitPayment(
+          order.id,
+          receipt,
+          selectedPaymentMethodId,
+          payerAccountNumber.replace(/\D/g, ''),
+        );
       }
+
       toast(
-        isPayOnDelivery ? t('checkout.successPayOnDelivery') : t('checkout.success'),
+        isPayOnDelivery ? t('checkout.successPayOnDelivery') : t('checkout.successBankTransfer'),
         'success',
       );
       router.push(`/dashboard/orders/${order!.order_number}`);
     } catch (error) {
-      toast(error instanceof Error ? error.message : t('checkout.failed'), 'error');
+      toast(getErrorMessage(error) || t('checkout.failed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -258,7 +291,6 @@ export function CheckoutView({
                 checked={paymentType === 'bank_transfer'}
                 onChange={() => {
                   setPaymentType('bank_transfer');
-                  setReceipt(null);
                 }}
                 className="mt-1"
               />
@@ -297,64 +329,6 @@ export function CheckoutView({
               </div>
             </label>
           </div>
-
-          {!isPayOnDelivery && (
-            <>
-              {paymentMethods.length === 0 ? (
-                <p className="text-white/50 text-sm">{t('checkout.noPaymentMethods')}</p>
-              ) : (
-                paymentMethods.map((pm) => (
-                  <label
-                    key={pm.id}
-                    className={cn(
-                      'block p-4 rounded-lg border cursor-pointer text-sm space-y-1',
-                      selectedPaymentMethodId === pm.id ? 'border-primary-500 bg-primary-500/5' : 'border-white/10 bg-dark-800',
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="payment_method"
-                        checked={selectedPaymentMethodId === pm.id}
-                        onChange={() => setSelectedPaymentMethodId(pm.id)}
-                        className="mt-1"
-                      />
-                      <div className="space-y-1">
-                        <p className="font-medium text-white">{pm.name}</p>
-                        <p className="text-white/50">{t('checkout.bank')}: {pm.bank_name}</p>
-                        {pm.account_number && <p className="text-white/50">{t('checkout.account')}: {pm.account_number}</p>}
-                        {pm.iban && <p className="text-white/50">{t('checkout.iban')}: {pm.iban}</p>}
-                      </div>
-                    </div>
-                  </label>
-                ))
-              )}
-              <div>
-                <label className="label-dark">{t('checkout.uploadReceipt')}</label>
-                <label
-                  htmlFor="receipt-upload"
-                  onClick={(e) => {
-                    if (!selectedPaymentMethodId) {
-                      e.preventDefault();
-                      toast(t('checkout.selectPaymentMethod'), 'error');
-                    }
-                  }}
-                  className={`inline-flex items-center justify-center py-2 px-4 rounded bg-primary-500 text-dark-950 font-medium cursor-pointer transition-opacity ${!selectedPaymentMethodId ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
-                    }`}
-                >
-                  {receipt ? receipt.name : t('checkout.uploadReceipt')}
-                </label>
-                <input
-                  id="receipt-upload"
-                  type="file"
-                  accept="image/*"
-                  disabled={!selectedPaymentMethodId}
-                  onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-                  className="sr-only"
-                />
-              </div>
-            </>
-          )}
 
           <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4 space-y-3">
             <div className="flex items-center gap-2 text-white font-medium">
@@ -429,10 +403,92 @@ export function CheckoutView({
               </div>
             ))}
             {renderOrderTotals(true)}
-          </div>          <div className="flex gap-2">
+          </div>
+
+          {!isPayOnDelivery && (
+            <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.02] p-4">
+              <p className="text-sm text-white/60">{t('checkout.transferInstructions')}</p>
+
+              {totalYer != null && canUseYer ? (
+                <div className="rounded-lg border border-primary-500/30 bg-primary-500/5 p-4">
+                  <p className="text-sm text-white/60">{t('checkout.amountToPayYer')}</p>
+                  <p className="text-2xl font-bold text-primary-400 mt-1">{formatYer(totalYer)}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-danger">{t('checkout.failed')}</p>
+              )}
+
+              {paymentMethods.length === 0 ? (
+                <p className="text-white/50 text-sm">{t('checkout.noPaymentMethods')}</p>
+              ) : (
+                paymentMethods.map((pm) => (
+                  <label
+                    key={pm.id}
+                    className={cn(
+                      'block p-4 rounded-lg border cursor-pointer text-sm space-y-1',
+                      selectedPaymentMethodId === pm.id ? 'border-primary-500 bg-primary-500/5' : 'border-white/10 bg-dark-800',
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        name="payment_method_review"
+                        checked={selectedPaymentMethodId === pm.id}
+                        onChange={() => setSelectedPaymentMethodId(pm.id)}
+                        className="mt-1"
+                      />
+                      <div className="space-y-1">
+                        <p className="font-medium text-white">{pm.name}</p>
+                        <p className="text-white/50">{t('checkout.bank')}: {pm.bank_name}</p>
+                        {pm.account_number && <p className="text-white/50">{t('checkout.account')}: {pm.account_number}</p>}
+                        {pm.iban && <p className="text-white/50">{t('checkout.iban')}: {pm.iban}</p>}
+                      </div>
+                    </div>
+                  </label>
+                ))
+              )}
+
+              <div>
+                <label className="label-dark">{t('checkout.payerAccountNumber')}</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={payerAccountNumber}
+                  onChange={(e) => setPayerAccountNumber(e.target.value.replace(/\D/g, ''))}
+                  placeholder={t('checkout.payerAccountPlaceholder')}
+                  className="input-dark mt-2"
+                />
+                <p className="text-xs text-white/40 mt-1">{t('checkout.payerAccountHint')}</p>
+              </div>
+
+              <div>
+                <label className="label-dark">{t('checkout.uploadReceipt')}</label>
+                <label
+                  htmlFor="receipt-upload-review"
+                  className="inline-flex items-center justify-center py-2 px-4 rounded bg-primary-500 text-dark-950 font-medium cursor-pointer transition-opacity hover:opacity-90 mt-2"
+                >
+                  {receipt ? receipt.name : t('checkout.uploadReceipt')}
+                </label>
+                <input
+                  id="receipt-upload-review"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+                  className="sr-only"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2">
             <Button disabled={loading} variant="outline" onClick={() => setStep(2)}>{t('common.back')}</Button>
-            <Button onClick={handlePlaceOrder} disabled={loading}>
-              {loading ? t('checkout.placing') : t('checkout.placeOrder')}
+            <Button
+              onClick={handlePlaceOrder}
+              disabled={loading || (!isPayOnDelivery && !canConfirmTransfer)}
+            >
+              {loading
+                ? (isPayOnDelivery ? t('checkout.placing') : t('checkout.confirmingTransfer'))
+                : (isPayOnDelivery ? t('checkout.placeOrder') : t('checkout.confirmTransfer'))}
             </Button>
           </div>
         </Card>

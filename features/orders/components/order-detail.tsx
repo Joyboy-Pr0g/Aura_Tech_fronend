@@ -72,7 +72,11 @@ export function OrderDetail({
     try {
       const methodId = paymentMethods[0]?.id;
       if (!methodId) throw new Error(t('checkout.noPaymentMethods'));
-      await submitPayment(order.id, file, methodId);
+      const payerAccount = window.prompt(t('checkout.payerAccountNumber'));
+      if (!payerAccount || payerAccount.replace(/\D/g, '').length < 6) {
+        throw new Error(t('checkout.missingPayerAccount'));
+      }
+      await submitPayment(order.id, file, methodId, payerAccount.replace(/\D/g, ''));
       toast(t('order.receiptUploaded'), 'success');
       router.refresh();
     } catch (err) {

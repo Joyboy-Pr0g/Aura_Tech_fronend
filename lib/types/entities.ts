@@ -163,6 +163,9 @@ export interface Payment {
   order_id: string;
   amount: number;
   payment_method_id?: string | null;
+  payer_account_number?: string | null;
+  expected_amount_yer?: number | null;
+  auto_verify_status?: 'pending' | 'matched' | 'parse_failed' | 'match_failed';
   status: PaymentStatus;
   receipt_document_url: string | null;
   submitted_at: string;

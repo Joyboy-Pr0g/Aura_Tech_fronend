@@ -3,7 +3,7 @@ export type DisplayCurrency = 'SAR' | 'YER';
 export function convertSarToYer(amountSar: number | string, rate: number): number {
   const base = Number(amountSar);
   if (!Number.isFinite(base) || !Number.isFinite(rate) || rate <= 0) return base;
-  return Math.round(base * rate * 100) / 100;
+  return Math.floor(base * rate);
 }
 
 export function formatSar(amount: number | string): string {

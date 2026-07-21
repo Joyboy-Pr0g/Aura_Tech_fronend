@@ -67,10 +67,16 @@ export async function getPaymentMethods() {
   return res.data!;
 }
 
-export async function submitPayment(orderId: string, file: File, paymentMethodId: string) {
+export async function submitPayment(
+  orderId: string,
+  file: File,
+  paymentMethodId: string,
+  payerAccountNumber: string,
+) {
   const form = new FormData();
   form.append('receipt', file);
   form.append('payment_method_id', paymentMethodId);
+  form.append('payer_account_number', payerAccountNumber.replace(/\D/g, ''));
   const res = await clientFetch<Payment>(`/api/payments/orders/${orderId}`, {
     method: 'POST',
     body: form,
