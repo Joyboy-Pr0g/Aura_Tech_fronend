@@ -377,3 +377,26 @@ export interface BlogPost {
   created_at: string;
   updated_at: string;
 }
+
+export interface PaymentDevice {
+  id: string;
+  device_uuid: string;
+  label: string | null;
+  enabled: boolean;
+  last_seen: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentDeviceRegistered extends PaymentDevice {
+  api_key: string;
+}
+
+export interface PaymentProvider {
+  id: string;
+  name: string;
+  aliases: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

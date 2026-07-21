@@ -11,7 +11,7 @@ import {
   LayoutDashboard, Users, ClipboardList, Banknote, LogOut, Heart, Star,
   Menu, X, ChevronsLeft, ChevronsRight,
   ListIcon, Truck, Tag, Bell, BookOpen,
-  Settings, HelpCircle, BarChart3, RotateCcw, Receipt,
+  Settings, HelpCircle, BarChart3, RotateCcw, Receipt, Smartphone,
 } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +49,7 @@ const ADMIN_NAV: NavItem[] = [
   { key: 'sidebar.blogs', href: '/admin/blogs', icon: <BookOpen size={18} /> },
   { key: 'sidebar.analytics', href: '/admin/analytics', icon: <BarChart3 size={18} /> },
   { key: 'sidebar.payments', href: '/admin/payments', icon: <Banknote size={18} />, badgeKey: 'pending_payments' },
+  { key: 'sidebar.paymentBridge', href: '/admin/payment-bridge', icon: <Smartphone size={18} /> },
   { key: 'sidebar.refunds', href: '/admin/refunds', icon: <RotateCcw size={18} />, badgeKey: 'pending_refunds' },
   { key: 'sidebar.expenses', href: '/admin/expenses', icon: <Receipt size={18} /> },
   { key: 'sidebar.profile', href: '/admin/profile', icon: <UserIcon size={18} /> },
