@@ -719,6 +719,7 @@ export const ar: Record<TranslationKey, string> = {
   'admin.paymentMethodUpdated': 'تم تحديث طريقة الدفع',
   'admin.paymentMethodDeleted': 'تم حذف طريقة الدفع',
   'admin.paymentMethodName': 'الاسم المعروض',
+  'admin.paymentMethodAccountHolder': 'اسم صاحب الحساب',
   'admin.paymentMethodBank': 'اسم البنك',
   'admin.paymentMethodAccount': 'رقم الحساب',
   'admin.paymentMethodIban': 'الآيبان',

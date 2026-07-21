@@ -26,6 +26,7 @@ import {
 
 const paymentMethodFormSchema = z.object({
   name: z.string().min(2).max(100),
+  account_holder_name: z.string().min(2).max(100),
   bank_name: z.string().min(2).max(100),
   account_number: z.string().max(50).optional(),
   iban: z.string().max(50).optional(),
@@ -67,6 +68,7 @@ export function PaymentMethodFormModal({
     resolver: zodResolver(paymentMethodFormSchema),
     defaultValues: {
       name: '',
+      account_holder_name: '',
       bank_name: '',
       account_number: '',
       iban: '',
@@ -83,6 +85,7 @@ export function PaymentMethodFormModal({
     if (mode.type === 'create') {
       reset({
         name: '',
+        account_holder_name: '',
         bank_name: '',
         account_number: '',
         iban: '',
@@ -94,6 +97,7 @@ export function PaymentMethodFormModal({
 
     reset({
       name: mode.method.name,
+      account_holder_name: mode.method.account_holder_name,
       bank_name: mode.method.bank_name,
       account_number: mode.method.account_number ?? '',
       iban: mode.method.iban ?? '',
@@ -107,6 +111,7 @@ export function PaymentMethodFormModal({
 
     const payload = {
       name: values.name.trim(),
+      account_holder_name: values.account_holder_name.trim(),
       bank_name: values.bank_name.trim(),
       account_number: values.account_number?.trim() || undefined,
       iban: values.iban?.trim() || undefined,
@@ -148,6 +153,18 @@ export function PaymentMethodFormModal({
               <Label htmlFor="pm-name">{t('admin.paymentMethodName')}</Label>
               <Input id="pm-name" {...register('name')} error={Boolean(errors.name)} />
               {errors.name && <p className="text-xs text-danger">{errors.name.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="pm-holder">{t('admin.paymentMethodAccountHolder')}</Label>
+              <Input
+                id="pm-holder"
+                {...register('account_holder_name')}
+                error={Boolean(errors.account_holder_name)}
+              />
+              {errors.account_holder_name && (
+                <p className="text-xs text-danger">{errors.account_holder_name.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">

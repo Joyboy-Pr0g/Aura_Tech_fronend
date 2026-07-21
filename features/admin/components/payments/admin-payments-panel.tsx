@@ -408,6 +408,12 @@ export function AdminPaymentsPanel({
       </div>
 
       <div className="space-y-1 text-sm text-white/60 flex-1">
+        {method.account_holder_name && (
+          <p>
+            <span className="text-white/40">{t('admin.paymentMethodAccountHolder')}: </span>
+            {method.account_holder_name}
+          </p>
+        )}
         {method.account_number && (
           <p>
             <span className="text-white/40">{t('admin.paymentMethodAccount')}: </span>

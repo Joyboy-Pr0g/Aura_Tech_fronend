@@ -718,6 +718,7 @@ export const en = {
   'admin.paymentMethodUpdated': 'Payment method updated',
   'admin.paymentMethodDeleted': 'Payment method deleted',
   'admin.paymentMethodName': 'Display name',
+  'admin.paymentMethodAccountHolder': 'Account holder name',
   'admin.paymentMethodBank': 'Bank name',
   'admin.paymentMethodAccount': 'Account number',
   'admin.paymentMethodIban': 'IBAN',

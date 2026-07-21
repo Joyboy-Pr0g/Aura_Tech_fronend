@@ -286,6 +286,7 @@ export interface CustomerAddress {
 export interface PaymentMethod {
   id: string;
   name: string;
+  account_holder_name: string;
   bank_name: string;
   account_number: string | null;
   iban: string | null;

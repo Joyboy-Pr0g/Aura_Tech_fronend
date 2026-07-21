@@ -7,6 +7,7 @@ import { parseAdminPaymentsPage } from '@/features/admin/lib/parse-admin-payment
 
 export interface CreatePaymentMethodPayload {
   name: string;
+  account_holder_name: string;
   bank_name: string;
   account_number?: string;
   iban?: string;
@@ -15,6 +16,7 @@ export interface CreatePaymentMethodPayload {
 
 export interface UpdatePaymentMethodPayload {
   name?: string;
+  account_holder_name?: string;
   bank_name?: string;
   account_number?: string;
   iban?: string;
