@@ -7,6 +7,7 @@ import { useFormatPrice, useCurrency } from '@/lib/currency/currency-provider';
 import { convertSarToYer, formatYer } from '@/lib/utils/format';
 import { checkout } from '@/features/orders/services/orders-client';
 import { submitPayment } from '@/features/cart/services/cart-client';
+import { paymentVerifyDebug } from '@/lib/debug/payment-verify-debug';
 import { validateCoupon, type ValidateCouponResult } from '@/features/coupons/services/coupons-client';
 import { toast } from '@/components/ui/Toaster';
 import { Button } from '@/components/ui/button';
@@ -162,12 +163,31 @@ export function CheckoutView({
       });
 
       if (!isPayOnDelivery && receipt && order?.id) {
-        await submitPayment(
+        paymentVerifyDebug('checkout_submit_payment', {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          paymentMethodId: selectedPaymentMethodId,
+          payerAccount: payerAccountNumber.replace(/\D/g, ''),
+          totalSar: total,
+          totalYer,
+          sarToYer,
+        });
+
+        const payment = await submitPayment(
           order.id,
           receipt,
           selectedPaymentMethodId,
           payerAccountNumber.replace(/\D/g, ''),
         );
+
+        paymentVerifyDebug('checkout_payment_response', {
+          orderId: order.id,
+          paymentId: payment.id,
+          autoVerifyStatus: payment.auto_verify_status,
+          expectedAmountYer: payment.expected_amount_yer,
+          payerAccountNumber: payment.payer_account_number,
+          amountSar: payment.amount,
+        });
       }
 
       toast(
