@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import type { Order } from '@/lib/types/entities';
 
 interface BlogRevalidateOptions {
   slug?: string | null;
@@ -70,6 +71,36 @@ export function revalidateWebsiteSettingsStorefront() {
   revalidatePath('/privacy-policy');
   revalidatePath('/terms-of-service');
   revalidatePath('/sitemap.xml');
+}
+
+export function revalidateShippingFeesStorefront() {
+  revalidateTag('shipping-fees');
+  revalidatePath('/checkout');
+}
+
+export function revalidateOrderProductsStorefront(order: Order) {
+  const slugs = new Set<string>();
+  const ids = new Set<string>();
+
+  for (const item of order.items ?? []) {
+    const slug = item.product?.slug?.trim();
+    if (slug) {
+      slugs.add(slug);
+      continue;
+    }
+    const id = item.product_id?.trim() || item.product?.id?.trim();
+    if (id) ids.add(id);
+  }
+
+  revalidateProductStorefront();
+
+  for (const slug of slugs) {
+    revalidateTag(`product-${slug}`);
+    revalidatePath(`/products/${slug}`);
+  }
+  for (const id of ids) {
+    revalidateTag(`product-id-${id}`);
+  }
 }
 
 export async function readJsonField(

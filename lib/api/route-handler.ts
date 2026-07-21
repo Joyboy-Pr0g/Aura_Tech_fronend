@@ -8,7 +8,7 @@ interface ProxyOptions {
   method?: string;
   requireAuth?: boolean;
   searchParams?: Record<string, string>;
-  revalidateOnSuccess?: () => void;
+  revalidateOnSuccess?: (data?: unknown) => void;
 }
 
 export async function proxyToBackend(
@@ -54,7 +54,7 @@ export async function proxyToBackend(
       searchParams: queryParams,
     });
 
-    revalidateOnSuccess?.();
+    revalidateOnSuccess?.(response.data);
 
     return NextResponse.json(response);
   } catch (err) {
