@@ -94,13 +94,13 @@ export function revalidateOrderProductsStorefront(order: Order) {
 
   revalidateProductStorefront();
 
-  for (const slug of slugs) {
+  slugs.forEach((slug) => {
     revalidateTag(`product-${slug}`);
     revalidatePath(`/products/${slug}`);
-  }
-  for (const id of ids) {
+  });
+  ids.forEach((id) => {
     revalidateTag(`product-id-${id}`);
-  }
+  });
 }
 
 export async function readJsonField(
