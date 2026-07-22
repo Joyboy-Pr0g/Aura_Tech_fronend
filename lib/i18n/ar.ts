@@ -230,6 +230,7 @@ export const ar: Record<TranslationKey, string> = {
   'checkout.amountToPayYer': 'المبلغ المطلوب تحويله (ر.ي)',
   'checkout.missingPayerAccount': 'يرجى إدخال رقم حساب محفظتك.',
   'checkout.missingReceipt': 'يرجى رفع إيصال التحويل.',
+  'checkout.receiptTooLarge': 'يجب أن يكون الإيصال 5 ميجابايت أو أقل. استخدم لقطة شاشة أو صورة مضغوطة.',
   'checkout.noShippingFees': 'لا توجد خيارات شحن متاحة. يرجى التواصل مع الدعم.',
   'checkout.noPaymentMethods': 'لا توجد طرق دفع متاحة.',
   'checkout.selectPaymentMethod': 'يرجى اختيار طريقة الدفع أولاً.',

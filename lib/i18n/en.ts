@@ -228,6 +228,7 @@ export const en = {
   'checkout.amountToPayYer': 'Amount to transfer (YER)',
   'checkout.missingPayerAccount': 'Please enter your wallet account number.',
   'checkout.missingReceipt': 'Please upload your transfer receipt.',
+  'checkout.receiptTooLarge': 'Receipt must be 5 MB or smaller. Use a screenshot or compress the image.',
   'checkout.noShippingFees': 'No shipping options available. Please contact support.',
   'checkout.noPaymentMethods': 'No payment methods available.',
   'checkout.selectPaymentMethod': 'Please select a payment method first.',

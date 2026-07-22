@@ -91,6 +91,7 @@ async function ProductsContent({ searchParams }: ProductsPageProps) {
 
   const maxPrice = Math.max(maxProductPrice, 1000);
   const isAuthenticated = Boolean(await getAuthToken());
+  console.log(productPage.items);
 
   return (
     <ProductsCatalog

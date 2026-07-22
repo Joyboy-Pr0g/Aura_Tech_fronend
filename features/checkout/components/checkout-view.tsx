@@ -30,6 +30,8 @@ const STEP_KEYS = [
   'checkout.step.review',
 ] as const;
 
+const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
+
 export function CheckoutView({
   cart,
   addresses,
@@ -140,6 +142,10 @@ export function CheckoutView({
       }
       if (!receipt) {
         toast(t('checkout.missingReceipt'), 'error');
+        return;
+      }
+      if (receipt.size > MAX_RECEIPT_BYTES) {
+        toast(t('checkout.receiptTooLarge'), 'error');
         return;
       }
       if (payerAccountNumber.replace(/\D/g, '').length < 6) {
@@ -493,7 +499,16 @@ export function CheckoutView({
                   id="receipt-upload-review"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    if (file && file.size > MAX_RECEIPT_BYTES) {
+                      toast(t('checkout.receiptTooLarge'), 'error');
+                      e.target.value = '';
+                      setReceipt(null);
+                      return;
+                    }
+                    setReceipt(file);
+                  }}
                   className="sr-only"
                 />
               </div>

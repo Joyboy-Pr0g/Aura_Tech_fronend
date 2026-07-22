@@ -33,7 +33,7 @@ export function ProductCard({
   const { t } = useLocale();
   const formatPrice = useFormatPrice();
   const imageUrl = getProductImageUrl(product);
-  const inStock = isInStock(product);
+  // const inStock = isInStock(product);
   const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
 
   useEffect(() => {
@@ -111,9 +111,9 @@ export function ProductCard({
           </CardTitle>
           <div className="flex items-center justify-between pt-1">
             <span className="font-bold text-primary-400">{formatPrice(product.price)}</span>
-            <Badge variant={inStock ? 'success' : 'danger'}>
+            {/* <Badge variant={inStock ? 'success' : 'danger'}>
               {inStock ? t('common.inStock') : t('common.outOfStock')}
-            </Badge>
+            </Badge> */}
           </div>
         </CardContent>
       </Card>
