@@ -9,6 +9,7 @@ export interface CreateProductPayload {
   title: string;
   description: string;
   price: number;
+  discount_price?: number | null;
   category_id: string;
   sub_category_id?: string | null;
   brand?: string;
@@ -19,6 +20,7 @@ export interface CreateProductPayload {
     size?: string | null;
     color?: string | null;
     price?: number | null;
+    discount_price?: number | null;
     stock_quantity?: number;
     delete_image_public_id?: string | null;
   }>;
@@ -28,6 +30,7 @@ export interface UpdateProductPayload {
   title?: string;
   description?: string;
   price?: number;
+  discount_price?: number | null;
   category_id?: string;
   sub_category_id?: string | null;
   brand?: string | null;
@@ -40,6 +43,7 @@ export interface UpdateProductPayload {
     size?: string | null;
     color?: string | null;
     price?: number | null;
+    discount_price?: number | null;
     stock_quantity?: number;
     delete_image_public_id?: string | null;
   }>;

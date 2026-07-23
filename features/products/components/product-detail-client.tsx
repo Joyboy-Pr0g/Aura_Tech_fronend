@@ -8,9 +8,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Product } from '@/lib/types/entities';
 import { useFormatPrice } from '@/lib/currency/currency-provider';
 import {
-  getDisplayPrice,
   getDisplayStock,
   getMainProductStock,
+  getProductPricing,
   getVariantLabel,
   getProductPriceRange,
   getVariantAvailableStock,
@@ -34,6 +34,7 @@ import { Minus, Plus, Heart, ShoppingCart, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { SlideIn, Stagger, staggerItemVariants, EASE_OUT_EXPO, Reveal } from '@/lib/motion/reveal';
 import { ProductImageZoom } from '@/features/products/components/product-image-zoom';
+import { ProductPriceDisplay } from '@/features/products/components/product-price-display';
 
 interface ProductDetailClientProps {
   product: Product;
@@ -68,7 +69,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     [product, selectedVariant],
   );
 
-  const displayPrice = getDisplayPrice(product, selectedVariant);
+  const selectedPricing = getProductPricing(product, selectedVariant);
   const available = getDisplayStock(product, selectedVariant);
   const variantInStock = isInStock(product, selectedVariant);
   const stockScopeLabel = selectedVariant
@@ -238,9 +239,9 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
             </p>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-3xl font-bold text-primary-400">{formatPrice(displayPrice)}</p>
-            {priceRange && (
+          <div className="space-y-2">
+            <ProductPriceDisplay product={product} variant={selectedVariant} layout="detail" />
+            {priceRange && !selectedPricing.hasDiscount && (
               <p className="text-sm text-white/40">
                 {t('product.fromPrice', { price: formatPrice(priceRange.min) })}
                 {' — '}
@@ -271,7 +272,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                     )}
                   >
                     <span className="block font-medium">{t('product.mainProduct')}</span>
-                    <span className="block text-xs mt-0.5 opacity-80">{formatPrice(Number(product.price))}</span>
+                    <ProductPriceDisplay product={product} layout="inline" className="mt-0.5" />
                     <span className="block text-xs mt-0.5 text-white/45">
                       {t('product.availableCount', { count: mainProductStock })}
                     </span>
@@ -280,7 +281,6 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                 {variants.map((variant) => {
                   const label = getVariantLabel(variant);
                   const variantStock = getVariantAvailableStock(variant);
-                  const variantPrice = getDisplayPrice(product, variant);
                   const isSelected = selectedVariantId === variant.id;
                   const outOfStock = variantStock <= 0;
 
@@ -299,9 +299,12 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
                       )}
                     >
                       <span className="block font-medium">{label}</span>
-                      {variantPrice !== Number(product.price) && (
-                        <span className="block text-xs mt-0.5 opacity-80">{formatPrice(variantPrice)}</span>
-                      )}
+                      <ProductPriceDisplay
+                        product={product}
+                        variant={variant}
+                        layout="inline"
+                        className="mt-0.5"
+                      />
                       <span className={cn('block text-xs mt-0.5', outOfStock ? 'text-danger' : 'text-white/45')}>
                         {outOfStock
                           ? t('common.outOfStock')

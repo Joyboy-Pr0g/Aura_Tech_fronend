@@ -61,6 +61,7 @@ export interface ProductVariant {
   size: string | null;
   color: string | null;
   price: number | null;
+  discount_price?: number | null;
   stock_quantity: number;
   reserved_quantity: number;
   images?: ProductImage[] | null;
@@ -100,6 +101,7 @@ export interface Product {
   title: string;
   description: string;
   price: number;
+  discount_price?: number | null;
   brand: string;
   features: Record<string, string>;
   stock_quantity: number;

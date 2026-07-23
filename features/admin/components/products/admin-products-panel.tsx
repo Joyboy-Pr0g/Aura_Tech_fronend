@@ -37,6 +37,23 @@ import { useAdminLatestActions } from '@/features/admin/hooks/use-admin-latest-a
 import { AdminPageHeader } from '@/components/ui/admin-page-header';
 import { getProductImageUrl, getAvailableStock } from '@/lib/products/helpers';
 
+function renderAdminProductPrice(product: AdminProduct) {
+  const basePrice = Number(product.price);
+  const discountPrice =
+    product.discount_price != null ? Number(product.discount_price) : null;
+
+  if (discountPrice != null && !Number.isNaN(discountPrice) && discountPrice > 0 && discountPrice < basePrice) {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <span className="text-xs text-white/40 line-through">{formatCurrency(basePrice)}</span>
+        <span className="font-medium text-primary-400">{formatCurrency(discountPrice)}</span>
+      </div>
+    );
+  }
+
+  return <span className="text-white">{formatCurrency(basePrice)}</span>;
+}
+
 const PAGE_SIZE = 20;
 
 interface AdminProductsPanelProps {
@@ -378,6 +395,7 @@ export function AdminProductsPanel({
                     <th className="px-5 py-4 font-medium">{t('admin.productCategory')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productSubCategory')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productPrice')}</th>
+                    <th className="px-5 py-4 font-medium">{t('admin.productDiscountPrice')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productStock')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productStatus')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.audit')}</th>
@@ -399,7 +417,10 @@ export function AdminProductsPanel({
                       <td className="px-5 py-4 text-white/70">{product.brand || '—'}</td>
                       <td className="px-5 py-4 text-white/70">{product.category?.name ?? '—'}</td>
                       <td className="px-5 py-4 text-white/70">{product.sub_category?.name ?? '—'}</td>
-                      <td className="px-5 py-4 text-white">{formatCurrency(product.price)}</td>
+                      <td className="px-5 py-4">{renderAdminProductPrice(product)}</td>
+                      <td className="px-5 py-4 text-white/70">
+                        {product.discount_price != null ? formatCurrency(Number(product.discount_price)) : '—'}
+                      </td>
                       <td className="px-5 py-4 text-white/70">{getAvailableStock(product)}</td>
                       <td className="px-5 py-4">{renderStatusBadges(product)}</td>
                       <td className="px-5 py-4">
@@ -440,7 +461,7 @@ export function AdminProductsPanel({
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {renderStatusBadges(product)}
-                  <Badge variant="outline">{formatCurrency(product.price)}</Badge>
+                  {renderAdminProductPrice(product)}
                   <Badge variant="outline">{getAvailableStock(product)} {t('admin.inStockShort')}</Badge>
                 </div>
               </div>

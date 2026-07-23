@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, Package, Eye } from 'lucide-react';
 import { Product } from '@/lib/types/entities';
-import { useFormatPrice } from '@/lib/currency/currency-provider';
-import { getProductImageUrl, isInStock } from '@/lib/products/helpers';
+import { getProductBestDiscount, getProductImageUrl } from '@/lib/products/helpers';
+import { ProductPriceDisplay, ProductSaleBadge } from '@/features/products/components/product-price-display';
 import { addToWishlist, removeFromWishlist } from '@/features/engagement/services/engagement-client';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ProductImage } from '@/components/ui/product-image';
 import { cn } from '@/lib/utils/cn';
 import { toast } from '@/components/ui/Toaster';
@@ -31,9 +30,8 @@ export function ProductCard({
 }: ProductCardProps) {
   const router = useRouter();
   const { t } = useLocale();
-  const formatPrice = useFormatPrice();
   const imageUrl = getProductImageUrl(product);
-  // const inStock = isInStock(product);
+  const onSale = Boolean(getProductBestDiscount(product));
   const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
 
   useEffect(() => {
@@ -67,7 +65,10 @@ export function ProductCard({
 
   return (
     <Link href={`/products/${product.slug}`}>
-      <Card className="group overflow-hidden h-full transition-all hover:border-primary-500/30 hover:shadow-lg hover:shadow-primary-500/5">
+      <Card className={cn(
+        'group overflow-hidden h-full transition-all hover:border-primary-500/30 hover:shadow-lg hover:shadow-primary-500/5',
+        onSale && 'border-[#ff0080]/25 shadow-[0_0_28px_rgba(255,0,128,0.12)]',
+      )}>
         <div className={cn('relative w-full overflow-hidden bg-dark-800 flex items-center justify-center', imageClassName)}>
           {imageUrl ? (
             <ProductImage
@@ -79,6 +80,7 @@ export function ProductCard({
           ) : (
             <Package className="h-12 w-12 text-white/20" />
           )}
+          <ProductSaleBadge product={product} />
           {showWishlist && (
             <button
               type="button"
@@ -110,10 +112,7 @@ export function ProductCard({
             {product.title}
           </CardTitle>
           <div className="flex items-center justify-between pt-1">
-            <span className="font-bold text-primary-400">{formatPrice(product.price)}</span>
-            {/* <Badge variant={inStock ? 'success' : 'danger'}>
-              {inStock ? t('common.inStock') : t('common.outOfStock')}
-            </Badge> */}
+            <ProductPriceDisplay product={product} layout="card" />
           </div>
         </CardContent>
       </Card>

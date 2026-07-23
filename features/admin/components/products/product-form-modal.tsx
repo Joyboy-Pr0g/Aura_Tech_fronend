@@ -35,6 +35,7 @@ function createProductFormSchema(t: (key: string) => string) {
     title: z.string().min(3, t('validation.titleMin3')).max(200),
     description: z.string().min(10, t('validation.descriptionMin10')),
     price: z.coerce.number().positive(t('validation.pricePositive')),
+    discount_price: z.string().optional(),
     category_id: z.string().uuid(t('validation.categoryRequired')),
     sub_category_id: z.string().uuid().optional().or(z.literal('')),
     brand: z.string().max(100).optional(),
@@ -54,6 +55,7 @@ interface VariantRow {
   size: string;
   color: string;
   price: string;
+  discount_price: string;
   stock_quantity: string;
   existingImage?: { url: string; public_id: string } | null;
   imageFile?: File | null;
@@ -79,6 +81,7 @@ const emptyVariant = (): VariantRow => ({
   size: '',
   color: '',
   price: '',
+  discount_price: '',
   stock_quantity: '0',
   existingImage: null,
   imageFile: null,
@@ -108,6 +111,7 @@ function variantsToRows(variants?: ProductVariant[]): VariantRow[] {
     size: variant.size ?? '',
     color: variant.color ?? '',
     price: variant.price != null ? String(Number(variant.price)) : '',
+    discount_price: variant.discount_price != null ? String(Number(variant.discount_price)) : '',
     stock_quantity: String(variant.stock_quantity),
     existingImage: variant.images?.[0] ?? null,
     imageFile: null,
@@ -125,6 +129,7 @@ function rowsToVariants(rows: VariantRow[]) {
       size: row.size.trim() || null,
       color: row.color.trim() || null,
       price: row.price ? Number(row.price) : null,
+      discount_price: row.discount_price ? Number(row.discount_price) : null,
       stock_quantity: Number(row.stock_quantity) || 0,
       ...(row.deleteImage && row.existingImage
         ? { delete_image_public_id: row.existingImage.public_id }
@@ -246,6 +251,7 @@ export function ProductFormModal({
         title: '',
         description: '',
         price: 0,
+        discount_price: '',
         category_id: categories[0]?.id ?? '',
         sub_category_id: '',
         brand: '',
@@ -260,6 +266,7 @@ export function ProductFormModal({
           title: product.title,
           description: product.description,
           price: Number(product.price),
+          discount_price: product.discount_price != null ? String(Number(product.discount_price)) : '',
           category_id: product.category_id ?? '',
           sub_category_id: product.sub_category_id ?? '',
           brand: product.brand ?? '',
@@ -397,6 +404,7 @@ export function ProductFormModal({
       title: values.title.trim(),
       description: values.description.trim(),
       price: values.price,
+      discount_price: values.discount_price === '' || values.discount_price == null ? null : Number(values.discount_price),
       category_id: values.category_id,
       sub_category_id: values.sub_category_id || null,
       brand: values.brand?.trim() || '',
@@ -478,6 +486,22 @@ export function ProductFormModal({
                       error={Boolean(errors.price)}
                     />
                     {errors.price && <p className="text-xs text-danger">{errors.price.message}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="product-discount-price">{t('admin.productDiscountPrice')}</Label>
+                    <Input
+                      id="product-discount-price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="—"
+                      {...register('discount_price')}
+                      error={Boolean(errors.discount_price)}
+                    />
+                    {errors.discount_price && (
+                      <p className="text-xs text-danger">{errors.discount_price.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -675,6 +699,17 @@ export function ProductFormModal({
                               onChange={(e) => {
                                 const next = [...variantRows];
                                 next[index] = { ...next[index], price: e.target.value };
+                                setVariantRows(next);
+                              }}
+                            />
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder={t('admin.variantDiscountPrice')}
+                              value={row.discount_price}
+                              onChange={(e) => {
+                                const next = [...variantRows];
+                                next[index] = { ...next[index], discount_price: e.target.value };
                                 setVariantRows(next);
                               }}
                             />

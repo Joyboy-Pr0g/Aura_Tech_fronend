@@ -27,10 +27,49 @@ export function getAvailableStock(product: Product): number {
 }
 
 export function getDisplayPrice(product: Product, variant?: ProductVariant | null): number {
-  if (variant?.price != null) {
-    return Number(variant.price);
+  return getProductPricing(product, variant).salePrice;
+}
+
+export interface ProductPricing {
+  originalPrice: number;
+  salePrice: number;
+  hasDiscount: boolean;
+  discountPercent: number;
+  savings: number;
+}
+
+export function getProductPricing(product: Product, variant?: ProductVariant | null): ProductPricing {
+  const originalPrice =
+    variant?.price != null ? Number(variant.price) : Number(product.price);
+
+  const discountRaw =
+    variant?.discount_price != null ? variant.discount_price : product.discount_price;
+  const discountPrice = discountRaw != null ? Number(discountRaw) : null;
+
+  const hasDiscount =
+    discountPrice != null &&
+    !Number.isNaN(discountPrice) &&
+    discountPrice > 0 &&
+    discountPrice < originalPrice;
+
+  const salePrice = hasDiscount ? discountPrice : originalPrice;
+  const savings = hasDiscount ? originalPrice - salePrice : 0;
+  const discountPercent = hasDiscount ? Math.round((savings / originalPrice) * 100) : 0;
+
+  return { originalPrice, salePrice, hasDiscount, discountPercent, savings };
+}
+
+/** Best visible discount on a product (for cards without a selected variant). */
+export function getProductBestDiscount(product: Product): ProductPricing | null {
+  const candidates = [getProductPricing(product, null)];
+  for (const variant of product.variants ?? []) {
+    candidates.push(getProductPricing(product, variant));
   }
-  return Number(product.price);
+  const discounted = candidates.filter((p) => p.hasDiscount);
+  if (!discounted.length) return null;
+  return discounted.reduce((best, current) =>
+    current.discountPercent > best.discountPercent ? current : best,
+  );
 }
 
 export function getDisplayStock(product: Product, variant?: ProductVariant | null): number {
@@ -115,7 +154,7 @@ export function getDefaultDetailImage(
 export function getProductPriceRange(product: Product): { min: number; max: number } | null {
   if (!product.variants?.length) return null;
 
-  const prices = product.variants.map((variant) => getDisplayPrice(product, variant));
+  const prices = product.variants.map((variant) => getProductPricing(product, variant).salePrice);
   const min = Math.min(...prices);
   const max = Math.max(...prices);
 
