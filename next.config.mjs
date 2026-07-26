@@ -2,8 +2,9 @@
 const nextConfig = {
   poweredByHeader: false,
   experimental: {
+    // Server Actions only; multipart admin uploads use Route Handlers (see nginx client_max_body_size on host).
     serverActions: {
-      bodySizeLimit: '10mb',
+      bodySizeLimit: '128mb',
     },
   },
   images: {

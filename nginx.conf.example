@@ -1,0 +1,36 @@
+# AURA TECH — Nginx reverse proxy for Next.js (www.auratechplus.com)
+# Admin product uploads hit /api/* on this host first, then proxy to the Node API.
+# Default nginx client_max_body_size is 1m — raise it or POST /api/admin/products returns 413.
+#
+#   sudo cp nginx.conf.example /etc/nginx/sites-available/auratech-web
+#   sudo ln -s /etc/nginx/sites-available/auratech-web /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+
+upstream auratech_next {
+    server 127.0.0.1:3001;
+    keepalive 16;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name www.auratechplus.com auratechplus.com;
+
+    ssl_certificate     /etc/ssl/auratech/origin.pem;
+    ssl_certificate_key /etc/ssl/auratech/origin.key;
+
+    client_max_body_size 128m;
+
+    location / {
+        proxy_pass http://auratech_next;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+}
