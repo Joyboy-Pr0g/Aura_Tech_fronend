@@ -6,6 +6,7 @@ const EXCLUDED_PATH_PREFIXES = [
   '/admin',
   '/api',
   '/coming-soon',
+  '/links',
 ] as const;
 
 function hasProductionBackend(): boolean {

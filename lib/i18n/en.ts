@@ -38,6 +38,10 @@ export const en = {
   'storefront.comingSoon.contact': 'Questions? Reach us at',
   'storefront.comingSoon.staffLogin': 'Staff login',
 
+  'links.badge': 'Official links',
+  'links.visitStore': 'Visit our store',
+  'links.empty': 'No links configured yet.',
+
   // Storefront errors
   'storefront.error.badge': 'Temporary issue',
   'storefront.error.title': "We couldn't load this page",

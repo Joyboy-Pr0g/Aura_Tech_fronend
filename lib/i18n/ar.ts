@@ -40,6 +40,10 @@ export const ar: Record<TranslationKey, string> = {
   'storefront.comingSoon.contact': 'لديك أسئلة؟ تواصل معنا على',
   'storefront.comingSoon.staffLogin': 'دخول فريق العمل',
 
+  'links.badge': 'روابطنا الرسمية',
+  'links.visitStore': 'زيارة المتجر',
+  'links.empty': 'لا توجد روابط متاحة حالياً.',
+
   // Storefront errors
   'storefront.error.badge': 'مشكلة مؤقتة',
   'storefront.error.title': 'تعذّر تحميل هذه الصفحة',
