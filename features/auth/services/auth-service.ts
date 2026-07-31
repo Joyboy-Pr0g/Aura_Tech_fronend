@@ -22,10 +22,9 @@ export async function login(data: LoginInput, turnstileToken?: string | null): P
 }
 
 export async function register(data: RegisterInput, turnstileToken?: string | null): Promise<User> {
-  const { confirm_password: _confirmPassword, ...payload } = data;
   const res = await clientFetch<AuthResponse>('/api/auth/register', {
     method: 'POST',
-    body: { ...payload, turnstileToken },
+    body: { ...data, turnstileToken },
   });
   return res.data!.user;
 }
