@@ -131,19 +131,17 @@ export function OrderDetail({
           </div>
         </div>
 
-        {(item.variant?.color || item.variant?.size || item.variant?.sku) && (
+        {(item.variant?.sku || Object.keys(item.variant?.features ?? {}).length > 0) && (
           <div className="flex flex-wrap gap-2 text-xs">
-            {item.variant.color && (
-              <span className="rounded-md border border-white/10 px-2 py-1 text-white/60">
-                {item.variant.color}
+            {Object.entries(item.variant?.features ?? {}).map(([key, value]) => (
+              <span
+                key={`${key}-${value}`}
+                className="rounded-md border border-white/10 px-2 py-1 text-white/60"
+              >
+                {key}: {value}
               </span>
-            )}
-            {item.variant.size && (
-              <span className="rounded-md border border-white/10 px-2 py-1 text-white/60">
-                {item.variant.size}
-              </span>
-            )}
-            {item.variant.sku && (
+            ))}
+            {item.variant?.sku && (
               <span className="rounded-md border border-white/10 px-2 py-1 text-white/50">
                 {t('product.sku')}: {item.variant.sku}
               </span>

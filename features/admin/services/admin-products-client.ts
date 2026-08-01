@@ -17,8 +17,7 @@ export interface CreateProductPayload {
   stock_quantity?: number;
   variants?: Array<{
     sku: string;
-    size?: string | null;
-    color?: string | null;
+    features?: Record<string, string>;
     price?: number | null;
     discount_price?: number | null;
     stock_quantity?: number;
@@ -40,8 +39,7 @@ export interface UpdateProductPayload {
   variants?: Array<{
     id?: string;
     sku: string;
-    size?: string | null;
-    color?: string | null;
+    features?: Record<string, string>;
     price?: number | null;
     discount_price?: number | null;
     stock_quantity?: number;

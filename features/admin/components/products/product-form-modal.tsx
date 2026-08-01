@@ -52,8 +52,7 @@ interface FeatureRow {
 interface VariantRow {
   id?: string;
   sku: string;
-  size: string;
-  color: string;
+  featureRows: FeatureRow[];
   price: string;
   discount_price: string;
   stock_quantity: string;
@@ -78,8 +77,7 @@ interface ProductFormModalProps {
 
 const emptyVariant = (): VariantRow => ({
   sku: '',
-  size: '',
-  color: '',
+  featureRows: [{ key: '', value: '' }],
   price: '',
   discount_price: '',
   stock_quantity: '0',
@@ -108,8 +106,7 @@ function variantsToRows(variants?: ProductVariant[]): VariantRow[] {
   return variants.map((variant) => ({
     id: variant.id,
     sku: variant.sku,
-    size: variant.size ?? '',
-    color: variant.color ?? '',
+    featureRows: featuresToRows(variant.features ?? {}),
     price: variant.price != null ? String(Number(variant.price)) : '',
     discount_price: variant.discount_price != null ? String(Number(variant.discount_price)) : '',
     stock_quantity: String(variant.stock_quantity),
@@ -126,8 +123,7 @@ function rowsToVariants(rows: VariantRow[]) {
     .map((row) => ({
       ...(row.id ? { id: row.id } : {}),
       sku: row.sku.trim(),
-      size: row.size.trim() || null,
-      color: row.color.trim() || null,
+      features: rowsToFeatures(row.featureRows),
       price: row.price ? Number(row.price) : null,
       discount_price: row.discount_price ? Number(row.discount_price) : null,
       stock_quantity: Number(row.stock_quantity) || 0,
@@ -674,24 +670,6 @@ export function ProductFormModal({
                               }}
                             />
                             <Input
-                              placeholder={t('admin.variantColor')}
-                              value={row.color}
-                              onChange={(e) => {
-                                const next = [...variantRows];
-                                next[index] = { ...next[index], color: e.target.value };
-                                setVariantRows(next);
-                              }}
-                            />
-                            <Input
-                              placeholder={t('admin.variantSize')}
-                              value={row.size}
-                              onChange={(e) => {
-                                const next = [...variantRows];
-                                next[index] = { ...next[index], size: e.target.value };
-                                setVariantRows(next);
-                              }}
-                            />
-                            <Input
                               type="number"
                               step="0.01"
                               placeholder={t('admin.variantPrice')}
@@ -724,6 +702,76 @@ export function ProductFormModal({
                                 setVariantRows(next);
                               }}
                             />
+                          </div>
+                          <div className="space-y-2 pt-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs text-white/60">{t('admin.variantFeatures')}</Label>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  const next = [...variantRows];
+                                  next[index] = {
+                                    ...next[index],
+                                    featureRows: [...next[index].featureRows, { key: '', value: '' }],
+                                  };
+                                  setVariantRows(next);
+                                }}
+                              >
+                                <Plus size={12} className="me-1" />
+                                {t('admin.addFeature')}
+                              </Button>
+                            </div>
+                            {row.featureRows.map((featureRow, featureIndex) => (
+                              <div key={featureIndex} className="flex gap-2">
+                                <Input
+                                  placeholder={t('admin.featureKey')}
+                                  value={featureRow.key}
+                                  onChange={(e) => {
+                                    const next = [...variantRows];
+                                    const featureRows = [...next[index].featureRows];
+                                    featureRows[featureIndex] = {
+                                      ...featureRows[featureIndex],
+                                      key: e.target.value,
+                                    };
+                                    next[index] = { ...next[index], featureRows };
+                                    setVariantRows(next);
+                                  }}
+                                />
+                                <Input
+                                  placeholder={t('admin.featureValue')}
+                                  value={featureRow.value}
+                                  onChange={(e) => {
+                                    const next = [...variantRows];
+                                    const featureRows = [...next[index].featureRows];
+                                    featureRows[featureIndex] = {
+                                      ...featureRows[featureIndex],
+                                      value: e.target.value,
+                                    };
+                                    next[index] = { ...next[index], featureRows };
+                                    setVariantRows(next);
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const next = [...variantRows];
+                                    const featureRows = next[index].featureRows.filter((_, i) => i !== featureIndex);
+                                    next[index] = {
+                                      ...next[index],
+                                      featureRows: featureRows.length ? featureRows : [{ key: '', value: '' }],
+                                    };
+                                    setVariantRows(next);
+                                  }}
+                                  disabled={row.featureRows.length === 1}
+                                >
+                                  <X size={14} />
+                                </Button>
+                              </div>
+                            ))}
                           </div>
                           <div className="space-y-2">
                             <Label>{t('admin.variantImage')}</Label>

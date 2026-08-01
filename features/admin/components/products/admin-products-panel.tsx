@@ -397,6 +397,8 @@ export function AdminProductsPanel({
                     <th className="px-5 py-4 font-medium">{t('admin.productPrice')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productDiscountPrice')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productStock')}</th>
+                    <th className="px-5 py-4 font-medium">{t('admin.productReservedStock')}</th>
+                    <th className="px-5 py-4 font-medium">{t('admin.productAvailableStock')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.productStatus')}</th>
                     <th className="px-5 py-4 font-medium">{t('admin.audit')}</th>
                     <th className="admin-table-actions-head">{t('admin.actions')}</th>
@@ -421,6 +423,8 @@ export function AdminProductsPanel({
                       <td className="px-5 py-4 text-white/70">
                         {product.discount_price != null ? formatCurrency(Number(product.discount_price)) : '—'}
                       </td>
+                      <td className="px-5 py-4 text-white/70">{product.stock_quantity}</td>
+                      <td className="px-5 py-4 text-white/70">{product.reserved_quantity}</td>
                       <td className="px-5 py-4 text-white/70">{getAvailableStock(product)}</td>
                       <td className="px-5 py-4">{renderStatusBadges(product)}</td>
                       <td className="px-5 py-4">

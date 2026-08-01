@@ -25,12 +25,7 @@ interface AddStockModalProps {
   onSuccess: () => void;
 }
 
-function formatVariantLabel(variant: ProductVariant) {
-  const parts = [variant.sku];
-  if (variant.color) parts.push(variant.color);
-  if (variant.size) parts.push(`(${variant.size})`);
-  return parts.join(' · ');
-}
+import { getVariantLabel } from '@/lib/products/helpers';
 
 export function AddStockModal({ open, onOpenChange, product, onSuccess }: AddStockModalProps) {
   const { t } = useLocale();
@@ -99,7 +94,7 @@ export function AddStockModal({ open, onOpenChange, product, onSuccess }: AddSto
                 >
                   {variants.map((variant) => (
                     <option key={variant.id} value={variant.id}>
-                      {formatVariantLabel(variant)} — {variant.stock_quantity}
+                      {getVariantLabel(variant)} — {variant.stock_quantity}
                     </option>
                   ))}
                   <option value="">{t('admin.mainProductStock')}</option>

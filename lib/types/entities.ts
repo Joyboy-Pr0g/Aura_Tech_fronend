@@ -58,8 +58,7 @@ export interface ProductImage {
 export interface ProductVariant {
   id: string;
   sku: string;
-  size: string | null;
-  color: string | null;
+  features?: Record<string, string>;
   price: number | null;
   discount_price?: number | null;
   stock_quantity: number;
@@ -213,6 +212,7 @@ export interface AdminLatestAction {
   action: string;
   admin_email: string | null;
   admin_name: string | null;
+  changes_json?: Record<string, unknown> | null;
   created_at: string;
 }
 

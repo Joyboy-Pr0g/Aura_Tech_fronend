@@ -85,8 +85,13 @@ export function isInStock(product: Product, variant?: ProductVariant | null): bo
 }
 
 export function getVariantLabel(variant: ProductVariant): string {
-  const parts = [variant.color, variant.size].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : variant.sku;
+  const entries = Object.entries(variant.features ?? {}).filter(
+    ([key, value]) => key.trim() && String(value).trim(),
+  );
+  if (entries.length > 0) {
+    return entries.map(([key, value]) => `${key}: ${value}`).join(' · ');
+  }
+  return variant.sku;
 }
 
 export function getPrimaryImage(product: Product): ProductImage | null {

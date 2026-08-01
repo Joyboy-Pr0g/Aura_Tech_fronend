@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Modal,
   ModalBody,
@@ -28,6 +29,7 @@ const ACTION_KEYS: Record<string, TranslationKey> = {
   reject: 'admin.actionLog.reject',
   status_change: 'admin.actionLog.statusChange',
   unassign_parent: 'admin.actionLog.unassignParent',
+  add_stock: 'admin.addStock',
 };
 
 interface AdminAuditTriggerProps {
@@ -37,11 +39,61 @@ interface AdminAuditTriggerProps {
   className?: string;
 }
 
+function formatChangeValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+function getChangeEntries(changes: Record<string, unknown> | null | undefined) {
+  if (!changes || typeof changes !== 'object') return [];
+  return Object.entries(changes)
+    .filter(([key]) => key.trim())
+    .map(([key, value]) => ({ key: key.trim(), value: formatChangeValue(value) }));
+}
+
 function AuditRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-4">
       <dt className="shrink-0 text-sm text-white/50 sm:w-36">{label}</dt>
       <dd className="text-sm text-white/90">{value}</dd>
+    </div>
+  );
+}
+
+function AuditChangesBadges({
+  changes,
+  label,
+}: {
+  changes: Record<string, unknown>;
+  label: string;
+}) {
+  const entries = getChangeEntries(changes);
+  if (!entries.length) return null;
+
+  return (
+    <div className="space-y-2 border-t mt-4 border-white/10 pt-4">
+      <p className="text-sm text-white/50">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {entries.map(({ key, value }) => (
+          <Badge
+            key={key}
+            variant="secondary"
+            title={`${key}: ${value}`}
+            className="max-w-full rounded-lg px-2.5 py-1 font-normal"
+          >
+            <span className="text-white/45">{key}</span>
+            <span className="mx-1 text-white/25">·</span>
+            <span className="truncate text-white/85 max-w-[14rem]">{value}</span>
+          </Badge>
+        ))}
+      </div>
     </div>
   );
 }
@@ -61,6 +113,7 @@ export function AdminAuditTrigger({
   const hasEditor = Boolean(editor && editor !== creator);
   const hasAction = Boolean(action);
   const hasAudit = hasCreator || hasEditor || hasAction;
+  const changeEntries = getChangeEntries(action?.changes_json);
 
   if (!hasAudit) {
     return <span className={cn('text-xs text-white/30', className)}>—</span>;
@@ -85,6 +138,11 @@ export function AdminAuditTrigger({
       >
         <ClipboardList className="h-3.5 w-3.5" />
         {t('admin.audit')}
+        {changeEntries.length > 0 && (
+          <Badge variant="default" className="h-4 min-w-4 px-1 text-[10px] leading-none">
+            {changeEntries.length}
+          </Badge>
+        )}
       </Button>
 
       <Modal open={open} onOpenChange={setOpen}>
@@ -110,6 +168,9 @@ export function AdminAuditTrigger({
                 </>
               )}
             </dl>
+            {action?.changes_json && Object.keys(action.changes_json).length > 0 && (
+              <AuditChangesBadges changes={action.changes_json} label={t('admin.actionChanges')} />
+            )}
           </ModalBody>
         </ModalContent>
       </Modal>

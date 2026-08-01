@@ -1,5 +1,5 @@
 import { CartItem } from '@/lib/types/entities';
-import { getProductImageUrl } from '@/lib/products/helpers';
+import { getProductImageUrl, getVariantLabel } from '@/lib/products/helpers';
 
 export function getCartItemImageUrl(item: CartItem): string | null {
   const variantImage = item.variant?.images?.[0]?.url;
@@ -7,16 +7,16 @@ export function getCartItemImageUrl(item: CartItem): string | null {
   return item.product ? getProductImageUrl(item.product) : null;
 }
 
-export function getCartItemVariantColor(item: CartItem): string | null {
-  return item.variant?.color ?? null;
-}
-
-export function getCartItemVariantSize(item: CartItem): string | null {
-  return item.variant?.size ?? null;
-}
-
 export function getCartItemVariantSummary(item: CartItem): string | null {
   if (!item.variant) return null;
-  const parts = [item.variant.color, item.variant.size].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : null;
+  const hasFeatures = Object.keys(item.variant.features ?? {}).length > 0;
+  if (!hasFeatures) return null;
+  return getVariantLabel(item.variant);
+}
+
+export function getCartItemVariantFeatures(item: CartItem): Array<{ key: string; value: string }> {
+  if (!item.variant?.features) return [];
+  return Object.entries(item.variant.features)
+    .filter(([key, value]) => key.trim() && String(value).trim())
+    .map(([key, value]) => ({ key: key.trim(), value: String(value).trim() }));
 }
