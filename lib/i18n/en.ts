@@ -574,7 +574,6 @@ export const en = {
   'admin.lastActionBy': 'Last action by',
   'admin.lastActionAt': 'Last action at',
   'admin.actionChanges': 'Changes',
-  'admin.actionChanges': 'Changes',
   'admin.createdBy': 'Created by',
   'admin.updatedBy': 'Updated by',
   'nav.recentSearches': 'Recent searches',
