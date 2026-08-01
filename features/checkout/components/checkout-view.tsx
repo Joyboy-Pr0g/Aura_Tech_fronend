@@ -7,15 +7,21 @@ import { useFormatPrice, useCurrency } from '@/lib/currency/currency-provider';
 import { convertSarToYer, formatYer } from '@/lib/utils/format';
 import { checkout } from '@/features/orders/services/orders-client';
 import { submitPayment } from '@/features/cart/services/cart-client';
-import { paymentVerifyDebug } from '@/lib/debug/payment-verify-debug';
 import { validateCoupon, type ValidateCouponResult } from '@/features/coupons/services/coupons-client';
 import { toast } from '@/components/ui/Toaster';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils/cn';
 import { useLocale } from '@/lib/i18n/locale-provider';
-import { Banknote, Tag, Truck } from 'lucide-react';
+import { Banknote, Tag, Truck, HelpCircle } from 'lucide-react';
 import { getErrorMessage } from '@/lib/errors/api-error';
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+} from '@/components/ui/models/modal';
 interface CheckoutViewProps {
   cart: Cart;
   addresses: CustomerAddress[];
@@ -53,6 +59,14 @@ export function CheckoutView({
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<ValidateCouponResult | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [autoVerifyInfoOpen, setAutoVerifyInfoOpen] = useState(false);
+
+  const autoVerifyReasons = [
+    { titleKey: 'checkout.autoVerifyReason1Title', descKey: 'checkout.autoVerifyReason1Desc' },
+    { titleKey: 'checkout.autoVerifyReason2Title', descKey: 'checkout.autoVerifyReason2Desc' },
+    { titleKey: 'checkout.autoVerifyReason3Title', descKey: 'checkout.autoVerifyReason3Desc' },
+    { titleKey: 'checkout.autoVerifyReason4Title', descKey: 'checkout.autoVerifyReason4Desc' },
+  ] as const;
 
   const items = cart.items ?? [];
   const subtotal = items.reduce((s, i) => s + Number(i.price_at_time) * i.quantity, 0);
@@ -169,16 +183,6 @@ export function CheckoutView({
       });
 
       if (!isPayOnDelivery && receipt && order?.id) {
-        paymentVerifyDebug('checkout_submit_payment', {
-          orderId: order.id,
-          orderNumber: order.order_number,
-          paymentMethodId: selectedPaymentMethodId,
-          payerAccount: payerAccountNumber.replace(/\D/g, ''),
-          totalSar: total,
-          totalYer,
-          sarToYer,
-        });
-
         const payment = await submitPayment(
           order.id,
           receipt,
@@ -186,14 +190,6 @@ export function CheckoutView({
           payerAccountNumber.replace(/\D/g, ''),
         );
 
-        paymentVerifyDebug('checkout_payment_response', {
-          orderId: order.id,
-          paymentId: payment.id,
-          autoVerifyStatus: payment.auto_verify_status,
-          expectedAmountYer: payment.expected_amount_yer,
-          payerAccountNumber: payment.payer_account_number,
-          amountSar: payment.amount,
-        });
       }
 
       toast(
@@ -433,7 +429,17 @@ export function CheckoutView({
 
           {!isPayOnDelivery && (
             <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-              <p className="text-sm text-white/60">{t('checkout.transferInstructions')}</p>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <p className="text-sm text-white/60">{t('checkout.transferInstructions')}</p>
+                <button
+                  type="button"
+                  onClick={() => setAutoVerifyInfoOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-white/60 transition-colors hover:border-primary-500/40 hover:text-primary-400"
+                >
+                  <HelpCircle size={14} />
+                  {t('checkout.autoVerifyInfoButton')}
+                </button>
+              </div>
 
               {totalYer != null && canUseYer ? (
                 <div className="rounded-lg border border-primary-500/30 bg-primary-500/5 p-4">
@@ -528,6 +534,28 @@ export function CheckoutView({
           </div>
         </Card>
       )}
+
+      <Modal open={autoVerifyInfoOpen} onOpenChange={setAutoVerifyInfoOpen}>
+        <ModalContent size="md">
+          <ModalHeader>
+            <ModalTitle>{t('checkout.autoVerifyInfoTitle')}</ModalTitle>
+          </ModalHeader>
+          <ModalBody className="space-y-4">
+            <p className="text-sm text-white/60">{t('checkout.autoVerifyInfoIntro')}</p>
+            <ol className="space-y-3 text-sm">
+              {autoVerifyReasons.map((reason, index) => (
+                <li key={reason.titleKey} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                  <p className="font-medium text-white">
+                    {index + 1}. {t(reason.titleKey)}
+                  </p>
+                  <p className="mt-1 text-white/50">{t(reason.descKey)}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="text-sm font-medium text-emerald-400">{t('checkout.autoVerifyInfoSuccess')}</p>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

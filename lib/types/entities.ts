@@ -166,7 +166,7 @@ export interface Payment {
   payment_method_id?: string | null;
   payer_account_number?: string | null;
   expected_amount_yer?: number | null;
-  auto_verify_status?: 'pending' | 'matched' | 'parse_failed' | 'match_failed';
+  auto_verify_status?: 'pending' | 'matched' | 'parse_failed' | 'match_failed' | 'verify_expired' | 'amount_insufficient' | 'account_mismatch';
   status: PaymentStatus;
   receipt_document_url: string | null;
   submitted_at: string;

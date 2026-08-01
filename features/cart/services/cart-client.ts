@@ -1,5 +1,4 @@
 import { clientFetch } from '@/lib/api/client';
-import { paymentVerifyDebug } from '@/lib/debug/payment-verify-debug';
 import { Cart, CustomerAddress, Payment, PaymentMethod } from '@/lib/types/entities';
 
 export async function addToCart(data: {
@@ -78,18 +77,10 @@ export async function submitPayment(
   form.append('receipt', file);
   form.append('payment_method_id', paymentMethodId);
   form.append('payer_account_number', payerAccountNumber.replace(/\D/g, ''));
-  paymentVerifyDebug('submit_payment_request', {
-    orderId,
-    paymentMethodId,
-    payerAccount: payerAccountNumber.replace(/\D/g, ''),
-    receiptName: file.name,
-    receiptSize: file.size,
-  });
   const res = await clientFetch<Payment>(`/api/payments/orders/${orderId}`, {
     method: 'POST',
     body: form,
   });
-  paymentVerifyDebug('submit_payment_response', res.data);
   return res.data!;
 }
 
