@@ -10,7 +10,7 @@ import {
   ShoppingCart, Package, MapPin, UserIcon,
   LayoutDashboard, Users, ClipboardList, Banknote, LogOut, Heart, Star,
   Menu, X, ChevronsLeft, ChevronsRight,
-  ListIcon, Truck, Tag, Bell, BookOpen,
+  ListIcon, Truck, Tag, Bell, BookOpen, ShieldAlert,
   Settings, HelpCircle, BarChart3, RotateCcw, Receipt, Smartphone,
 } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
@@ -22,7 +22,7 @@ interface NavItem {
   key: string;
   href: string;
   icon: React.ReactNode;
-  badgeKey?: 'pending_orders' | 'pending_payments' | 'unanswered_questions' | 'pending_refunds';
+  badgeKey?: 'pending_orders' | 'pending_payments' | 'unanswered_questions' | 'pending_refunds' | 'suspicious_users';
 }
 
 const CUSTOMER_NAV: NavItem[] = [
@@ -40,6 +40,7 @@ const ADMIN_NAV: NavItem[] = [
   { key: 'sidebar.dashboard', href: '/admin', icon: <LayoutDashboard size={18} /> },
   { key: 'sidebar.notifications', href: '/admin/notifications', icon: <Bell size={18} /> },
   { key: 'sidebar.users', href: '/admin/users', icon: <Users size={18} /> },
+  { key: 'sidebar.suspiciousUsers', href: '/admin/suspicious-users', icon: <ShieldAlert size={18} />, badgeKey: 'suspicious_users' },
   { key: 'sidebar.categories', href: '/admin/categories', icon: <ListIcon size={18} /> },
   { key: 'sidebar.products', href: '/admin/products', icon: <Package size={18} /> },
   { key: 'sidebar.adminOrders', href: '/admin/orders', icon: <ClipboardList size={18} />, badgeKey: 'pending_orders' },

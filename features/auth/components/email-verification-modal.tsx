@@ -29,6 +29,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { toast } from '@/components/ui/Toaster';
+import { TurnstileField } from '@/components/security/turnstile-field';
+import { useTurnstile } from '@/features/auth/hooks/use-turnstile';
 
 const RESEND_COOLDOWN_SECONDS = 120;
 
@@ -58,6 +60,14 @@ export function EmailVerificationModal({
   const [resending, setResending] = useState(false);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const verifyEmailChangeSchema = useMemo(() => createVerifyEmailChangeSchema(t), [t]);
+  const {
+    enabled: turnstileEnabled,
+    token: turnstileToken,
+    setToken: setTurnstileToken,
+    reset: resetTurnstile,
+    registerReset,
+    isReady: turnstileReady,
+  } = useTurnstile();
 
   const form = useForm<VerifyEmailChangeInput>({
     resolver: zodResolver(verifyEmailChangeSchema),
@@ -82,22 +92,32 @@ export function EmailVerificationModal({
     return () => window.clearTimeout(timerId);
   }, [cooldownSeconds]);
 
-  const canResend = cooldownSeconds === 0 && !resending;
+  const canResend = cooldownSeconds === 0 && !resending
+    && (variant !== 'register' || !turnstileEnabled || turnstileReady);
 
   const handleResend = async () => {
     if (!canResend) return;
+
+    if (variant === 'register' && turnstileEnabled && !turnstileToken) {
+      setError(t('auth.turnstileRequired'));
+      return;
+    }
 
     setError('');
     setResending(true);
     try {
       if (variant === 'register') {
-        await sendRegistrationEmailVerification({ email });
+        await sendRegistrationEmailVerification({ email }, turnstileToken);
+        resetTurnstile();
       } else {
         await sendEmailVerification({ email });
       }
       setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
       toast(t('settings.verificationSent'), 'success');
     } catch (err) {
+      if (variant === 'register') {
+        resetTurnstile();
+      }
       setError(getErrorMessage(err));
     } finally {
       setResending(false);
@@ -182,6 +202,13 @@ export function EmailVerificationModal({
                   />
                 </div>
               </div>
+            )}
+
+            {variant === 'register' && cooldownSeconds === 0 && (
+              <TurnstileField
+                onTokenChange={setTurnstileToken}
+                onResetReady={registerReset}
+              />
             )}
           </ModalBody>
 

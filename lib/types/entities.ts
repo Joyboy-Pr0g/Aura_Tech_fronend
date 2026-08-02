@@ -24,6 +24,35 @@ export interface User {
   updated_at?: string;
 }
 
+export type SuspiciousReportStatus = 'open' | 'dismissed' | 'blocked' | 'deleted';
+export type SuspiciousReportCategory = 'profile_churn' | 'address_churn' | 'order_churn' | 'mixed';
+
+export interface SuspiciousActivitySignals {
+  profile_updates_24h?: number;
+  password_changes_24h?: number;
+  address_changes_24h?: number;
+  orders_placed_24h?: number;
+  orders_cancelled_7d?: number;
+  refund_requests_7d?: number;
+}
+
+export interface SuspiciousUserReport {
+  id: string;
+  user_id: string;
+  user?: User;
+  category: SuspiciousReportCategory;
+  status: SuspiciousReportStatus;
+  signals: SuspiciousActivitySignals;
+  summary: string;
+  last_detected_at: string;
+  reviewed_by_admin_id?: string | null;
+  reviewed_by_admin?: User | null;
+  reviewed_at?: string | null;
+  admin_note?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Category {
   id: string;
   name: string;

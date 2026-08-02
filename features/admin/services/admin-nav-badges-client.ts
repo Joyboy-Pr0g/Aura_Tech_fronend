@@ -7,9 +7,16 @@ export interface AdminNavBadges {
   pending_payments: number;
   unanswered_questions: number;
   pending_refunds: number;
+  suspicious_users: number;
 }
 
 export async function getAdminNavBadges(): Promise<AdminNavBadges> {
   const res = await clientFetch<AdminNavBadges>(bffPath(endpoints.admin.navBadges));
-  return res.data ?? { pending_orders: 0, pending_payments: 0, unanswered_questions: 0, pending_refunds: 0 };
+  return res.data ?? {
+    pending_orders: 0,
+    pending_payments: 0,
+    unanswered_questions: 0,
+    pending_refunds: 0,
+    suspicious_users: 0,
+  };
 }

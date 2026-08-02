@@ -146,5 +146,9 @@ export const endpoints = {
     paymentBridgeDevice: (id: string) => `/admin/payment-bridge/devices/${id}`,
     paymentBridgeProviders: '/admin/payment-bridge/providers',
     paymentBridgeProvider: (id: string) => `/admin/payment-bridge/providers/${id}`,
+    suspiciousUsers: '/admin/suspicious-users',
+    suspiciousUserDismiss: (id: string) => `/admin/suspicious-users/${id}/dismiss`,
+    suspiciousUserBlock: (id: string) => `/admin/suspicious-users/${id}/block`,
+    suspiciousUserDelete: (id: string) => `/admin/suspicious-users/${id}/delete-user`,
   },
 } as const;

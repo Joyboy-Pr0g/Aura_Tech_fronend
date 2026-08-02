@@ -69,10 +69,11 @@ export async function verifyEmailChange(data: VerifyEmailChangeInput): Promise<v
 
 export async function sendRegistrationEmailVerification(
   data: SendEmailVerificationInput,
+  turnstileToken?: string | null,
 ): Promise<void> {
   await clientFetch('/api/auth/registration/email-verification/send', {
     method: 'POST',
-    body: data,
+    body: { ...data, turnstileToken },
   });
 }
 

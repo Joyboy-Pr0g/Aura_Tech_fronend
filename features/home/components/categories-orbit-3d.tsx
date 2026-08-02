@@ -204,7 +204,8 @@ export function CategoriesOrbit3D({ categories }: CategoriesOrbit3DProps) {
                       )}
                     >
                       <GamingHudFrame active={isFront} />
-                      <div className="relative aspect-[4/3] overflow-hidden bg-dark-800">
+
+                      <div className="absolute inset-0 bg-dark-800">
                         {category.image_url ? (
                           <ProductImage
                             src={category.image_url}
@@ -217,7 +218,7 @@ export function CategoriesOrbit3D({ categories }: CategoriesOrbit3DProps) {
                             <Layers className="h-10 w-10 text-primary-400/40" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark-950/95 via-dark-950/20 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/40 to-dark-950/10" />
                         <div
                           className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay"
                           style={{
@@ -226,11 +227,12 @@ export function CategoriesOrbit3D({ categories }: CategoriesOrbit3DProps) {
                           }}
                         />
                       </div>
+
                       {(isFront || slot === 'left' || slot === 'right') && (
-                        <div className="p-2 text-center">
+                        <div className="absolute inset-x-0 bottom-0 z-10 px-2.5 pb-2.5 pt-10">
                           <h3
                             className={cn(
-                              'truncate text-xs font-semibold transition-colors sm:text-sm',
+                              'truncate text-center text-xs font-semibold transition-colors sm:text-sm',
                               isFront ? 'text-primary-300' : 'text-white/80 group-hover:text-primary-400',
                             )}
                           >

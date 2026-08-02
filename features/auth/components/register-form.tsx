@@ -64,12 +64,20 @@ export function RegisterForm() {
 
   const handleSendVerification = async () => {
     setError('');
+
+    if (turnstileEnabled && !turnstileToken) {
+      setError(t('auth.turnstileRequired'));
+      return;
+    }
+
     setSendingVerification(true);
     try {
-      await sendRegistrationEmailVerification({ email: normalizedEmail });
+      await sendRegistrationEmailVerification({ email: normalizedEmail }, turnstileToken);
       setVerifiedEmail(null);
       setVerificationModalOpen(true);
+      resetTurnstile();
     } catch (err) {
+      resetTurnstile();
       setError(getErrorMessage(err));
     } finally {
       setSendingVerification(false);
@@ -161,7 +169,7 @@ export function RegisterForm() {
                       variant="outline"
                       size="sm"
                       className="shrink-0 whitespace-nowrap"
-                      disabled={sendingVerification}
+                      disabled={sendingVerification || !turnstileReady}
                       onClick={handleSendVerification}
                     >
                       {sendingVerification ? t('settings.sendingCode') : t('settings.verifyEmail')}
@@ -176,6 +184,12 @@ export function RegisterForm() {
                 <p className="text-xs text-white/40">{t('auth.verifyEmailHint')}</p>
               )}
             </div>
+
+            <TurnstileField
+              onTokenChange={setTurnstileToken}
+              onResetReady={registerReset}
+              className="pt-1"
+            />
 
             <div className="space-y-2">
               <Label htmlFor="password">{t('auth.password')}</Label>
@@ -232,12 +246,6 @@ export function RegisterForm() {
                 <p className="text-xs text-danger">{form.formState.errors.phone.message}</p>
               )}
             </div>
-
-            <TurnstileField
-              onTokenChange={setTurnstileToken}
-              onResetReady={registerReset}
-              className="pt-1"
-            />
 
             <Button
               type="submit"

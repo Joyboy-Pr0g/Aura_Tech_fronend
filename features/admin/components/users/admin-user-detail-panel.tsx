@@ -52,8 +52,8 @@ export function AdminUserDetailPanel({
         </div>
       </div>
 
-      <Tabs.Root defaultValue="general" className="space-y-6">
-        <Tabs.List className="flex flex-wrap gap-1 border-b border-white/10">
+      <Tabs.Root defaultValue="general" dir="rtl" className="space-y-6">
+        <Tabs.List className="flex  flex-wrap gap-1 border-b border-white/10">
           {tabs.map((tab) => (
             <Tabs.Trigger
               key={tab.value}
@@ -65,7 +65,7 @@ export function AdminUserDetailPanel({
           ))}
         </Tabs.List>
 
-        <Tabs.Content value="general" className="card-dark p-5 space-y-4 max-w-2xl">
+        <Tabs.Content value="general" dir="rtl" className="card-dark p-5 space-y-4 max-w-2xl">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <dt className="text-white/40">{t('admin.userName')}</dt>
