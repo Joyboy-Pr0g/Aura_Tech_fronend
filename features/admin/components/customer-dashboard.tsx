@@ -26,7 +26,7 @@ export function CustomerDashboard({ user }: CustomerDashboardProps) {
           <p className="text-sm text-white/40 mt-1">{t('dashboard.ordersHint')}</p>
         </Link>
 
-        <Link href="/dashboard/cart" className="card-dark p-6 hover:border-primary-500/30 transition-colors group">
+        <Link href="/cart" className="card-dark p-6 hover:border-primary-500/30 transition-colors group">
           <ShoppingCart size={28} className="text-primary-500 mb-3" />
           <h3 className="font-semibold text-white group-hover:text-primary-400 transition-colors">{t('dashboard.cart')}</h3>
           <p className="text-sm text-white/40 mt-1">{t('dashboard.cartHint')}</p>

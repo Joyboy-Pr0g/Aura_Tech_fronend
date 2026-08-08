@@ -26,7 +26,7 @@ export function UserMenu({ user }: UserMenuProps) {
   const { t, locale, setLocale } = useLocale();
   const dashboardHref = user.role === 'customer' ? '/dashboard' : '/admin';
   const ordersHref = user.role === 'customer' ? '/dashboard/orders' : '/admin/orders';
-  const settingsHref = user.role === 'customer' ? '/dashboard/settings' : '/admin/settings';
+  const settingsHref = user.role === 'customer' ? '/dashboard/profile' : '/admin/profile';
 
   const handleLogout = async () => {
     try {
