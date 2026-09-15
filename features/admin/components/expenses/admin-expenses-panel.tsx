@@ -360,20 +360,33 @@ export function AdminExpensesPanel({
                   </option>
                 ))}
               </select>
-              <Input
-                type="date"
-                value={filters.fromDate}
-                onChange={(e) => updateFilter('fromDate', e.target.value)}
-                className="input-dark"
-                aria-label={t('admin.fromDate')}
-              />
-              <Input
-                type="date"
-                value={filters.toDate}
-                onChange={(e) => updateFilter('toDate', e.target.value)}
-                className="input-dark"
-                aria-label={t('admin.toDate')}
-              />
+              <div className="flex flex-col">
+                <Label htmlFor="fromDate" className="mb-1 text-white/70">
+                  {t('admin.fromDate')}
+                </Label>
+                <Input
+                  id="fromDate"
+                  type="date"
+                  value={filters.fromDate}
+                  onChange={(e) => updateFilter('fromDate', e.target.value)}
+                  className="input-dark"
+                  aria-label={t('admin.fromDate')}
+                />
+              </div>
+              <div className="flex flex-col">
+                <Label htmlFor="toDate" className="mb-1 text-white/70">
+                  {t('admin.toDate')}
+                </Label>
+                <Input
+                  id="toDate"
+                  type="date"
+                  value={filters.toDate}
+                  onChange={(e) => updateFilter('toDate', e.target.value)}
+                  className="input-dark"
+                  aria-label={t('admin.toDate')}
+                />
+              </div>
+       
               {activeTab === 'refund' && (
                 <Input
                   value={filters.orderNumber}
