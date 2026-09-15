@@ -15,6 +15,13 @@ import type {
   TopProductRow,
 } from '@/features/admin/services/admin-analytics-types';
 import type { PaymentStatus } from '@/lib/types/entities';
+import type { AnalyticsPeriod } from '@/lib/utils/analytics-period';
+
+export type AnalyticsPeriodParams = {
+  period?: AnalyticsPeriod;
+  from_date?: string;
+  to_date?: string;
+};
 
 const analyticsBase = '/api/admin/analytics';
 
@@ -23,17 +30,17 @@ export async function getAdminAnalyticsDashboardClient(): Promise<DashboardAnaly
   return res.data ?? null;
 }
 
-export async function getAdminRevenueAnalytics(params: {
-  from_date: string;
-  to_date: string;
-}): Promise<RevenueByDayRow[]> {
+export async function getAdminRevenueAnalytics(params: AnalyticsPeriodParams): Promise<RevenueByDayRow[]> {
   const res = await clientFetch<RevenueByDayRow[]>(`${analyticsBase}/revenue`, { searchParams: params });
   return res.data ?? [];
 }
 
-export async function getAdminTopProductsAnalytics(limit = 20): Promise<TopProductRow[]> {
+export async function getAdminTopProductsAnalytics(
+  limit = 20,
+  params?: AnalyticsPeriodParams,
+): Promise<TopProductRow[]> {
   const res = await clientFetch<TopProductRow[]>(`${analyticsBase}/products/top`, {
-    searchParams: { limit },
+    searchParams: { limit, ...params },
   });
   return res.data ?? [];
 }
@@ -76,10 +83,8 @@ export async function getAdminPaymentStatusAnalytics(): Promise<PaymentStatusSum
   return res.data ?? null;
 }
 
-export async function getAdminPaymentHistoryAnalytics(params?: {
+export async function getAdminPaymentHistoryAnalytics(params?: AnalyticsPeriodParams & {
   status?: PaymentStatus;
-  from_date?: string;
-  to_date?: string;
   limit?: number;
 }): Promise<PaymentHistoryRow[]> {
   const res = await clientFetch<PaymentHistoryRow[]>(`${analyticsBase}/payments/history`, {
@@ -88,19 +93,14 @@ export async function getAdminPaymentHistoryAnalytics(params?: {
   return res.data ?? [];
 }
 
-export async function getAdminFinancialAnalytics(params?: {
-  from_date?: string;
-  to_date?: string;
-}): Promise<FinancialPeriodSummary | null> {
+export async function getAdminFinancialAnalytics(params?: AnalyticsPeriodParams): Promise<FinancialPeriodSummary | null> {
   const res = await clientFetch<FinancialPeriodSummary>(`${analyticsBase}/financial`, {
     searchParams: params,
   });
   return res.data ?? null;
 }
 
-export async function getAdminExpensesHistoryAnalytics(params?: {
-  from_date?: string;
-  to_date?: string;
+export async function getAdminExpensesHistoryAnalytics(params?: AnalyticsPeriodParams & {
   limit?: number;
 }): Promise<ExpenseHistoryRow[]> {
   const res = await clientFetch<ExpenseHistoryRow[]>(`${analyticsBase}/expenses/history`, {

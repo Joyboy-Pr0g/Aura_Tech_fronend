@@ -4,9 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BarChart3, Package, TrendingUp, Users, Wallet } from 'lucide-react';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { formatCurrency, formatDateTime } from '@/lib/utils/format';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import type { DashboardAnalytics } from '@/features/admin/services/admin-dashboard-server';
+import { cn } from '@/lib/utils/cn';
+import {
+  ANALYTICS_PERIOD_LABEL_KEYS,
+  ANALYTICS_PERIODS,
+  type AnalyticsPeriod,
+} from '@/lib/utils/analytics-period';
 import {
   getAdminCustomersAnalytics,
   getAdminExpensesHistoryAnalytics,
@@ -35,21 +39,10 @@ interface AdminAnalyticsPanelProps {
   initial: DashboardAnalytics | null;
 }
 
-function defaultDateRange() {
-  const to = new Date();
-  const from = new Date();
-  from.setDate(from.getDate() - 30);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
-}
-
 export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
   const { t } = useLocale();
   const [tab, setTab] = useState<TabId>('overview');
-  const [fromDate, setFromDate] = useState(defaultDateRange().from);
-  const [toDate, setToDate] = useState(defaultDateRange().to);
+  const [period, setPeriod] = useState<AnalyticsPeriod>('this_month');
   const [loading, setLoading] = useState(false);
   const [revenueRows, setRevenueRows] = useState<RevenueByDayRow[]>([]);
   const [topProducts, setTopProducts] = useState<TopProductRow[]>(initial?.top_products ?? []);
@@ -72,13 +65,15 @@ export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
     [t],
   );
 
+  const periodParams = useMemo(() => ({ period }), [period]);
+
   const loadTabData = useCallback(async () => {
     setLoading(true);
     try {
       if (tab === 'revenue') {
         const [revenue, products] = await Promise.all([
-          getAdminRevenueAnalytics({ from_date: fromDate, to_date: toDate }),
-          getAdminTopProductsAnalytics(20),
+          getAdminRevenueAnalytics(periodParams),
+          getAdminTopProductsAnalytics(20, periodParams),
         ]);
         setRevenueRows(revenue);
         setTopProducts(products);
@@ -92,16 +87,22 @@ export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
       } else if (tab === 'payments') {
         const [status, history, financial, expenses] = await Promise.all([
           getAdminPaymentStatusAnalytics(),
-          getAdminPaymentHistoryAnalytics({ from_date: fromDate, to_date: toDate, limit: 50 }),
-          getAdminFinancialAnalytics({ from_date: fromDate, to_date: toDate }),
-          getAdminExpensesHistoryAnalytics({ from_date: fromDate, to_date: toDate, limit: 50 }),
+          getAdminPaymentHistoryAnalytics({ ...periodParams, limit: 50 }),
+          getAdminFinancialAnalytics(periodParams),
+          getAdminExpensesHistoryAnalytics({ ...periodParams, limit: 50 }),
         ]);
         setPaymentStatus(status);
         setPaymentHistory(history);
         setFinancialSummary(financial);
         setExpenseHistory(expenses);
       } else if (tab === 'overview') {
-        const customers = await getAdminCustomersAnalytics({ limit: 10 });
+        const [financial, products, customers] = await Promise.all([
+          getAdminFinancialAnalytics(periodParams),
+          getAdminTopProductsAnalytics(10, periodParams),
+          getAdminCustomersAnalytics({ limit: 10 }),
+        ]);
+        setFinancialSummary(financial);
+        setTopProducts(products);
         if (customers) {
           setTopCustomers(customers.top_customers);
         }
@@ -109,12 +110,11 @@ export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [tab, fromDate, toDate]);
+  }, [tab, periodParams]);
 
   useEffect(() => {
-    if (tab === 'overview' && initial) return;
     void loadTabData();
-  }, [tab, loadTabData, initial]);
+  }, [tab, period, loadTabData]);
 
   const analytics = initial;
 
@@ -143,23 +143,30 @@ export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
         ))}
       </div>
 
-      {(tab === 'revenue' || tab === 'payments') && (
-        <div className="card-dark p-4 flex flex-wrap items-end gap-3">
-          <div className="space-y-1">
-            <label className="text-xs text-white/40">{t('admin.analyticsFromDate')}</label>
-            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="input-dark" />
+      {(tab === 'overview' || tab === 'revenue' || tab === 'payments') && (
+        <div className="card-dark p-4">
+          <p className="text-xs text-white/40 mb-3">{t('admin.analyticsPeriod')}</p>
+          <div className="flex flex-wrap gap-2">
+            {ANALYTICS_PERIODS.map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPeriod(value)}
+                className={cn(
+                  'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                  period === value
+                    ? 'border-primary-500/50 bg-primary-500/10 text-primary-300'
+                    : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80',
+                )}
+              >
+                {t(ANALYTICS_PERIOD_LABEL_KEYS[value] as never)}
+              </button>
+            ))}
           </div>
-          <div className="space-y-1">
-            <label className="text-xs text-white/40">{t('admin.analyticsToDate')}</label>
-            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="input-dark" />
-          </div>
-          <Button type="button" variant="outline" onClick={() => void loadTabData()} disabled={loading}>
-            {loading ? t('admin.refreshing') : t('admin.analyticsApply')}
-          </Button>
         </div>
       )}
 
-      {loading && tab !== 'overview' && (
+      {loading && (
         <p className="text-sm text-white/40">{t('common.loading')}</p>
       )}
 
@@ -167,16 +174,22 @@ export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div className="card-dark p-5">
-              <p className="text-sm text-white/50">{t('admin.paymentsReceivedWeek')}</p>
-              <p className="text-2xl font-bold text-white mt-1">{formatCurrency(analytics.payments_received_week)}</p>
+              <p className="text-sm text-white/50">{t('admin.analyticsPaymentsReceived')}</p>
+              <p className="text-2xl font-bold text-white mt-1">
+                {formatCurrency(financialSummary?.payments_received ?? analytics.payments_received_week)}
+              </p>
             </div>
             <div className="card-dark p-5">
-              <p className="text-sm text-white/50">{t('admin.expensesWeek')}</p>
-              <p className="text-2xl font-bold text-white mt-1">{formatCurrency(analytics.expenses_week)}</p>
+              <p className="text-sm text-white/50">{t('admin.analyticsExpensesTotal')}</p>
+              <p className="text-2xl font-bold text-white mt-1">
+                {formatCurrency(financialSummary?.expenses_total ?? analytics.expenses_week)}
+              </p>
             </div>
             <div className="card-dark p-5">
-              <p className="text-sm text-white/50">{t('admin.netProfitWeek')}</p>
-              <p className="text-2xl font-bold text-white mt-1">{formatCurrency(analytics.profit_week)}</p>
+              <p className="text-sm text-white/50">{t('admin.netProfit')}</p>
+              <p className="text-2xl font-bold text-white mt-1">
+                {formatCurrency(financialSummary?.net_profit ?? analytics.profit_week)}
+              </p>
             </div>
             <div className="card-dark p-5">
               <p className="text-sm text-white/50">{t('admin.visitorsToday')}</p>
@@ -188,7 +201,7 @@ export function AdminAnalyticsPanel({ initial }: AdminAnalyticsPanelProps) {
             <div className="card-dark p-6">
               <h3 className="font-semibold text-white mb-4">{t('admin.topProducts')}</h3>
               <ul className="space-y-2">
-                {analytics.top_products.map((p) => (
+                {topProducts.map((p) => (
                   <li key={p.id} className="flex justify-between gap-3 text-sm">
                     <span className="text-white/80 truncate">{p.title}</span>
                     <span className="text-white/50 shrink-0">{formatCurrency(p.revenue)}</span>

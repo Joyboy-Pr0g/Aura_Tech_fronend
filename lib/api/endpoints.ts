@@ -142,6 +142,8 @@ export const endpoints = {
     refundRequestApprove: (id: string) => `/admin/refund-requests/${id}/approve`,
     refundRequestReject: (id: string) => `/admin/refund-requests/${id}/reject`,
     expenses: '/admin/expenses',
+    expensesTotals: '/admin/expenses/totals',
+    expense: (id: string) => `/admin/expenses/${id}`,
     paymentBridgeDevices: '/admin/payment-bridge/devices',
     paymentBridgeDevice: (id: string) => `/admin/payment-bridge/devices/${id}`,
     paymentBridgeProviders: '/admin/payment-bridge/providers',
