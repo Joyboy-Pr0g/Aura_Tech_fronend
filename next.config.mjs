@@ -25,12 +25,22 @@ const nextConfig = {
     ];
   },
   async headers() {
+    const globalHeaders = [
+      { key: 'Referrer-Policy', value: 'no-referrer-when-downgrade' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+    ];
+
     return [
+      {
+        source: '/:path*',
+        headers: globalHeaders,
+      },
       {
         source: '/firebase-messaging-sw.js',
         headers: [
           { key: 'Service-Worker-Allowed', value: '/' },
           { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          ...globalHeaders,
         ],
       },
     ];

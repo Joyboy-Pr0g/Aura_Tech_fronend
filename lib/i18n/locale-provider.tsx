@@ -28,8 +28,12 @@ function interpolate(template: string, params?: Record<string, string | number>)
 
 function resolveInitialLocale(): Locale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
-  const saved = localStorage.getItem('aura-locale') as Locale | null;
-  return saved === 'en' || saved === 'ar' ? saved : DEFAULT_LOCALE;
+  try {
+    const saved = localStorage.getItem('aura-locale') as Locale | null;
+    return saved === 'en' || saved === 'ar' ? saved : DEFAULT_LOCALE;
+  } catch {
+    return DEFAULT_LOCALE;
+  }
 }
 
 function applyDocumentLocale(locale: Locale) {
@@ -48,7 +52,11 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
-    localStorage.setItem('aura-locale', next);
+    try {
+      localStorage.setItem('aura-locale', next);
+    } catch {
+      /* in-app browsers may block storage */
+    }
     applyDocumentLocale(next);
   }, []);
 

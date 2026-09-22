@@ -1,7 +1,6 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowUpRight,
@@ -12,7 +11,6 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { HomePageBackground } from '@/components/backgrounds/home-page-background';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/lib/i18n/locale-provider';
@@ -60,7 +58,17 @@ export function SocialLinksPage({ settings }: SocialLinksPageProps) {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <HomePageBackground />
+      {/* Static background only — WebGL + next/image often fail in Instagram in-app browser */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-[#080810] to-[#050508]" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 95% 60% at 50% 30%, transparent 0%, rgba(3,3,8,0.4) 45%, rgba(3,3,8,0.92) 100%)',
+          }}
+        />
+      </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="flex items-center justify-end p-4 sm:p-6">
@@ -90,13 +98,13 @@ export function SocialLinksPage({ settings }: SocialLinksPageProps) {
                 }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={logoSrc}
                   alt={settings.title}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="128px"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  decoding="async"
+                  fetchPriority="high"
                 />
                 <div
                   className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/10"

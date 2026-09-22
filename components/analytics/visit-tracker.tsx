@@ -8,12 +8,16 @@ const VISITED_PATHS_KEY = 'aura_visited_paths';
 
 function getVisitorId(): string {
   if (typeof window === 'undefined') return '';
-  let id = localStorage.getItem(VISITOR_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(VISITOR_KEY, id);
+  try {
+    let id = localStorage.getItem(VISITOR_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(VISITOR_KEY, id);
+    }
+    return id;
+  } catch {
+    return crypto.randomUUID();
   }
-  return id;
 }
 
 function hasLoggedPath(pathname: string): boolean {
