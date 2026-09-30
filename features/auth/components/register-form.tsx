@@ -185,11 +185,20 @@ export function RegisterForm() {
               )}
             </div>
 
-            <TurnstileField
-              onTokenChange={setTurnstileToken}
-              onResetReady={registerReset}
-              className="pt-1"
-            />
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">{t('auth.phone')}</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder={t('auth.phonePlaceholder')}
+                error={!!form.formState.errors.phone}
+                {...form.register('phone')}
+              />
+              {form.formState.errors.phone && (
+                <p className="text-xs text-danger">{form.formState.errors.phone.message}</p>
+              )}
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">{t('auth.password')}</Label>
@@ -233,19 +242,11 @@ export function RegisterForm() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">{t('auth.phone')}</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder={t('auth.phonePlaceholder')}
-                error={!!form.formState.errors.phone}
-                {...form.register('phone')}
-              />
-              {form.formState.errors.phone && (
-                <p className="text-xs text-danger">{form.formState.errors.phone.message}</p>
-              )}
-            </div>
+            <TurnstileField
+              onTokenChange={setTurnstileToken}
+              onResetReady={registerReset}
+              className="pt-1"
+            />
 
             <Button
               type="submit"
