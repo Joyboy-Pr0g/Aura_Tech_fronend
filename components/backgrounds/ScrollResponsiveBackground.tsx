@@ -413,7 +413,7 @@ export function ScrollResponsiveBackground({
       mobile,
     };
 
-    let controller = createScene(variant, sceneConfig);
+    const controller = createScene(variant, sceneConfig);
 
     const clock = new THREE.Clock();
     let lastFrame = 0;

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE_NAME, decodeTokenRole } from '@/lib/auth/constants';
 import { shouldShowComingSoonForPath } from '@/lib/storefront/coming-soon';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (shouldShowComingSoonForPath(pathname)) {

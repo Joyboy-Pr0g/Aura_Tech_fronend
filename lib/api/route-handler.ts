@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchBackend } from '@/lib/api/fetch';
 import { getAuthToken } from '@/lib/auth/session';
 import { ApiError } from '@/lib/errors/api-error';
+import { getClientIp } from '@/lib/http/client-ip';
 
 interface ProxyOptions {
   path: string;
@@ -19,7 +20,7 @@ export async function proxyToBackend(
     const token = await getAuthToken();
     if (requireAuth && !token) {
       return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
+        { success: false, message: 'غير مصرح ' },
         { status: 401 },
       );
     }
@@ -41,15 +42,10 @@ export async function proxyToBackend(
 
     const queryParams = searchParams ?? Object.fromEntries(request.nextUrl.searchParams);
 
-    const clientIp =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-      ?? request.headers.get('x-real-ip')
-      ?? undefined;
-
     const response = await fetchBackend(path, {
       method: method ?? request.method,
       token,
-      clientIp,
+      clientIp: getClientIp(request),
       body,
       searchParams: queryParams,
     });

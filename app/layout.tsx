@@ -7,7 +7,6 @@ import { StorefrontCurrencyProvider } from '@/components/storefront/storefront-c
 import { getRootMetadata, getRootOrganizationSchema } from '@/lib/seo/metadata'; // ← Updated import
 import { getWebsiteSettingsServer } from '@/features/website-settings/services/website-settings-server';
 import { isStorefrontComingSoon } from '@/lib/storefront/coming-soon';
-import { Analytics } from '@vercel/analytics/next';
 
 const COMING_SOON_METADATA: Metadata = {
   title: 'AuraTech — Coming Soon',
@@ -58,7 +57,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </StorefrontCurrencyProvider>
           <AppProviders />
           <Toaster />
-          <Analytics />
         </LocaleProvider>
       </body>
     </html>

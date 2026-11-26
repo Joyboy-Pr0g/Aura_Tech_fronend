@@ -69,8 +69,8 @@ export async function fetchBackend<T = unknown>(
         Accept: 'application/json',
         ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(clientIp ? { 'X-Forwarded-For': clientIp } : {}),
         ...headers,
+        ...(clientIp ? { 'X-Forwarded-For': clientIp } : {}),
       },
     });
   } catch {

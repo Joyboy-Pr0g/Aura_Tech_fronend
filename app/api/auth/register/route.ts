@@ -5,6 +5,7 @@ import { setAuthCookie } from '@/lib/auth/session';
 import { User } from '@/lib/types/entities';
 import { ApiError } from '@/lib/errors/api-error';
 import { assertTurnstileFromBody } from '@/lib/security/turnstile';
+import { getClientIp } from '@/lib/http/client-ip';
 
 interface AuthData {
   token: string;
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
     const response = await fetchBackend<AuthData>(endpoints.auth.register, {
       method: 'POST',
       body: turnstile.payload,
+      clientIp: getClientIp(request),
     });
 
     const { token, user } = response.data!;

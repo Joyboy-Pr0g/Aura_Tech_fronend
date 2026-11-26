@@ -16,15 +16,19 @@ interface ProductRevalidateOptions {
   id?: string | null;
 }
 
+export function expireTag(tag: string) {
+  revalidateTag(tag, { expire: 0 });
+}
+
 /** Storefront shell (header/footer) uses website settings on every page. */
 function revalidateStorefrontLayout() {
   revalidatePath('/', 'layout');
 }
 
 export function revalidateBlogStorefront(options?: BlogRevalidateOptions) {
-  revalidateTag('blogs');
+  expireTag('blogs');
   if (options?.slug?.trim()) {
-    revalidateTag(`blog-${options.slug.trim()}`);
+    expireTag(`blog-${options.slug.trim()}`);
     revalidatePath(`/blogs/${options.slug.trim()}`);
   }
   revalidatePath('/blogs');
@@ -32,12 +36,12 @@ export function revalidateBlogStorefront(options?: BlogRevalidateOptions) {
 }
 
 export function revalidateCategoryStorefront(options?: CategoryRevalidateOptions) {
-  revalidateTag('categories');
+  expireTag('categories');
   if (options?.slug?.trim()) {
-    revalidateTag(`category-${options.slug.trim()}`);
+    expireTag(`category-${options.slug.trim()}`);
   }
   if (options?.id?.trim()) {
-    revalidateTag(`category-${options.id.trim()}`);
+    expireTag(`category-${options.id.trim()}`);
   }
   revalidatePath('/categories');
   revalidatePath('/products');
@@ -46,16 +50,16 @@ export function revalidateCategoryStorefront(options?: CategoryRevalidateOptions
 }
 
 export function revalidateProductStorefront(options?: ProductRevalidateOptions) {
-  revalidateTag('products');
-  revalidateTag('trending');
-  revalidateTag('brands');
-  revalidateTag('max-price');
+  expireTag('products');
+  expireTag('trending');
+  expireTag('brands');
+  expireTag('max-price');
   if (options?.slug?.trim()) {
-    revalidateTag(`product-${options.slug.trim()}`);
+    expireTag(`product-${options.slug.trim()}`);
     revalidatePath(`/products/${options.slug.trim()}`);
   }
   if (options?.id?.trim()) {
-    revalidateTag(`product-id-${options.id.trim()}`);
+    expireTag(`product-id-${options.id.trim()}`);
   }
   revalidatePath('/products');
   revalidateStorefrontLayout();
@@ -63,7 +67,7 @@ export function revalidateProductStorefront(options?: ProductRevalidateOptions) 
 }
 
 export function revalidateWebsiteSettingsStorefront() {
-  revalidateTag('website-settings');
+  expireTag('website-settings');
   revalidateStorefrontLayout();
   revalidatePath('/about');
   revalidatePath('/contact');
@@ -74,7 +78,7 @@ export function revalidateWebsiteSettingsStorefront() {
 }
 
 export function revalidateShippingFeesStorefront() {
-  revalidateTag('shipping-fees');
+  expireTag('shipping-fees');
   revalidatePath('/checkout');
 }
 
@@ -95,11 +99,11 @@ export function revalidateOrderProductsStorefront(order: Order) {
   revalidateProductStorefront();
 
   slugs.forEach((slug) => {
-    revalidateTag(`product-${slug}`);
+    expireTag(`product-${slug}`);
     revalidatePath(`/products/${slug}`);
   });
   ids.forEach((id) => {
-    revalidateTag(`product-id-${id}`);
+    expireTag(`product-id-${id}`);
   });
 }
 

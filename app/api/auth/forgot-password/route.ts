@@ -3,6 +3,7 @@ import { fetchBackend } from '@/lib/api/fetch';
 import { endpoints } from '@/lib/api/endpoints';
 import { ApiError } from '@/lib/errors/api-error';
 import { assertTurnstileFromBody } from '@/lib/security/turnstile';
+import { getClientIp } from '@/lib/http/client-ip';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest) {
     const response = await fetchBackend(endpoints.auth.forgotPassword, {
       method: 'POST',
       body: turnstile.payload,
+      clientIp: getClientIp(request),
     });
 
     return NextResponse.json({

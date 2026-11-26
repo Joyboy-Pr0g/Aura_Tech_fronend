@@ -4,14 +4,16 @@ import { endpoints } from '@/lib/api/endpoints';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  return proxyToBackend(request, { path: endpoints.admin.coupon(params.id), method: 'PUT' });
+  const { id } = await params;
+  return proxyToBackend(request, { path: endpoints.admin.coupon(id), method: 'PUT' });
 }
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  return proxyToBackend(_request, { path: endpoints.admin.coupon(params.id), method: 'DELETE' });
+  const { id } = await params;
+  return proxyToBackend(_request, { path: endpoints.admin.coupon(id), method: 'DELETE' });
 }

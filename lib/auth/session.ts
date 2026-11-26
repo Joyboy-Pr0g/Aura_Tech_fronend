@@ -3,6 +3,7 @@ import { fetchBackend } from '@/lib/api/fetch';
 import { endpoints } from '@/lib/api/endpoints';
 import { User } from '@/lib/types/entities';
 import { AUTH_COOKIE_NAME } from '@/lib/auth/constants';
+import { getServerClientIp } from '@/lib/http/client-ip';
 
 const cookieOptions = {
   httpOnly: true,
@@ -35,6 +36,7 @@ export const getSession = async (): Promise<User | null> => {
     const response = await fetchBackend<User>(endpoints.auth.me, {
       token,
       cacheProfile: 'none',
+      clientIp: await getServerClientIp(),
     });
     return response.data ?? null;
   } catch {

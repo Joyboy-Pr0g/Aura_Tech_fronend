@@ -4,10 +4,11 @@ import { endpoints } from '@/lib/api/endpoints';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   return proxyToBackend(request, {
-    path: endpoints.admin.expense(params.id),
+    path: endpoints.admin.expense(id),
     method: 'PATCH',
   });
 }

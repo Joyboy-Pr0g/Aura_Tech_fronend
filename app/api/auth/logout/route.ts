@@ -1,15 +1,20 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchBackend } from '@/lib/api/fetch';
 import { endpoints } from '@/lib/api/endpoints';
 import { clearAuthCookie, getAuthToken } from '@/lib/auth/session';
 import { ApiError } from '@/lib/errors/api-error';
+import { getClientIp } from '@/lib/http/client-ip';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     const token = await getAuthToken();
     if (token) {
       try {
-        await fetchBackend(endpoints.auth.logout, { method: 'POST', token });
+        await fetchBackend(endpoints.auth.logout, {
+          method: 'POST',
+          token,
+          clientIp: getClientIp(request),
+        });
       } catch {
         // Still clear cookie even if backend logout fails
       }
