@@ -5,11 +5,12 @@ import { readJsonField, revalidateBlogStorefront } from '@/lib/storefront/revali
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const slug = await readJsonField(request, 'slug');
   return proxyToBackend(request, {
-    path: endpoints.admin.blog(params.id),
+    path: endpoints.admin.blog(id),
     method: 'PUT',
     revalidateOnSuccess: () => revalidateBlogStorefront({ slug }),
   });
@@ -17,10 +18,11 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   return proxyToBackend(_request, {
-    path: endpoints.admin.blog(params.id),
+    path: endpoints.admin.blog(id),
     method: 'DELETE',
     revalidateOnSuccess: () => revalidateBlogStorefront(),
   });

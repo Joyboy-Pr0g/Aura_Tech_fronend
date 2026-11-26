@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { getClientIp } from '@/lib/http/client-ip';
 
 interface TurnstileVerifyResponse {
   success: boolean;
@@ -20,15 +21,6 @@ export function getTurnstileSecretKey(): string | undefined {
 
 export function isTurnstileConfigured(): boolean {
   return Boolean(getTurnstileSiteKey() && getTurnstileSecretKey());
-}
-
-export function getClientIp(request: NextRequest): string | undefined {
-  return (
-    request.headers.get('cf-connecting-ip')
-    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || undefined
-  );
 }
 
 export async function verifyTurnstileToken(

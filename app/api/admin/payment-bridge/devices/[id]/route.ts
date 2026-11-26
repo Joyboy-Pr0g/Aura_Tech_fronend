@@ -4,20 +4,22 @@ import { endpoints } from '@/lib/api/endpoints';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   return proxyToBackend(request, {
-    path: endpoints.admin.paymentBridgeDevice(params.id),
+    path: endpoints.admin.paymentBridgeDevice(id),
     method: 'PATCH',
   });
 }
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   return proxyToBackend(_request, {
-    path: endpoints.admin.paymentBridgeDevice(params.id),
+    path: endpoints.admin.paymentBridgeDevice(id),
     method: 'DELETE',
   });
 }

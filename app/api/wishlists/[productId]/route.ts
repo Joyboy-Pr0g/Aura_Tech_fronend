@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { proxyToBackend } from '@/lib/api/route-handler';
-import { revalidateTag, revalidatePath } from 'next/cache';
+import { revalidatePath } from 'next/cache';
+import { expireTag } from '@/lib/storefront/revalidate';
 
 export async function DELETE(
   request: NextRequest,
@@ -11,8 +12,8 @@ export async function DELETE(
     path: `/wishlists/${productId}`,
     method: 'DELETE',
   });
-  revalidateTag('wishlist');
-  revalidateTag('products');
+  expireTag('wishlist');
+  expireTag('products');
   revalidatePath('/dashboard/wishlist');
   revalidatePath('/products');
   console.log(

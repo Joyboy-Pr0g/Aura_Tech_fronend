@@ -3,15 +3,16 @@ import { AdminPaymentBridgeContent } from '@/features/admin/components/payment-b
 import { AdminTableSkeleton } from '@/features/admin/skeletons/admin-table-skeleton';
 
 interface AdminPaymentBridgePageProps {
-  searchParams?: {
+  searchParams?: Promise<{
     tab?: string;
-  };
+  }>;
 }
 
-export default function AdminPaymentBridgePage({ searchParams }: AdminPaymentBridgePageProps) {
+export default async function AdminPaymentBridgePage({ searchParams }: AdminPaymentBridgePageProps) {
+  const params = searchParams ? await searchParams : undefined;
   return (
     <Suspense fallback={<AdminTableSkeleton />}>
-      <AdminPaymentBridgeContent searchParams={searchParams} />
+      <AdminPaymentBridgeContent searchParams={params} />
     </Suspense>
   );
 }

@@ -6,8 +6,9 @@ import { AUTH_COOKIE_NAME } from '@/lib/auth/constants';
 import { ApiError } from '@/lib/errors/api-error';
 import { User } from '@/lib/types/entities';
 import { proxyToBackend } from '@/lib/api/route-handler';
+import { getClientIp } from '@/lib/http/client-ip';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const token = await getAuthToken();
     if (!token) {
@@ -17,7 +18,10 @@ export async function GET() {
       );
     }
 
-    const response = await fetchBackend<User>(endpoints.auth.me, { token });
+    const response = await fetchBackend<User>(endpoints.auth.me, {
+      token,
+      clientIp: getClientIp(request),
+    });
     return NextResponse.json(response);
   } catch (err) {
     if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {

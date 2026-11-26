@@ -1,16 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   poweredByHeader: false,
   experimental: {
     // Server Actions only; multipart admin uploads use Route Handlers (see nginx client_max_body_size on host).
     serverActions: {
-      bodySizeLimit: '128mb',
+      bodySizeLimit: '100mb',
     },
   },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
-    ],
+    loader: 'custom',
+    loaderFile: './lib/images/cloudinary-loader.ts',
   },
   async rewrites() {
     return [
