@@ -17,7 +17,6 @@ interface ProductsInfiniteGridProps {
   pageSize: number;
   sort: SortOption;
   fetchParams: Record<string, string | number | boolean | undefined>;
-  isAuthenticated?: boolean;
 }
 
 function sortProducts(products: Product[], sort: SortOption): Product[] {
@@ -43,7 +42,6 @@ export function ProductsInfiniteGrid({
   pageSize,
   sort,
   fetchParams,
-  isAuthenticated = false,
 }: ProductsInfiniteGridProps) {
   const { t } = useLocale();
   const [products, setProducts] = useState(initialProducts);
@@ -107,7 +105,7 @@ export function ProductsInfiniteGrid({
     <>
       {sorted.map((product) => (
         <StaggerItem key={product.id}>
-          <ProductCard product={product} showWishlist isAuthenticated={isAuthenticated} />
+          <ProductCard product={product} showWishlist />
         </StaggerItem>
       ))}
       {hasMore && (

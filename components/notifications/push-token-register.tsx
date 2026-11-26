@@ -4,14 +4,17 @@ import { useEffect, useRef } from 'react';
 import { User } from '@/lib/types/entities';
 import { isFirebaseClientConfigured, requestPushToken } from '@/lib/firebase/client';
 import { clientFetch } from '@/lib/api/client';
+import { useStorefrontSession } from '@/features/shared/components/storefront-session-provider';
 
 const PUSH_ROLES = new Set(['customer', 'admin', 'sub_admin']);
 
 interface PushTokenRegisterProps {
-  user: User | null;
+  user?: User | null;
 }
 
-export function PushTokenRegister({ user }: PushTokenRegisterProps) {
+export function PushTokenRegister({ user: userProp }: PushTokenRegisterProps) {
+  const session = useStorefrontSession();
+  const user = userProp === undefined ? session.user : userProp;
   const registeredRef = useRef(false);
 
   useEffect(() => {

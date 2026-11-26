@@ -35,14 +35,16 @@ import { cn } from '@/lib/utils/cn';
 import { SlideIn, Stagger, staggerItemVariants, EASE_OUT_EXPO, Reveal } from '@/lib/motion/reveal';
 import { ProductImageZoom } from '@/features/products/components/product-image-zoom';
 import { ProductPriceDisplay } from '@/features/products/components/product-price-display';
+import { useStorefrontSession } from '@/features/shared/components/storefront-session-provider';
 
 interface ProductDetailClientProps {
   product: Product;
-  isAuthenticated: boolean;
 }
 
-export function ProductDetailClient({ product, isAuthenticated }: ProductDetailClientProps) {
+export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const router = useRouter();
+  const { isAuthenticated, status, isWishlisted, setWishlisted } = useStorefrontSession();
+  const wishlisted = isWishlisted(product.id);
   const { t, dir } = useLocale();
   const formatPrice = useFormatPrice();
   const { setItemCount, openPanel } = useCartUiStore();
@@ -56,7 +58,6 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
   const [selectedVariantId, setSelectedVariantId] = useState('');
   const [adding, setAdding] = useState(false);
   const [reminding, setReminding] = useState(false);
-  const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
   const [activeImage, setActiveImage] = useState(() => getDefaultDetailImage(product, null));
 
   const selectedVariant = useMemo(
@@ -88,15 +89,12 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     setQuantity((current) => Math.min(current, Math.max(available, 1)));
   }, [available]);
 
-  useEffect(() => {
-    setWishlisted(product.is_wishlisted ?? false);
-  }, [product.id, product.is_wishlisted]);
-
   const handleVariantSelect = (variantId: string) => {
     setSelectedVariantId((current) => (current === variantId ? '' : variantId));
   };
 
   const handleAddToCart = async () => {
+    if (status === 'loading') return;
     if (!isAuthenticated) {
       router.push(`/login?redirect=/products/${product.slug}`);
       return;
@@ -121,6 +119,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
   };
 
   const handleWishlist = async () => {
+    if (status === 'loading') return;
     if (!isAuthenticated) {
       router.push(`/login?redirect=/products/${product.slug}`);
       return;
@@ -128,11 +127,11 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
     try {
       if (wishlisted) {
         await removeFromWishlist(product.id);
-        setWishlisted(false);
+        setWishlisted(product.id, false);
         toast(t('wishlist.removed'), 'success');
       } else {
         await addToWishlist(product.id);
-        setWishlisted(true);
+        setWishlisted(product.id, true);
         toast(t('wishlist.added'), 'success');
       }
     } catch {
@@ -141,6 +140,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
   };
 
   const handleStockReminder = async () => {
+    if (status === 'loading') return;
     if (!isAuthenticated) {
       router.push(`/login?redirect=/products/${product.slug}`);
       return;
@@ -382,7 +382,7 @@ export function ProductDetailClient({ product, isAuthenticated }: ProductDetailC
             </Button>
           </div>
 
-          {!isAuthenticated && (
+          {status === 'ready' && !isAuthenticated && (
             <p className="text-sm text-white/40">
               <Link href={`/login?redirect=/products/${product.slug}`} className="text-primary-400 hover:underline">
                 {t('product.signIn')}

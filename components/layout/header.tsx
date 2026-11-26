@@ -8,7 +8,8 @@ import { Menu, X, ShoppingCart, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Container } from '@/components/ui/container';
 import { ButtonLink } from '@/components/ui/button';
-import { User as UserType, WebsiteSettings } from '@/lib/types/entities';
+import { Skeleton } from '@/components/ui/skeleton';
+import { WebsiteSettings } from '@/lib/types/entities';
 import { HeaderSearch } from '@/components/layout/header-search';
 import { UserMenu } from '@/components/layout/user-menu';
 import { NotificationBell } from '@/components/notifications/notification-bell';
@@ -18,14 +19,15 @@ import { useLocale } from '@/lib/i18n/locale-provider';
 import { getCart } from '@/features/cart/services/cart-client';
 import { resolveWebsiteLogo, splitWebsiteTitle } from '@/lib/website-settings/defaults';
 import { CurrencyToggle } from '@/components/layout/currency-toggle';
+import { useStorefrontSession } from '@/features/shared/components/storefront-session-provider';
 
 interface HeaderProps {
-  user?: UserType | null;
   settings: WebsiteSettings;
 }
 
-export function Header({ user, settings }: HeaderProps) {
+export function Header({ settings }: HeaderProps) {
   const pathname = usePathname();
+  const { user, status } = useStorefrontSession();
   const { t, locale, setLocale } = useLocale();
   const { itemCount, setItemCount, togglePanel } = useCartUiStore();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -80,21 +82,25 @@ export function Header({ user, settings }: HeaderProps) {
                 <Globe className="h-4 w-4" />
               </button>
 
-              {user ? (
-                <>
-                  <NotificationBell audience={user.role as 'admin' | 'customer'} />
-                  <UserMenu user={user} />
-                </>
-              ) : (
-                <div className="hidden sm:flex items-center gap-2">
-                  <ButtonLink href="/login" variant="ghost" size="sm">
-                    {t('nav.login')}
-                  </ButtonLink>
-                  <ButtonLink href="/register" size="sm">
-                    {t('nav.register')}
-                  </ButtonLink>
-                </div>
-              )}
+              <div className="flex w-28 shrink-0 items-center justify-end gap-2 sm:w-60">
+                {status === 'loading' ? (
+                  <Skeleton className="h-9 w-full" />
+                ) : user ? (
+                  <>
+                    <NotificationBell audience={user.role as 'admin' | 'customer'} />
+                    <UserMenu user={user} />
+                  </>
+                ) : (
+                  <div className="hidden sm:flex items-center gap-2">
+                    <ButtonLink href="/login" variant="ghost" size="sm">
+                      {t('nav.login')}
+                    </ButtonLink>
+                    <ButtonLink href="/register" size="sm">
+                      {t('nav.register')}
+                    </ButtonLink>
+                  </div>
+                )}
+              </div>
 
               <button
                 type="button"
@@ -127,7 +133,7 @@ export function Header({ user, settings }: HeaderProps) {
             <div className="flex items-center gap-2 mt-3 sm:hidden">
               <CurrencyToggle className="flex-1 justify-center" />
             </div>
-            {!user && (
+            {status === 'ready' && !user && (
               <div className="flex gap-2 mt-3 sm:hidden">
                 <ButtonLink href="/login" variant="outline" className="flex-1">
                   {t('nav.login')}

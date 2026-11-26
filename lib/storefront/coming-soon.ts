@@ -9,6 +9,10 @@ const EXCLUDED_PATH_PREFIXES = [
   '/links',
 ] as const;
 
+function isProductionBuild(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build';
+}
+
 function hasProductionBackend(): boolean {
   const url = process.env.BACKEND_API_URL?.trim();
   if (!url) return false;
@@ -25,7 +29,7 @@ export function isStorefrontComingSoon(): boolean {
   }
 
   // Safety net: in production without a real backend URL, stay on coming soon.
-  if (process.env.NODE_ENV === 'production' && !hasProductionBackend()) {
+  if (process.env.NODE_ENV === 'production' && !isProductionBuild() && !hasProductionBackend()) {
     return true;
   }
 

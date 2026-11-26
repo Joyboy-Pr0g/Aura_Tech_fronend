@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, Package, Eye } from 'lucide-react';
@@ -13,11 +12,11 @@ import { ProductImage } from '@/components/ui/product-image';
 import { cn } from '@/lib/utils/cn';
 import { toast } from '@/components/ui/Toaster';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { useStorefrontSession } from '@/features/shared/components/storefront-session-provider';
 
 interface ProductCardProps {
   product: Product;
   showWishlist?: boolean;
-  isAuthenticated?: boolean;
   /** Tailwind height/aspect classes for the image area, e.g. `h-40`, `h-48`, `aspect-video` */
   imageClassName?: string;
 }
@@ -25,22 +24,19 @@ interface ProductCardProps {
 export function ProductCard({
   product,
   showWishlist = false,
-  isAuthenticated = false,
   imageClassName = 'h-56',
 }: ProductCardProps) {
   const router = useRouter();
   const { t } = useLocale();
+  const { isAuthenticated, status, isWishlisted, setWishlisted } = useStorefrontSession();
   const imageUrl = getProductImageUrl(product);
   const onSale = Boolean(getProductBestDiscount(product));
-  const [wishlisted, setWishlisted] = useState(product.is_wishlisted ?? false);
-
-  useEffect(() => {
-    setWishlisted(product.is_wishlisted ?? false);
-  }, [product.id, product.is_wishlisted]);
+  const wishlisted = isWishlisted(product.id);
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (status === 'loading') return;
     if (!isAuthenticated) {
       toast(t('wishlist.signIn'), 'info');
       router.push('/login');
@@ -49,11 +45,11 @@ export function ProductCard({
     try {
       if (wishlisted) {
         await removeFromWishlist(product.id);
-        setWishlisted(false);
+        setWishlisted(product.id, false);
         toast(t('wishlist.removed'), 'success');
       } else {
         await addToWishlist(product.id);
-        setWishlisted(true);
+        setWishlisted(product.id, true);
         toast(t('wishlist.added'), 'success');
       }
     } catch {

@@ -4,7 +4,6 @@ import { getMaxProductPriceServer, getProductBrandsServer, getProductsServer } f
 import { getCategoriesServer, getCategoryByIdServer, getCategoryBySlugServer } from '@/features/categories/services/categories-server';
 import { ProductsCatalog } from '@/features/products/components/products-catalog';
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
-import { getAuthToken } from '@/lib/auth/session';
 import { getPageMetadataFromSettings } from '@/lib/seo/metadata';
 import { buildCategoryProductsPath } from '@/lib/storefront/product-paths';
 
@@ -90,8 +89,7 @@ async function ProductsContent({ searchParams }: ProductsPageProps) {
   ]);
 
   const maxPrice = Math.max(maxProductPrice, 1000);
-  const isAuthenticated = Boolean(await getAuthToken());
-  
+
   return (
     <ProductsCatalog
       products={productPage.items}
@@ -103,7 +101,6 @@ async function ProductsContent({ searchParams }: ProductsPageProps) {
       searchQuery={search || undefined}
       fetchParams={fetchParams}
       pageSize={PAGE_SIZE}
-      isAuthenticated={isAuthenticated}
     />
   );
 }

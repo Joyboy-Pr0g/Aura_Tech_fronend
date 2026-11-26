@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Container } from '@/components/ui/container';
 import { getProductBySlugServer } from '@/features/products/services/products-server';
-import { getSession } from '@/lib/auth/session';
 import { ProductDetailClient } from '@/features/products/components/product-detail-client';
 import { ProductDetailNav } from '@/features/products/components/product-detail-nav';
 import { getPageMetadataFromSettings } from '@/lib/seo/metadata';
@@ -10,6 +9,10 @@ import { getProductImageUrl } from '@/lib/products/helpers';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
 }
 
 export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
@@ -27,10 +30,7 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
-  const [product, session] = await Promise.all([
-    getProductBySlugServer(slug),
-    getSession(),
-  ]);
+  const product = await getProductBySlugServer(slug);
 
   if (!product) notFound();
 
@@ -51,7 +51,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               : undefined
           }
         />
-        <ProductDetailClient product={product} isAuthenticated={!!session} />
+        <ProductDetailClient product={product} />
       </Container>
     </div>
   );

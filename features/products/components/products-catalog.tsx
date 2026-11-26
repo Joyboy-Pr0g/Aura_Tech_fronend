@@ -22,7 +22,6 @@ interface ProductsCatalogProps {  products: Product[];
   searchQuery?: string;
   fetchParams: Record<string, string | number | boolean | undefined>;
   pageSize: number;
-  isAuthenticated?: boolean;
 }
 
 export function ProductsCatalog({
@@ -35,7 +34,6 @@ export function ProductsCatalog({
   searchQuery,
   fetchParams,
   pageSize,
-  isAuthenticated,
 }: ProductsCatalogProps) {
   const { t } = useLocale();
   const [sort, setSort] = useState<SortOption>('relevance');
@@ -124,7 +122,6 @@ export function ProductsCatalog({
                 pageSize={pageSize}
                 sort={sort}
                 fetchParams={fetchParams}
-                isAuthenticated={isAuthenticated}
               />
             </div>
           </div>
